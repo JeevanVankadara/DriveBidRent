@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - DriveBidRent</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .error-message {
+      color: #dc3545;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+    .success-message {
+      color: #155724;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+    }
+    .age-error, .email-error {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    .conditional-fields {
+      display: none;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .form-title {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .input-group i {
+      position: absolute;
+      left: 15px;
+      top: 15px;
+      color: #777;
+    }
+    .input-group input {
+      padding-left: 40px;
+      width: 100%;
+      height: 45px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .input-group input:valid {
+      border-color: #28a745;
+    }
+    .input-group input:invalid {
+      border-color: #dc3545;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn:hover {
+      background: #0069d9;
+    }
+    .btn:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    .service-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .service-item:last-child {
+      border-bottom: none;
+    }
+    .service-name {
+      font-weight: 500;
+      color: #333;
+    }
+    .service-checkbox {
+      height: 20px;
+      width: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-control {
+      width: 100%;
+      height: 45px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0 15px;
+      font-size: 16px;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    .form-group.col-md-6 {
+      flex: 1;
+    }
+    .form-text {
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    .text-muted {
+      color: #6c757d !important;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .mt-3 {
+      margin-top: 1rem;
+    }
+    .form-check {
+      padding-left: 0;
+    }
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h1 class="form-title">Create an Account</h1>
+
+      <!-- Server-side error message -->
+      <% if (typeof error !== 'undefined') { %>
+        <div class="error-message"><%= error %></div>
+      <% } %>
+      
+      <!-- Client-side messages -->
+      <div id="clientError" class="error-message" style="display: none;"></div>
+      <div id="clientSuccess" class="success-message" style="display: none;"></div>
+      
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="userType">I am a:</label>
+          <select id="userType" name="userType" class="form-control" required>
+            <option value="">Select user type</option>
+            <option value="buyer" <%= (typeof formData !== 'undefined' && formData.userType === 'buyer') ? 'selected' : '' %>>Buyer</option>
+            <option value="seller" <%= (typeof formData !== 'undefined' && formData.userType === 'seller') ? 'selected' : '' %>>Seller/Renter</option>
+            <option value="mechanic" <%= (typeof formData !== 'undefined' && formData.userType === 'mechanic') ? 'selected' : '' %>>Mechanic</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="firstName">First Name</label>
+            <div class="input-group">
+              <i class="fas fa-user"></i>
+              <input type="text" id="firstName" name="firstName" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.firstName : '' %>" required>
+            </div>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="lastName">Last Name</label>
+            <div class="input-group">
+              <i class="fas fa-user"></i>
+              <input type="text" id="lastName" name="lastName" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.lastName : '' %>" required>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" class="form-control"
+                   value="<%= typeof formData !== 'undefined' ? formData.email : '' %>"
+                   pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                   title="Please enter a valid email address (e.g., example@gmail.com)"
+                   required>
+          </div>
+          <div id="emailError" class="email-error">Please enter a valid email address (e.g., example@gmail.com)</div>
+        </div>
+        
+        <!-- Phone Number Field -->
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="phone" name="phone" class="form-control" 
+                   value="<%= typeof formData !== 'undefined' ? formData.phone : '' %>" 
+                   pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password (at least 8 characters)</label>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" class="form-control"
+                   pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                   title="Password must be at least 8 characters long, include one uppercase letter, one number, and one special character."
+                   required>
+          </div>
+          <small id="passwordStrength" class="form-text text-muted"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+          </div>
+          <small id="confirmMessage" class="form-text text-muted"></small>
+        </div>
+        
+        <div class="form-group">
+          <label for="dateOfBirth">Date of Birth</label>
+          <div class="input-group">
+            <i class="fas fa-calendar"></i>
+            <input type="date" id="dateOfBirth" name="dateOfBirth" class="form-control" 
+                   value="<%= typeof formData !== 'undefined' ? formData.dateOfBirth : '' %>" required>
+          </div>
+          <div id="ageError" class="age-error">You must be at least 18 years old to sign up.</div>
+        </div>
+
+        <!-- Address Fields (shown for buyer, seller, driver) -->
+        <div id="addressFields" class="conditional-fields">
+          <div class="form-group">
+            <label>Address</label>
+            <div class="form-group">
+              <label for="doorNo">Door No.</label>
+              <input type="text" id="doorNo" name="doorNo" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.doorNo : '' %>"
+                     placeholder="Apt/House Number">
+            </div>
+            <div class="form-group">
+              <label for="street">Street</label>
+              <input type="text" id="street" name="street" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.street : '' %>"
+                     placeholder="Street Name">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="city">City</label>
+                <select id="city" name="city" class="form-control">
+                  <option value="">Select City</option>
+                  <option value="Hyderabad" <%= (typeof formData !== 'undefined' && formData.city === 'Hyderabad') ? 'selected' : '' %>>Hyderabad</option>
+                  <option value="Chennai" <%= (typeof formData !== 'undefined' && formData.city === 'Chennai') ? 'selected' : '' %>>Chennai</option>
+                  <option value="Kurnool" <%= (typeof formData !== 'undefined' && formData.city === 'Kurnool') ? 'selected' : '' %>>Kurnool</option>
+                  <option value="Mumbai" <%= (typeof formData !== 'undefined' && formData.city === 'Mumbai') ? 'selected' : '' %>>Mumbai</option>
+                  <option value="Bangalore" <%= (typeof formData !== 'undefined' && formData.city === 'Bangalore') ? 'selected' : '' %>>Bangalore</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" class="form-control" 
+                       value="<%= typeof formData !== 'undefined' ? formData.state : '' %>"
+                       placeholder="State">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Driver Specific Fields -->
+        <div id="driverFields" class="conditional-fields">
+          <div class="form-group">
+            <label for="drivingLicense">Driving License Number</label>
+            <div class="input-group">
+              <i class="fas fa-id-card"></i>
+              <input type="text" id="drivingLicense" name="drivingLicense" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.drivingLicense : '' %>"
+                     placeholder="Enter your driving license number">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Types of Vehicles You Can Handle</label>
+            <div class="vehicle-types">
+              <div class="service-item">
+                <span class="service-name">Bikes</span>
+                <input class="service-checkbox" type="checkbox" name="repairBikes" id="driver-repairBikes" 
+                       <%= (typeof formData !== 'undefined' && formData.repairBikes) ? 'checked' : '' %>>
+              </div>
+              <div class="service-item">
+                <span class="service-name">Cars</span>
+                <input class="service-checkbox" type="checkbox" name="repairCars" id="driver-repairCars" 
+                       <%= (typeof formData !== 'undefined' && formData.repairCars) ? 'checked' : '' %>>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mechanic Specific Fields -->
+        <div id="mechanicFields" class="conditional-fields">
+          <div class="form-group">
+            <label for="shopName">Shop Name</label>
+            <div class="input-group">
+              <i class="fas fa-store"></i>
+              <input type="text" id="shopName" name="shopName" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.shopName : '' %>"
+                     placeholder="Enter your shop name">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Shop Address</label>
+            <div class="form-group">
+              <label for="mechDoorNo">Door No.</label>
+              <input type="text" id="mechDoorNo" name="doorNo" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.doorNo : '' %>"
+                     placeholder="Shop/Building Number">
+            </div>
+            <div class="form-group">
+              <label for="mechStreet">Street</label>
+              <input type="text" id="mechStreet" name="street" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.street : '' %>"
+                     placeholder="Street Name">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="mechCity">City</label>
+                <select id="mechCity" name="city" class="form-control">
+                  <option value="">Select City</option>
+                  <option value="Hyderabad" <%= (typeof formData !== 'undefined' && formData.city === 'Hyderabad') ? 'selected' : '' %>>Hyderabad</option>
+                  <option value="Chennai" <%= (typeof formData !== 'undefined' && formData.city === 'Chennai') ? 'selected' : '' %>>Chennai</option>
+                  <option value="Kurnool" <%= (typeof formData !== 'undefined' && formData.city === 'Kurnool') ? 'selected' : '' %>>Kurnool</option>
+                  <option value="Mumbai" <%= (typeof formData !== 'undefined' && formData.city === 'Mumbai') ? 'selected' : '' %>>Mumbai</option>
+                  <option value="Bangalore" <%= (typeof formData !== 'undefined' && formData.city === 'Bangalore') ? 'selected' : '' %>>Bangalore</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="mechState">State</label>
+                <input type="text" id="mechState" name="state" class="form-control" 
+                       value="<%= typeof formData !== 'undefined' ? formData.state : '' %>"
+                       placeholder="State">
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="experienceYears">Experience (Years)</label>
+            <div class="input-group">
+              <i class="fas fa-briefcase"></i>
+              <input type="number" id="experienceYears" name="experienceYears" class="form-control" min="0" 
+                     value="<%= typeof formData !== 'undefined' ? formData.experienceYears : '' %>"
+                     placeholder="Years of experience">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Services Offered</label>
+            <div class="services-offered">
+              <div class="service-item">
+                <span class="service-name">Bike Repair</span>
+                <input class="service-checkbox" type="checkbox" name="repairBikes" id="mechanic-repairBikes" 
+                       <%= (typeof formData !== 'undefined' && formData.repairBikes) ? 'checked' : '' %>>
+              </div>
+              
+              <div class="service-item">
+                <span class="service-name">Car Repair</span>
+                <input class="service-checkbox" type="checkbox" name="repairCars" id="mechanic-repairCars" 
+                       <%= (typeof formData !== 'undefined' && formData.repairCars) ? 'checked' : '' %>>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Google Address Link Field (only for mechanics) -->
+          <div class="form-group">
+            <label for="googleAddressLink">Google Maps Shop Location Link</label>
+            <div class="input-group">
+              <i class="fas fa-map-marker-alt"></i>
+              <input type="url" id="googleAddressLink" name="googleAddressLink" class="form-control" 
+                     value="<%= typeof formData !== 'undefined' ? formData.googleAddressLink : '' %>"
+                     placeholder="https://maps.google.com/?q=...">
+            </div>
+            <small class="form-text text-muted">Share your shop's Google Maps link </small>
+          </div>
+          
+          <!-- Hidden field for approved_status, default to 'No' -->
+          <input type="hidden" name="approved_status" value="No">
+        </div>
+        
+        <!-- Terms and Conditions -->
+        <div class="form-group form-check">
+          <div class="service-item">
+            <span class="service-name">I accept the Terms and Conditions</span>
+            <input class="service-checkbox" type="checkbox" id="termsAccepted" name="termsAccepted" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary" id="signupBtn">Sign Up</button>
+        </div>
+        
+        <div class="text-center mt-3">
+          Already have an account? <a href="/login">Log in</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const signupForm = document.getElementById("signupForm");
+      const signupBtn = document.getElementById("signupBtn");
+      const clientError = document.getElementById("clientError");
+      const clientSuccess = document.getElementById("clientSuccess");
+
+      function showMessage(element, message) {
+        element.textContent = message;
+        element.style.display = 'block';
+        // Hide server-side error if client-side error is shown
+        const serverError = document.querySelector('.error-message:not(#clientError)');
+        if (serverError) serverError.style.display = 'none';
+      }
+
+      function hideMessages() {
+        clientError.style.display = 'none';
+        clientSuccess.style.display = 'none';
+      }
+
+      // Email validation function
+      function validateEmail(email) {
+        const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return pattern.test(email);
+      }
+
+      // Age validation
+      function calculateAge(birthday) {
+        const today = new Date();
+        const birthDate = new Date(birthday);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        return age;
+      }
+
+      // Form validation
+      function validateForm() {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const dateOfBirth = document.getElementById('dateOfBirth').value;
+        const userType = document.getElementById('userType').value;
+        const termsAccepted = document.getElementById('termsAccepted').checked;
+
+        // Basic validation
+        if (!firstName || !lastName || !email || !phone || !password || !confirmPassword || !dateOfBirth || !userType) {
+          showMessage(clientError, "Please fill in all required fields.");
+          return false;
+        }
+
+        // Email validation
+        if (!validateEmail(email)) {
+          showMessage(clientError, "Please enter a valid email address.");
+          return false;
+        }
+
+        // Phone validation
+        if (!/^\d{10}$/.test(phone)) {
+          showMessage(clientError, "Please enter a valid 10-digit phone number.");
+          return false;
+        }
+
+        // Age validation
+        if (dateOfBirth) {
+          const age = calculateAge(dateOfBirth);
+          if (age < 18) {
+            showMessage(clientError, "You must be at least 18 years old to sign up.");
+            return false;
+          }
+        }
+
+        // Password validation
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+          showMessage(clientError, "Password must be at least 8 characters long, include one uppercase letter, one number, and one special character.");
+          return false;
+        }
+
+        // Password confirmation
+        if (password !== confirmPassword) {
+          showMessage(clientError, "Passwords do not match.");
+          return false;
+        }
+
+        // Terms and conditions
+        if (!termsAccepted) {
+          showMessage(clientError, "You must accept the terms and conditions.");
+          return false;
+        }
+
+        return true;
+      }
+
+      // Form submission handler with fetch - 201 RESPONSE IMPLEMENTATION
+      signupForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        // Hide previous messages
+        hideMessages();
+        
+        // Validate form
+        if (!validateForm()) {
+          return;
+        }
+        
+        // Show loading state
+        signupBtn.disabled = true;
+        signupBtn.textContent = "Creating Account...";
+        signupForm.classList.add('loading');
+
+        try {
+          // Create form data
+          const formData = new FormData(signupForm);
+          const data = Object.fromEntries(formData.entries());
+
+          // Convert checkbox values to boolean
+          data.repairBikes = formData.get('repairBikes') === 'on';
+          data.repairCars = formData.get('repairCars') === 'on';
+          data.termsAccepted = formData.get('termsAccepted') === 'on';
+
+          const response = await fetch('/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json', // Send as JSON
+            },
+            body: JSON.stringify(data)
+          });
+
+          // Handle 201 Created response
+          if (response.status === 201) {
+            const result = await response.json();
+            showMessage(clientSuccess, result.message);
+            
+            // Redirect after success message
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 2000);
+            
+          } else if (response.status === 400) {
+            // Handle validation errors
+            const result = await response.json();
+            showMessage(clientError, result.message);
+            
+          } else if (response.status === 409) {
+            // Handle duplicate email/phone
+            const result = await response.json();
+            showMessage(clientError, result.message);
+            
+          } else {
+            // Handle other errors
+            const result = await response.json();
+            showMessage(clientError, result.message || "Signup failed. Please try again.");
+          }
+
+        } catch (error) {
+          console.error('Signup error:', error);
+          showMessage(clientError, "Network error. Please check your connection and try again.");
+        } finally {
+          // Reset loading state
+          signupBtn.disabled = false;
+          signupBtn.textContent = "Sign Up";
+          signupForm.classList.remove('loading');
+        }
+      });
+
+      // Real-time email validation
+      document.getElementById('email').addEventListener('blur', function() {
+        const email = this.value;
+        const emailError = document.getElementById('emailError');
+        
+        if (email && !validateEmail(email)) {
+          emailError.style.display = 'block';
+          this.style.borderColor = '#dc3545';
+        } else {
+          emailError.style.display = 'none';
+          this.style.borderColor = email ? '#28a745' : '#ddd';
+        }
+      });
+
+      // Real-time age validation
+      document.getElementById('dateOfBirth').addEventListener('change', function() {
+        const ageError = document.getElementById('ageError');
+        if (this.value) {
+          const age = calculateAge(this.value);
+          ageError.style.display = age < 18 ? 'block' : 'none';
+        } else {
+          ageError.style.display = 'none';
+        }
+      });
+
+      // Show/hide fields based on user type
+      document.getElementById('userType').addEventListener('change', function() {
+        const userType = this.value;
+        document.getElementById('addressFields').style.display = 
+          ['buyer', 'seller', 'driver'].includes(userType) ? 'block' : 'none';
+        document.getElementById('driverFields').style.display = 
+          userType === 'driver' ? 'block' : 'none';
+        document.getElementById('mechanicFields').style.display = 
+          userType === 'mechanic' ? 'block' : 'none';
+      });
+
+      // Initialize fields based on any existing form data
+      window.addEventListener('DOMContentLoaded', function() {
+        const userType = document.getElementById('userType').value;
+        if (userType) {
+          document.getElementById('userType').dispatchEvent(new Event('change'));
+        }
+      });
+
+      // Phone number validation
+      document.getElementById('phone').addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+      });
+
+      // Password strength check
+      document.getElementById('password').addEventListener('input', function () {
+        const password = this.value;
+        const strengthMsg = document.getElementById('passwordStrength');
+        const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+        if (!password) {
+          strengthMsg.textContent = '';
+        } else if (!strongRegex.test(password)) {
+          strengthMsg.textContent = '❌ Weak password: add uppercase, number, and special character.';
+          strengthMsg.style.color = 'red';
+        } else {
+          strengthMsg.textContent = '✅ Strong password.';
+          strengthMsg.style.color = 'green';
+        }
+      });
+
+      // Confirm password match check (real-time)
+      document.getElementById('confirmPassword').addEventListener('input', function () {
+        const password = document.getElementById('password').value;
+        const confirm = this.value;
+        const confirmMsg = document.getElementById('confirmMessage');
+
+        if (!confirm) {
+          confirmMsg.textContent = '';
+        } else if (password !== confirm) {
+          confirmMsg.textContent = '❌ Passwords do not match.';
+          confirmMsg.style.color = 'red';
+        } else {
+          confirmMsg.textContent = '✅ Passwords match.';
+          confirmMsg.style.color = 'green';
+        }
+      });
+
+      // Clear error messages when user starts typing
+      const formInputs = signupForm.querySelectorAll('input, select');
+      formInputs.forEach(input => {
+        input.addEventListener('input', hideMessages);
+      });
+    });
+  </script>
+</body>
+</html>

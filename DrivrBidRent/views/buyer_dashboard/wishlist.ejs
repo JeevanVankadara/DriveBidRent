@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveBidRent - Wishlist</title>
+    <style>
+        /* --- Hero Section --- */
+        .wishlist-hero {
+            width: 100%;
+            height: 400px;
+            margin: 0 auto 60px auto;
+            background-image: url('/images/'); /* 🔸 Update image path */
+            background-size: cover;
+
+            background-color: #403a2e;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            border-bottom: 5px solid #ff6b00;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .wishlist-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.45);
+            z-index: 1;
+        }
+
+        .wishlist-hero h1,
+        .wishlist-hero p {
+            position: relative;
+            z-index: 2;
+            color: #ffffff;
+        }
+
+        .wishlist-hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            font-family: "Montserrat", sans-serif;
+            letter-spacing: -1px;
+            transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+            margin-bottom: 10px;
+        }
+
+        .wishlist-hero h1:hover {
+            color: #ff6b00;
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.7);
+        }
+
+        .wishlist-hero p {
+            font-size: 22px;
+            font-weight: 500;
+            color: #f0f0f0;
+        }
+
+        .highlight {
+            color: #ff6b00;
+            font-weight: 900;
+        }
+
+        /* --- Wishlist Page Specific Styles --- */
+        .wishlist,
+        .wishlist-rentals {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .wishlist h1,
+        .wishlist-rentals h1 {
+            color: #ff6b00;
+            font-size: 2rem;
+            text-align: left;
+            margin-top: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .car-card {
+            flex: 1 1 28%;
+            max-width: 25%;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: relative;
+            transition: transform 0.3s ease;
+            border: 1px solid #ff6b00;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 107, 0, 0.2);
+        }
+
+        .heart-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #ff6b00;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .car-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .car-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #ff6b00;
+        }
+
+        .auction-date,
+        .rental-cost {
+            color: #666666;
+            margin-bottom: 1rem;
+        }
+
+        .car-details {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .car-details p {
+            margin-bottom: 0.5rem;
+            color: #333333;
+        }
+
+        .details-btn {
+            display: inline-block;
+            background-color: #ff6b00;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.3rem;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .details-btn:hover {
+            background-color: #e65c00;
+        }
+
+        .placebid-btn,
+        .rent-btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.3rem;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .placebid-btn:hover,
+        .rent-btn:hover {
+            background-color: #45a049;
+        }
+
+        .no-items {
+            flex: 1 1 100%;
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        section {
+            position: relative;
+            overflow: hidden;
+        }
+
+        section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b00, #ff9a44, transparent);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            justify-content: space-between;
+        }
+
+        .button-container a {
+            flex: 1;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .card-container .car-card {
+                flex: 1 1 48%;
+                max-width: 48%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-container .car-card {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+
+            .wishlist-hero {
+                height: 300px;
+            }
+
+            .wishlist-hero h1 {
+                font-size: 40px;
+            }
+
+            .wishlist-hero p {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <%- include('partials/navbar') %>
+
+    <!-- Wishlist Hero Section -->
+    <section class="wishlist-hero">
+        <h1>Your <span class="highlight">Wishlist</span></h1>
+        <p>All your favorite auctions and rentals in one place.</p>
+    </section>
+
+    <!-- Wishlist - Auctions -->
+    <section class="wishlist">
+        <h1>Wishlist - Auctions</h1>
+        <div class="card-container" id="auction-wishlist">
+            <% if (auctionWishlist && auctionWishlist.length > 0) { %>
+                <% auctionWishlist.forEach(auction => { %>
+                    <div class="car-card" data-id="<%= auction._id %>">
+                        <button class="heart-btn" data-liked="true" onclick="removeFromAuctionWishlist('<%= auction._id %>')">❤</button>
+                        <img src="<%= auction.vehicleImage %>" alt="<%= auction.vehicleName %>">
+                        <h3><%= auction.vehicleName %></h3>
+                        <p class="auction-date">Auction on: <strong><%= new Date(auction.auctionDate).toLocaleDateString() %></strong></p>
+                        <div class="car-details">
+                            <p><strong>Year:</strong> <%= auction.year %></p>
+                            <p><strong>Mileage:</strong> <%= auction.mileage %> km</p>
+                            <p><strong>Condition:</strong> <%= auction.condition.charAt(0).toUpperCase() + auction.condition.slice(1) %></p>
+                            <p><strong>Starting Price:</strong> ₹<%= auction.startingBid.toLocaleString() %></p>
+                            <% if (auction.sellerId) { %>
+                                <p><strong>Seller:</strong> <%= auction.sellerId.firstName %> <%= auction.sellerId.lastName %></p>
+                            <% } %>
+                        </div>
+                        <div class="button-container">
+                            <a href="/buyer_dashboard?page=auction&id=<%= auction._id %>" class="details-btn">View more</a>
+                            <a href="/buyer_dashboard?page=auction&id=<%= auction._id %>" class="placebid-btn">Place a bid</a>
+                        </div>
+                    </div>
+
+                <% }); %>
+            <% } else { %>
+                <div class="no-items"><p>No auctions in your wishlist yet.</p></div>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- Wishlist - Rentals -->
+    <section class="wishlist-rentals">
+        <h1>Wishlist - Rentals</h1>
+        <div class="card-container" id="rental-wishlist">
+            <% if (rentalWishlist && rentalWishlist.length > 0) { %>
+                <% rentalWishlist.forEach(rental => { %>
+                    <div class="car-card" data-id="<%= rental._id %>">
+                        <button class="heart-btn" data-liked="true" onclick="removeFromRentalWishlist('<%= rental._id %>')">❤</button>
+                        <img src="<%= rental.vehicleImage %>" alt="<%= rental.vehicleName %>">
+                        <h3><%= rental.vehicleName %></h3>
+                        <p class="rental-cost">Cost/day: <strong>₹<%= rental.costPerDay %></strong></p>
+                        <div class="car-details">
+                            <% if (rental.sellerId && rental.sellerId.city) { %>
+                                <p><strong>City:</strong> <%= rental.sellerId.city || 'Not specified' %></p>
+                            <% } %>
+                            <p><strong>Year:</strong> <%= rental.year %></p>
+                            <p><strong>AC:</strong> <%= rental.AC === 'available' ? 'Yes' : 'No' %></p>
+                            <p><strong>Capacity:</strong> <%= rental.capacity %> passengers</p>
+                            <p><strong>Driver:</strong> <%= rental.driverAvailable ? 'Yes' : 'No' %></p>
+                            <% if (rental.sellerId) { %>
+                                <p><strong>Seller:</strong> <%= rental.sellerId.firstName %> <%= rental.sellerId.lastName %></p>
+                            <% } %>
+                        </div>
+                        <div class="button-container">
+                            <a href="/buyer_dashboard?page=rental&id=<%= rental._id %>" class="details-btn">View more</a>
+                            <a href="/buyer_dashboard?page=rental&id=<%= rental._id %>" class="rent-btn">Rent it</a>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="no-items"><p>No rentals in your wishlist yet.</p></div>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- Include Footer -->
+    <%- include('partials/footer') %>
+
+    <script>
+        // Remove from auction wishlist
+        function removeFromAuctionWishlist(id) {
+            fetch('/api/wishlist', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ auctionId: id, type: 'auction' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`.car-card[data-id="${id}"]`)?.remove();
+                    const container = document.getElementById('auction-wishlist');
+                    if (!container.querySelector('.car-card')) {
+                        container.innerHTML = '<div class="no-items"><p>No auctions in your wishlist yet.</p></div>';
+                    }
+                }
+            });
+        }
+
+        // Remove from rental wishlist
+        function removeFromRentalWishlist(id) {
+            fetch('/api/wishlist', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rentalId: id, type: 'rental' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`.car-card[data-id="${id}"]`)?.remove();
+                    const container = document.getElementById('rental-wishlist');
+                    if (!container.querySelector('.car-card')) {
+                        container.innerHTML = '<div class="no-items"><p>No rentals in your wishlist yet.</p></div>';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
