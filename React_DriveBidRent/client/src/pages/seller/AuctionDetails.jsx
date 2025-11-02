@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const AuctionDetails = () => {
@@ -191,11 +189,10 @@ const AuctionDetails = () => {
           }
         }
       `}</style>
-      <Navbar currentPage="view-auctions" />
       <section className="vehicle-details">
-        <a href="/seller/view-auctions" className="back-link">
+        <Link to="/seller/view-auctions" className="back-link">
           &larr; Back to All Auctions
-        </a>
+        </Link>
         
         <div className="details-container">
           <div className="details-header">
@@ -256,13 +253,12 @@ const AuctionDetails = () => {
               </div>
               
               {(auction.status === 'approved' || auction.status === 'assignedMechanic') && (
-                <a href={`/seller/view-bids/${auction._id}`} className="card-btn">View Bids</a>
+                <Link to={`/seller/view-bids/${auction._id}`} className="card-btn">View Bids</Link>
               )}
             </div>
           </div>
         </div>
       </section>
-      <Footer />
     </>
   );
 };

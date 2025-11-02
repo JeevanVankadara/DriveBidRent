@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const ViewBids = () => {
@@ -183,7 +181,6 @@ const ViewBids = () => {
           background: #e65c00;
         }
       `}</style>
-      <Navbar currentPage="" />
       <section className="seller-dashboard">
         <h1>Bids on {auction ? capitalize(auction.vehicleName) : ''}</h1>
         
@@ -244,7 +241,6 @@ const ViewBids = () => {
         </div>
       )}
 
-      <Footer />
     </>
   );
 };

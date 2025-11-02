@@ -5,8 +5,28 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DriveBidRent</title>
+
+    <!-- Tailwind CSS CDN (Development) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Optional: Configure Tailwind (if needed) -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              orange: {
+                500: '#ff6b00',
+                600: '#e65c00',
+                700: '#cc5200',
+              },
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
+  <body class="bg-gray-50 text-gray-900">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

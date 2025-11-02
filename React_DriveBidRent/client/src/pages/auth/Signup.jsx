@@ -1,8 +1,10 @@
+// client/src/pages/auth/Signup.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authServices } from '../../services/auth.services';
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userType: '',
     firstName: '',
@@ -22,346 +24,450 @@ const Signup = () => {
     googleAddressLink: '',
     repairBikes: false,
     repairCars: false,
-    termsAccepted: false
+    termsAccepted: false,
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  const validateForm = () => {
-    // Same validation as in EJS JS
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword || !formData.dateOfBirth || !formData.userType) {
-      setError("Please fill in all required fields.");
-      return false;
+  const validateField = (name, value) => {
+    let error = '';
+    switch (name) {
+      case 'firstName':
+      case 'lastName':
+        if (!value.trim()) error = 'Required';
+        break;
+      case 'email':
+        if (!value) error = 'Required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email';
+        break;
+      case 'phone':
+        if (!value) error = 'Required';
+        else if (!/^\d{10}$/.test(value)) error = '10 digits only';
+        break;
+      case 'password':
+        if (!value) error = 'Required';
+        else if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value))
+          error = '8+ chars, uppercase, number, special char';
+        break;
+      case 'confirmPassword':
+        if (value !== formData.password) error = 'Passwords do not match';
+        break;
+      case 'dateOfBirth':
+        if (!value) error = 'Required';
+        else {
+          const age = new Date().getFullYear() - new Date(value).getFullYear();
+          const diff = new Date() - new Date(value);
+          if (diff < 18 * 365.25 * 24 * 60 * 60 * 1000) error = 'Must be 18+';
+        }
+        break;
+      case 'userType':
+        if (!value) error = 'Select a role';
+        break;
+      case 'termsAccepted':
+        if (!formData.termsAccepted) error = 'Must accept terms'; // Use formData
+        break;
+      default:
+        break;
     }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(formData.email)) {
-      setError("Please enter a valid email address.");
-      return false;
-    }
-    if (!/^\d{10}$/.test(formData.phone)) {
-      setError("Please enter a valid 10-digit phone number.");
-      return false;
-    }
-    const age = calculateAge(formData.dateOfBirth);
-    if (age < 18) {
-      setError("You must be at least 18 years old to sign up.");
-      return false;
-    }
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      setError("Password must be at least 8 characters long, include one uppercase letter, one number, and one special character.");
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return false;
-    }
-    if (!formData.termsAccepted) {
-      setError("You must accept the terms and conditions.");
-      return false;
-    }
-    return true;
+    return error;
   };
 
-  const calculateAge = (birthday) => {
-    const today = new Date();
-    const birthDate = new Date(birthday);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
+  const validateAll = () => {
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      const err = validateField(key, formData[key]);
+      if (err) newErrors[key] = err;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    if (!validateForm()) return;
-    setLoading(true);
+    setErrors({});
+    if (!validateAll()) return;
 
+    setLoading(true);
     try {
       const response = await authServices.signup(formData);
       if (response.success) {
-        setSuccess(response.message);
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        alert(response.message || 'Account created! Redirecting...');
+        navigate('/login');
       } else {
-        setError(response.message);
+        setErrors({ submit: response.message || 'Signup failed' });
       }
     } catch (err) {
-      setError('Network error. Please check your connection and try again.');
+      setErrors({ submit: 'Network error. Please try again.' });
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleFields = (userType) => {
-    // Show/hide based on userType as in EJS
-    setFormData(prev => ({
-      ...prev,
-      userType
-    }));
+  const getBorderColor = (field) => {
+    if (!touched[field]) return 'border-gray-300';
+    return errors[field] ? 'border-red-500' : 'border-green-500';
   };
-
-  useEffect(() => {
-    // Init based on formData.userType
-    toggleFields(formData.userType);
-  }, [formData.userType]);
 
   return (
     <>
-      <style>{`
-        .error-message {
-          color: #dc3545;
-          padding: 10px;
-          margin-bottom: 15px;
-          border-radius: 5px;
-          background-color: #f8d7da;
-          border: 1px solid #f5c6cb;
-        }
-        .success-message {
-          color: #155724;
-          padding: 10px;
-          margin-bottom: 15px;
-          border-radius: 5px;
-          background-color: #d4edda;
-          border: 1px solid #c3e6cb;
-        }
-        .age-error, .email-error {
-          color: #dc3545;
-          font-size: 0.875rem;
-          margin-top: 0.25rem;
-          display: none;
-        }
-        .conditional-fields {
-          display: none;
-        }
-        .form-container {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 30px;
-          background: #fff;
-          border-radius: 10px;
-          box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .form-title {
-          text-align: center;
-          margin-bottom: 30px;
-          color: #333;
-        }
-        .input-group {
-          position: relative;
-          margin-bottom: 20px;
-        }
-        .input-group i {
-          position: absolute;
-          left: 15px;
-          top: 15px;
-          color: #777;
-        }
-        .input-group input, .input-group select {
-          padding-left: 40px;
-          width: 100%;
-          height: 45px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          font-size: 16px;
-        }
-        .btn {
-          width: 100%;
-          padding: 12px;
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-        .btn:hover {
-          background: #0069d9;
-        }
-        .btn:disabled {
-          background-color: #6c757d;
-          cursor: not-allowed;
-        }
-        .service-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px 0;
-          border-bottom: 1px solid #eee;
-        }
-        .service-item:last-child {
-          border-bottom: none;
-        }
-        .service-name {
-          font-weight: 500;
-          color: #333;
-        }
-        .service-checkbox {
-          height: 20px;
-          width: 20px;
-        }
-        .form-group {
-          margin-bottom: 20px;
-        }
-        .form-control {
-          width: 100%;
-          height: 45px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          padding: 0 15px;
-          font-size: 16px;
-        }
-        .form-row {
-          display: flex;
-          gap: 15px;
-        }
-        .form-group.col-md-6 {
-          flex: 1;
-        }
-        .form-text {
-          font-size: 0.875rem;
-          margin-top: 0.25rem;
-        }
-        .text-muted {
-          color: #6c757d !important;
-        }
-        .text-center {
-          text-align: center;
-        }
-        .mt-3 {
-          margin-top: 1rem;
-        }
-        .form-check {
-          padding-left: 0;
-        }
-        .loading {
-          opacity: 0.7;
-          pointer-events: none;
-        }
-      `}</style>
-      <div className="container">
-        <div className="form-container">
-          <h1 className="form-title">Create an Account</h1>
+      <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        rel="stylesheet"
+      />
 
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
-          
-          <form onSubmit={handleSubmit} className={loading ? 'loading' : ''}>
-            <div className="form-group">
-              <label htmlFor="userType">I am a:</label>
-              <select id="userType" name="userType" className="form-control" value={formData.userType} onChange={handleChange} required>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+        <div className="max-w-2xl w-full bg-white p-8 rounded-xl shadow-lg">
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+            Create an Account
+          </h1>
+
+          {errors.submit && (
+            <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center">
+              {errors.submit}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* User Type */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">I am a:</label>
+              <select
+                name="userType"
+                value={formData.userType}
+                onChange={handleChange}
+                onBlur={() => setTouched((p) => ({ ...p, userType: true }))}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('userType')}`}
+              >
                 <option value="">Select user type</option>
                 <option value="buyer">Buyer</option>
                 <option value="seller">Seller/Renter</option>
                 <option value="mechanic">Mechanic</option>
               </select>
+              {errors.userType && touched.userType && (
+                <p className="text-red-500 text-sm mt-1">{errors.userType}</p>
+              )}
             </div>
-            
-            <div className="form-row">
-              <div className="form-group col-md-6">
-                <label htmlFor="firstName">First Name</label>
-                <div className="input-group">
-                  <i className="fas fa-user"></i>
-                  <input type="text" id="firstName" name="firstName" className="form-control" value={formData.firstName} onChange={handleChange} required />
+
+            {/* Name Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-medium text-gray-700 mb-1">First Name</label>
+                <div className="relative">
+                  <i className="fas fa-user absolute left-3 top-3 text-gray-500"></i>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    onBlur={() => setTouched((p) => ({ ...p, firstName: true }))}
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('firstName')}`}
+                  />
                 </div>
+                {errors.firstName && touched.firstName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+                )}
               </div>
-              <div className="form-group col-md-6">
-                <label htmlFor="lastName">Last Name</label>
-                <div className="input-group">
-                  <i className="fas fa-user"></i>
-                  <input type="text" id="lastName" name="lastName" className="form-control" value={formData.lastName} onChange={handleChange} required />
+
+              <div>
+                <label className="block font-medium text-gray-700 mb-1">Last Name</label>
+                <div className="relative">
+                  <i className="fas fa-user absolute left-3 top-3 text-gray-500"></i>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    onBlur={() => setTouched((p) => ({ ...p, lastName: true }))}
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('lastName')}`}
+                  />
                 </div>
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="email">Email Address</label>
-              <div className="input-group">
-                <i className="fas fa-envelope"></i>
-                <input type="email" id="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="phone">Phone Number</label>
-              <div className="input-group">
-                <i className="fas fa-phone"></i>
-                <input type="tel" id="phone" name="phone" className="form-control" value={formData.phone} onChange={handleChange} required />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="password">Password (at least 8 characters)</label>
-              <div className="input-group">
-                <i className="fas fa-lock"></i>
-                <input type="password" id="password" name="password" className="form-control" value={formData.password} onChange={handleChange} required />
+                {errors.lastName && touched.lastName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+                )}
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <div className="input-group">
-                <i className="fas fa-lock"></i>
-                <input type="password" id="confirmPassword" name="confirmPassword" className="form-control" value={formData.confirmPassword} onChange={handleChange} required />
+            {/* Email */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Email Address</label>
+              <div className="relative">
+                <i className="fas fa-envelope absolute left-3 top-3 text-gray-500"></i>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((p) => ({ ...p, email: true }))}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('email')}`}
+                />
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="dateOfBirth">Date of Birth</label>
-              <div className="input-group">
-                <i className="fas fa-calendar"></i>
-                <input type="date" id="dateOfBirth" name="dateOfBirth" className="form-control" value={formData.dateOfBirth} onChange={handleChange} required />
-              </div>
+              {errors.email && touched.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
-            {/* Address Fields - conditional */}
-            <div className={['buyer', 'seller', 'driver'].includes(formData.userType) ? 'conditional-fields' : 'conditional-fields display-block'}>
-              {/* Address inputs as in EJS */}
-              <div className="form-group">
-                <label htmlFor="doorNo">Door No.</label>
-                <input type="text" id="doorNo" name="doorNo" className="form-control" value={formData.doorNo} onChange={handleChange} />
+            {/* Phone */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Phone Number</label>
+              <div className="relative">
+                <i className="fas fa-phone absolute left-3 top-3 text-gray-500"></i>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((p) => ({ ...p, phone: true }))}
+                  maxLength="10"
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('phone')}`}
+                />
               </div>
-              {/* ... other address fields similarly */}
+              {errors.phone && touched.phone && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              )}
             </div>
-            
-            {/* Mechanic Fields - conditional */}
-            <div className={formData.userType === 'mechanic' ? 'conditional-fields' : 'conditional-fields display-block'}>
-              {/* Mechanic inputs as in EJS */}
+
+            {/* Passwords */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Password</label>
+              <div className="relative">
+                <i className="fas fa-lock absolute left-3 top-3 text-gray-500"></i>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((p) => ({ ...p, password: true }))}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('password')}`}
+                />
+              </div>
+              {errors.password && touched.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
-            
+
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Confirm Password</label>
+              <div className="relative">
+                <i className="fas fa-lock absolute left-3 top-3 text-gray-500"></i>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((p) => ({ ...p, confirmPassword: true }))}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('confirmPassword')}`}
+                />
+              </div>
+              {errors.confirmPassword && touched.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              )}
+            </div>
+
+            {/* DOB */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Date of Birth</label>
+              <div className="relative">
+                <i className="fas fa-calendar absolute left-3 top-3 text-gray-500"></i>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((p) => ({ ...p, dateOfBirth: true }))}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${getBorderColor('dateOfBirth')}`}
+                />
+              </div>
+              {errors.dateOfBirth && touched.dateOfBirth && (
+                <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>
+              )}
+            </div>
+
+            {/* Address Fields - Buyer & Seller */}
+            {(formData.userType === 'buyer' || formData.userType === 'seller') && (
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="font-semibold text-lg">Address</h3>
+                <input
+                  type="text"
+                  name="doorNo"
+                  placeholder="Door No."
+                  value={formData.doorNo}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  name="street"
+                  placeholder="Street"
+                  value={formData.street}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  >
+                    <option value="">Select City</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Kurnool">Kurnool</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Bangalore">Bangalore</option>
+                  </select>
+                  <input
+                    type="text"
+                    name="state"
+                    placeholder="State"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Mechanic Fields */}
+            {formData.userType === 'mechanic' && (
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="font-semibold text-lg">Mechanic Details</h3>
+                <input
+                  type="text"
+                  name="shopName"
+                  placeholder="Shop Name"
+                  value={formData.shopName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  name="doorNo"
+                  placeholder="Shop Door No."
+                  value={formData.doorNo}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  name="street"
+                  placeholder="Shop Street"
+                  value={formData.street}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  >
+                    <option value="">Select City</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Kurnool">Kurnool</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Bangalore">Bangalore</option>
+                  </select>
+                  <input
+                    type="text"
+                    name="state"
+                    placeholder="State"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
+                </div>
+                <input
+                  type="number"
+                  name="experienceYears"
+                  placeholder="Experience (Years)"
+                  value={formData.experienceYears}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="repairBikes"
+                      checked={formData.repairBikes}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <span>Bike Repair</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="repairCars"
+                      checked={formData.repairCars}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <span>Car Repair</span>
+                  </label>
+                </div>
+                <input
+                  type="url"
+                  name="googleAddressLink"
+                  placeholder="Google Maps Link"
+                  value={formData.googleAddressLink}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+              </div>
+            )}
+
             {/* Terms */}
-            <div className="form-group form-check">
-              <div className="service-item">
-                <span className="service-name">I accept the Terms and Conditions</span>
-                <input className="service-checkbox" type="checkbox" id="termsAccepted" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} required />
-              </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                checked={formData.termsAccepted}
+                onChange={handleChange}
+                onBlur={() => setTouched((p) => ({ ...p, termsAccepted: true }))}
+                className="mr-2"
+              />
+              <label className="text-sm">
+                I accept the{' '}
+                <a href="#" className="text-orange-600 hover:underline">
+                  Terms and Conditions
+                </a>
+              </label>
             </div>
-            
-            <div className="form-group">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Creating Account...' : 'Sign Up'}
-              </button>
-            </div>
-            
-            <div className="text-center mt-3">
-              Already have an account? <a href="/login">Log in</a>
-            </div>
+            {errors.termsAccepted && touched.termsAccepted && (
+              <p className="text-red-500 text-sm">{errors.termsAccepted}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-70 transition"
+            >
+              {loading ? 'Creating Account...' : 'Sign Up'}
+            </button>
           </form>
+
+          <p className="text-center mt-6 text-sm text-gray-600">
+            Already have an account?{' '}
+            <a href="/login" className="text-orange-600 hover:underline">
+              Log in
+            </a>
+          </p>
         </div>
       </div>
     </>

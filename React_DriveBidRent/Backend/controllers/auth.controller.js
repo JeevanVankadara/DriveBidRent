@@ -1,3 +1,4 @@
+// server/controllers/auth.controller.js
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
@@ -104,7 +105,6 @@ const authController = {
         });
       }
 
-      // Check for existing phone number
       const existingPhone = await User.findOne({ phone });
       if (existingPhone) {
         return res.status(409).json({
@@ -151,7 +151,6 @@ const authController = {
       
       let errorMessage = "An error occurred during signup";
       
-      // Handle specific error types
       if (err.name === 'ValidationError') {
         errorMessage = "Validation failed: " + Object.values(err.errors).map(e => e.message).join(', ');
         return res.status(400).json({
@@ -209,7 +208,7 @@ const authController = {
           redirectUrl = "/buyer-dashboard";
           break;
         case "seller":
-          redirectUrl = "/seller-dashboard";
+          redirectUrl = "/seller/dashboard";  // ← CORRECT: Matches frontend nested route
           break;
         case "driver":
           redirectUrl = "/driver-dashboard";
@@ -236,7 +235,7 @@ const authController = {
             email: user.email,
             userType: user.userType
           },
-          redirectUrl
+          redirectUrl  // ← Frontend will use this
         }
       });
     } catch (err) {
@@ -244,6 +243,21 @@ const authController = {
       return res.status(500).json({
         success: false,
         message: "An error occurred during login"
+      });
+    }
+  },
+
+  logout: async (req, res) => {
+    try {
+      res.clearCookie('jwt');
+      return res.status(200).json({
+        success: true,
+        message: "Logged out successfully"
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed"
       });
     }
   }

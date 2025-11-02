@@ -1,7 +1,6 @@
+// client/src/pages/seller/ViewRentals.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const ViewRentals = () => {
@@ -25,180 +24,55 @@ const ViewRentals = () => {
   }, []);
 
   return (
-    <>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold text-center text-orange-600 mb-10">Rental Vehicles</h1>
 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: "Montserrat", sans-serif;
-        }
-
-        body {
-          background-color: #f8f8f8;
-          color: #333333;
-        }
-
-        /* Seller Dashboard Content */
-        .seller-dashboard {
-          padding: 4rem 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .seller-dashboard h1 {
-          color: #ff6b00;
-          font-size: 2.5rem;
-          margin-bottom: 2rem;
-          text-align: center;
-        }
-
-        .dashboard-cards {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 2rem;
-        }
-
-        .dashboard-card {
-          background-color: #ffffff;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-          overflow: hidden;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .dashboard-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-img {
-          width: 100%;
-          height: 180px;
-          object-fit: cover;
-        }
-
-        .card-content {
-          padding: 1rem;
-        }
-
-        .car-name {
-          color: #333;
-          font-size: 1.6rem;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
-        }
-
-        .cost-info, .location-info {
-          color: #666;
-          margin-bottom: 0.5rem;
-          font-size: 0.9rem;
-        }
-
-        .card-buttons {
-          display: flex;
-          gap: 0.5rem;
-          margin-top: 1rem;
-        }
-
-        .details-btn, .update-btn {
-          flex: 1;
-          background-color: #ff6b00;
-          color: white;
-          padding: 0.75rem;
-          border: none;
-          border-radius: 0.3rem;
-          text-decoration: none;
-          font-weight: 500;
-          text-align: center;
-          transition: background 0.3s ease;
-          font-size: 0.9rem;
-        }
-
-        .update-btn {
-          background-color: #4c6fff;
-        }
-
-        .details-btn:hover {
-          background-color: #ff8c3f;
-        }
-
-        .update-btn:hover {
-          background-color: #6a86ff;
-        }
-
-        .no-rentals {
-          text-align: center;
-          padding: 2rem;
-          background-color: #ffffff;
-          border-radius: 0.5rem;
-          margin: 2rem auto;
-          max-width: 800px;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .error-message {
-          color: #ff0000;
-          text-align: center;
-          padding: 1rem;
-          background-color: #ffeeee;
-          border-radius: 0.5rem;
-          margin-bottom: 2rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-          .dashboard-cards {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (max-width: 768px) {
-          .dashboard-cards {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-      <Navbar currentPage="view-rentals" />
-      <section className="seller-dashboard">
-        <h1>Rental Vehicles</h1>
-        
         {error && (
-          <div className="error-message">
-            {error}
-          </div>
+          <div className="bg-red-100 text-red-700 p-4 rounded mb-6 text-center">{error}</div>
         )}
-        
+
         {rentals.length > 0 ? (
-          <div className="dashboard-cards" id="rental-listings">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rentals.map(rental => (
-              <div key={rental._id} className="dashboard-card" data-id={rental._id}>
-                <img src={rental.vehicleImage} alt={rental.vehicleName} className="card-img" />
-                <div className="card-content">
-                  <h2 className="car-name">{rental.vehicleName}</h2>
-                  <p className="cost-info">Cost/day: ₹{rental.costPerDay}</p>
-                  <p className="location-info">Location: {rental.location}</p>
-                  
-                  <div className="card-buttons">
-                    <Link to={`/seller/rental-details/${rental._id}`} className="details-btn">More Details</Link>
-                    <Link to={`/seller/update-rental/${rental._id}`} className="update-btn">Update</Link>
+              <div key={rental._id} className="bg-white rounded-xl shadow-md overflow-hidden">
+                <img src={rental.vehicleImage} alt={rental.vehicleName} className="w-full h-48 object-cover" />
+                <div className="p-5">
+                  <h3 className="text-xl font-semibold text-orange-600">{rental.vehicleName}</h3>
+                  <p className="text-gray-600">Cost/day: ₹{rental.costPerDay}</p>
+                  <p className="text-gray-600">Location: {rental.location}</p>
+                  <div className="flex gap-2 mt-4">
+                    <Link
+                      to={`/seller/rental-details/${rental._id}`}
+                      className="flex-1 bg-orange-600 text-white text-center py-2 rounded-md hover:bg-orange-700"
+                    >
+                      More Details
+                    </Link>
+                    <Link
+                      to={`/seller/update-rental/${rental._id}`}
+                      className="flex-1 bg-blue-600 text-white text-center py-2 rounded-md hover:bg-blue-700"
+                    >
+                      Update
+                    </Link>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="no-rentals">
-            <h2>You don't have any rental listings yet</h2>
-            <p>Add your first vehicle for rent to get started!</p>
-            <Link to="/seller/add-rental" className="details-btn" style={{display: 'inline-block', marginTop: '1rem', maxWidth: '200px'}}>Add Rental</Link>
+          <div className="text-center bg-white p-12 rounded-xl shadow">
+            <h2 className="text-2xl font-semibold mb-4">No Rentals Yet</h2>
+            <p className="text-gray-600 mb-6">Add your first rental vehicle!</p>
+            <Link
+              to="/seller/add-rental"
+              className="inline-block bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700"
+            >
+              Add Rental
+            </Link>
           </div>
         )}
-      </section>
-      <Footer />
-    </>
+      </div>
+    </div>
   );
 };
 

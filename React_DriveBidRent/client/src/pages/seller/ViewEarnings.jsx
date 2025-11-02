@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const ViewEarnings = () => {
@@ -168,7 +166,6 @@ const ViewEarnings = () => {
           }
         }
       `}</style>
-      <Navbar currentPage="earnings" />
       <section className="seller-dashboard">
         <h1>Your Earnings</h1>
 
@@ -205,7 +202,6 @@ const ViewEarnings = () => {
           )}
         </div>
       </section>
-      <Footer />
     </>
   );
 };

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const RentalDetails = () => {
@@ -158,7 +156,6 @@ const RentalDetails = () => {
             }
         }
       `}</style>
-      <Navbar currentPage="view-rentals" />
       <section className="rental-details-container">
         <h1>Rental Vehicle Details</h1>
         
@@ -214,9 +211,8 @@ const RentalDetails = () => {
           </div>
         </div>
         
-        <a href="/seller/view-rentals" className="back-btn">Back to Rentals</a>
+  <Link to="/seller/view-rentals" className="back-btn">Back to Rentals</Link>
       </section>
-      <Footer />
     </>
   );
 };

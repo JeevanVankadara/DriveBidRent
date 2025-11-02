@@ -73,9 +73,18 @@ const buyerMiddleware = require("./middlewares/buyer.middleware");
 
 const app = express();
 
-// CORS for frontend
+// CORS for frontend: allow common dev server origins or an explicit CLIENT_URL
+const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:5173'].filter(Boolean);
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // allow requests with no origin like mobile apps or curl
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS policy: Origin not allowed'));
+  },
   credentials: true
 }));
 
@@ -188,6 +197,23 @@ app.use("/api/seller", sellerMiddleware, sellerRoutes);
 // app.use("/mechanic_dashboard", isMechanicLoggedin, mcardetails);
 
 const PORT = process.env.PORT || 8000;
+
+// In production, optionally serve the client build so SPA routes work on direct navigation / refresh.
+if (process.env.NODE_ENV === 'production') {
+  // Adjust client build path as needed (assumes client build output is at ../client/dist)
+  const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
+  if (require('fs').existsSync(clientBuildPath)) {
+    app.use(express.static(clientBuildPath));
+    // Serve index.html for any non-API GET requests
+    app.get('*', (req, res) => {
+      if (req.path.startsWith('/api')) return res.status(404).json({ error: 'API route not found' });
+      return res.sendFile(path.join(clientBuildPath, 'index.html'));
+    });
+  } else {
+    console.warn('Client build not found at', clientBuildPath, '- skipping static serving.');
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import { Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const Profile = () => {
@@ -286,7 +285,6 @@ const Profile = () => {
           }
         }
       `}</style>
-      <Navbar currentPage="profile" />
       <section className="seller-profile-content">
         <h1>Seller Profile</h1>
         
@@ -404,12 +402,12 @@ const Profile = () => {
               <div className="summary-card">
                 <h3>Active Auctions</h3>
                 <p><strong>Total:</strong> {auctionsCount}</p>
-                <a href="/seller/view-auctions" className="details-btn">View Auctions</a>
+                <Link to="/seller/view-auctions" className="details-btn">View Auctions</Link>
               </div>
               <div className="summary-card">
                 <h3>Active Rentals</h3>
                 <p><strong>Total:</strong> {rentalsCount}</p>
-                <a href="/seller/view-rentals" className="details-btn">View Rentals</a>
+                <Link to="/seller/view-rentals" className="details-btn">View Rentals</Link>
               </div>
             </div>
           </div>
@@ -438,7 +436,7 @@ const Profile = () => {
                   <li>No recent completed transactions</li>
                 </ul>
               )}
-              <a href="/seller/view-earnings" className="details-btn">View All Earnings</a>
+              <Link to="/seller/view-earnings" className="details-btn">View All Earnings</Link>
             </div>
           </div>
 
@@ -489,7 +487,6 @@ const Profile = () => {
           </div>
         </div>
       </section>
-      <Footer />
     </>
   );
 };

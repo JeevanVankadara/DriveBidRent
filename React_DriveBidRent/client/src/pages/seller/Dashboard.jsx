@@ -1,6 +1,5 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   return (
@@ -89,7 +88,6 @@ const Dashboard = () => {
           }
         }
       `}</style>
-      <Navbar currentPage="dashboard" />
       <section className="seller-dashboard">
         <h1>Welcome, Seller!</h1>
         <div className="dashboard-cards">
@@ -97,27 +95,26 @@ const Dashboard = () => {
           <div className="dashboard-card">
             <h2>Auction Listings</h2>
             <p>Manage your vehicles listed for auction.</p>
-            <a href="/seller/add-auction" className="card-btn">Add New Auction</a>
-            <a href="/seller/view-auctions" className="card-btn">View Auctions</a>
+            <Link to="/seller/add-auction" className="card-btn">Add New Auction</Link>
+            <Link to="/seller/view-auctions" className="card-btn">View Auctions</Link>
           </div>
 
           {/* Rental Listings Card */}
           <div className="dashboard-card">
             <h2>Rental Listings</h2>
             <p>Manage your vehicles listed for rent.</p>
-            <a href="/seller/add-rental" className="card-btn">Add New Rental</a>
-            <a href="/seller/view-rentals" className="card-btn">View Rentals</a>
+            <Link to="/seller/add-rental" className="card-btn">Add New Rental</Link>
+            <Link to="/seller/view-rentals" className="card-btn">View Rentals</Link>
           </div>
 
           {/* Earnings Card */}
           <div className="dashboard-card">
             <h2>Earnings</h2>
             <p>View your total earnings and analytics.</p>
-            <a href="/seller/view-earnings" className="card-btn">View Earnings</a>
+            <Link to="/seller/view-earnings" className="card-btn">View Earnings</Link>
           </div>
         </div>
       </section>
-      <Footer />
     </>
   );
 };

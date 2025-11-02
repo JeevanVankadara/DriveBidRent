@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const RentalDetailsAlt = () => {
@@ -37,9 +35,9 @@ const RentalDetailsAlt = () => {
 
   if (error) {
     return (
-      <div className="no-rentals">
+        <div className="no-rentals">
         <h2>Rental details not found</h2>
-        <a href="/seller/view-rentals" className="back-button">Back to Rentals</a>
+        <Link to="/seller/view-rentals" className="back-button">Back to Rentals</Link>
       </div>
     );
   }
@@ -273,7 +271,6 @@ const RentalDetailsAlt = () => {
           }
         }
       `}</style>
-      <Navbar currentPage="view-rentals" />
       <div className="popup-overlay" style={{display: showPopup ? 'flex' : 'none'}}>
         <div className="popup-content">
           <h2>Rental Status</h2>
@@ -376,10 +373,9 @@ const RentalDetailsAlt = () => {
             </span>
           </div>
           
-          <a href="/seller/view-rentals" className="back-button">Back to Rentals</a>
+          <Link to="/seller/view-rentals" className="back-button">Back to Rentals</Link>
         </div>
       </section>
-      <Footer />
     </>
   );
 };

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const UpdateRental = () => {
@@ -268,7 +266,6 @@ const UpdateRental = () => {
           margin-top: 0.5rem;
         }
       `}</style>
-      <Navbar currentPage="view-rentals" />
       <section className="update-container">
         <h1 className="update-title">Update Rental Vehicle</h1>
         
@@ -321,10 +318,9 @@ const UpdateRental = () => {
           </div>
           
           <button type="submit" className="btn" disabled={isSubmitting}>Update Rental</button>
-          <a href="/seller/view-rentals" className="back-btn">Back to Rentals</a>
+          <Link to="/seller/view-rentals" className="back-btn">Back to Rentals</Link>
         </form>
       </section>
-      <Footer />
     </>
   );
 };
