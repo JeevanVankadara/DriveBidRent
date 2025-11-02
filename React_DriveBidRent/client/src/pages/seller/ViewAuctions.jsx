@@ -23,7 +23,7 @@ const ViewAuctions = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+  <div className="min-h-screen bg-gray-50 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-orange-600 mb-10">My Auctions</h1>
 

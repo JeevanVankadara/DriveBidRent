@@ -102,7 +102,7 @@ const AddRental = () => {
   }, [formData['driver-available']]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 px-4">
+  <div className="min-h-screen bg-gray-50 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-orange-600 mb-8">Add Vehicle for Rent</h1>
         {error && <div className="bg-red-100 text-red-700 p-4 rounded mb-6">{error}</div>}

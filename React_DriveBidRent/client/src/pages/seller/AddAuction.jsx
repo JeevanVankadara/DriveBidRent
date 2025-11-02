@@ -71,7 +71,7 @@ const AddAuction = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 pt-20 px-4 sm:px-6 lg:px-8">
+  <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold text-center text-orange-600 mb-8">
             Add Vehicle for Auction
