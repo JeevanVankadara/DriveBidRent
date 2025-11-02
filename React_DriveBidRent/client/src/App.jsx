@@ -1,8 +1,15 @@
+// client/src/App.jsx
 import { Routes, Route } from 'react-router-dom';
+
+// Public
 import HomePage from './pages/auth/HomePage';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+
+// Buyer
 import BuyerDashboard from './pages/buyer/Dashboard';
+
+// Seller
 import SellerLayout from './pages/seller/SellerLayout';
 import Dashboard from './pages/seller/Dashboard';
 import AddAuction from './pages/seller/AddAuction';
@@ -13,18 +20,23 @@ import ViewBids from './pages/seller/ViewBids';
 import ViewEarnings from './pages/seller/ViewEarnings';
 import ViewRentals from './pages/seller/ViewRentals';
 import UpdateRental from './pages/seller/UpdateRental';
-import RentalDetails from './pages/seller/RentalDetails';
+import RentalDetailsAlt from './pages/seller/RentalDetailsAlt'; // ← Use Alt
 import AuctionDetails from './pages/seller/AuctionDetails';
 
 function App() {
   return (
     <Routes>
+      {/* Public */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+
+      {/* Buyer */}
       <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
 
+      {/* === SELLER SPA === */}
       <Route path="/seller" element={<SellerLayout />}>
+        <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="add-auction" element={<AddAuction />} />
         <Route path="add-rental" element={<AddRental />} />
@@ -34,11 +46,12 @@ function App() {
         <Route path="view-earnings" element={<ViewEarnings />} />
         <Route path="view-rentals" element={<ViewRentals />} />
         <Route path="update-rental/:id" element={<UpdateRental />} />
-        <Route path="rental-details/:id" element={<RentalDetails />} />
+        <Route path="rental-details-alt/:id" element={<RentalDetailsAlt />} /> {/* ← Both use Alt */}
         <Route path="auction-details/:id" element={<AuctionDetails />} />
       </Route>
 
-      <Route path="*" element={<div className="text-center py-20">404 - Page Not Found</div>} />
+      {/* 404 */}
+      <Route path="*" element={<div className="text-center py-20 text-2xl">404 - Page Not Found</div>} />
     </Routes>
   );
 }

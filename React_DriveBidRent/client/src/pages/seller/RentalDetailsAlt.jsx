@@ -1,3 +1,4 @@
+// client/src/pages/seller/RentalDetailsAlt.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
@@ -29,354 +30,141 @@ const RentalDetailsAlt = () => {
     fetchRental();
   }, [id]);
 
-  const closePopup = () => {
-    setShowPopup(false);
-  };
+  const closePopup = () => setShowPopup(false);
 
   if (error) {
     return (
-        <div className="no-rentals">
-        <h2>Rental details not found</h2>
-        <Link to="/seller/view-rentals" className="back-button">Back to Rentals</Link>
+      <div className="text-center py-20">
+        <h2 className="text-2xl font-semibold text-red-600 mb-4">Rental details not found</h2>
+        <Link to="/seller/view-rentals" className="text-orange-600 hover:underline">
+          ← Back to Rentals
+        </Link>
       </div>
     );
   }
 
-  if (!rental) {
-    return <div>Loading...</div>;
-  }
+  if (!rental) return <div className="text-center py-20">Loading...</div>;
 
-  const formattedPickupDate = rental.pickupDate ? new Date(rental.pickupDate).toISOString().split('T')[0] : 'Not specified';
-  const formattedDropDate = rental.dropDate ? new Date(rental.dropDate).toISOString().split('T')[0] : 'Not specified';
+  const formattedPickupDate = rental.pickupDate 
+    ? new Date(rental.pickupDate).toLocaleDateString('en-GB') 
+    : 'Not specified';
+  const formattedDropDate = rental.dropDate 
+    ? new Date(rental.dropDate).toLocaleDateString('en-GB') 
+    : 'Not specified';
 
   return (
-    <>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      {/* Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold text-orange-600 mb-3">Rental Status</h2>
+            <p className="text-gray-700 mb-4">This car has been taken by someone for rental.</p>
+            <button
+              onClick={closePopup}
+              className="bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Montserrat", sans-serif;
-        }
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold text-center text-orange-600 mb-8">Rental Vehicle Details</h1>
 
-        body {
-            background-color: #f8f8f8;
-            color: #333333;
-        }
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Left: Image + Basic Info */}
+          <div className="space-y-6">
+            <img 
+              src={rental.vehicleImage} 
+              alt={rental.vehicleName} 
+              className="w-full h-80 object-cover rounded-lg shadow-md"
+            />
 
-        /* Rental Details Container */
-        .rental-details-container {
-          padding: 4rem 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 2rem;
-        }
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">{rental.vehicleName}</h3>
+              <p className="text-gray-600">Cost per day: <strong>₹{rental.costPerDay}</strong></p>
+              <p className="text-gray-600">Location: <strong>{rental.location}</strong></p>
+            </div>
 
-        .rental-title {
-          width: 100%;
-          color: #ff6b00;
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
-          text-align: center;
-        }
+            {/* Rental Info */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Rental Information</h3>
+              {rental.status === 'unavailable' && rental.buyerId ? (
+                <div className="space-y-2 text-sm">
+                  <p><strong>Renter:</strong> {rental.buyerId.firstName} {rental.buyerId.lastName}</p>
+                  <p><strong>Email:</strong> {rental.buyerId.email}</p>
+                  <p><strong>Phone:</strong> {rental.buyerId.phone}</p>
+                  <p><strong>Pickup:</strong> {formattedPickupDate}</p>
+                  <p><strong>Drop:</strong> {formattedDropDate}</p>
+                  <p><strong>Money Received:</strong> ₹{moneyReceived?.toFixed(2) || 'N/A'}</p>
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No rental information available.</p>
+              )}
+            </div>
+          </div>
 
-        /* Image Section */
-        .image-section {
-          flex: 1;
-          min-width: 300px;
-        }
+          {/* Right: Specifications */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b-2 border-orange-600 pb-2">
+              Vehicle Specifications
+            </h2>
 
-        .rental-image {
-          width: 100%;
-          height: auto;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Year</span>
+                <span>{rental.year}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">AC</span>
+                <span>{rental.AC === 'available' ? 'Available' : 'Not Available'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Capacity</span>
+                <span>{rental.capacity} passengers</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Condition</span>
+                <span className="capitalize">{rental.condition}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Fuel Type</span>
+                <span className="capitalize">{rental.fuelType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Transmission</span>
+                <span className="capitalize">{rental.transmission}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Driver</span>
+                <span>
+                  {rental.driverAvailable ? `Yes (₹${rental.driverRate}/day)` : 'No'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-600">Status</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  rental.status === 'available' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {rental.status}
+                </span>
+              </div>
+            </div>
 
-        .basic-info {
-          margin-top: 1.5rem;
-          background: white;
-          padding: 1.5rem;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .basic-info h3 {
-          color: #333;
-          font-size: 1.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .cost-info, .location-info {
-          color: #666;
-          font-size: 1rem;
-          margin-bottom: 0.5rem;
-        }
-
-        /* Rental Info (Buyer Details, Dates, Money Received) */
-        .rental-info {
-          margin-top: 1.5rem;
-          background: white;
-          padding: 1.5rem;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .rental-info h3 {
-          color: #333;
-          font-size: 1.5rem;
-          margin-bottom: 1rem;
-          border-bottom: 1px solid #ddd;
-          padding-bottom: 0.5rem;
-        }
-
-        .rental-info p {
-          color: #666;
-          font-size: 1rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .rental-info p strong {
-          color: #333;
-        }
-
-        /* Details Section */
-        .details-section {
-          flex: 1;
-          min-width: 300px;
-          background: white;
-          padding: 2rem;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .details-section h2 {
-          color: #333;
-          font-size: 1.8rem;
-          margin-bottom: 1.5rem;
-          border-bottom: 2px solid #ff6b00;
-          padding-bottom: 0.5rem;
-        }
-
-        .detail-item {
-          margin-bottom: 1rem;
-        }
-
-        .detail-label {
-          font-weight: 600;
-          color: #555;
-          display: block;
-          margin-bottom: 0.25rem;
-        }
-
-        .detail-value {
-          color: #333;
-          font-size: 1.1rem;
-        }
-
-        .status-badge {
-          display: inline-block;
-          padding: 0.25rem 0.75rem;
-          border-radius: 1rem;
-          font-weight: 500;
-          font-size: 0.9rem;
-          margin-left: 0.5rem;
-        }
-
-        .status-available {
-          background-color: #e6f7e6;
-          color: #2e7d32;
-        }
-
-        .status-unavailable {
-          background-color: #ffebee;
-          color: #c62828;
-        }
-
-        .back-button {
-          display: inline-block;
-          margin-top: 2rem;
-          background-color: #ff6b00;
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 0.3rem;
-          text-decoration: none;
-          font-weight: 500;
-          transition: background 0.3s ease;
-        }
-
-        .back-button:hover {
-          background-color: #ff8c3f;
-        }
-
-        /* Popup Styling */
-        .popup-overlay {
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          z-index: 1000;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .popup-content {
-          background-color: white;
-          padding: 2rem;
-          border-radius: 0.5rem;
-          text-align: center;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-          max-width: 400px;
-          width: 90%;
-        }
-
-        .popup-content h2 {
-          color: #ff6b00;
-          margin-bottom: 1rem;
-          font-size: 1.5rem;
-        }
-
-        .popup-content p {
-          color: #333;
-          margin-bottom: 1.5rem;
-          font-size: 1rem;
-        }
-
-        .popup-content button {
-          background-color: #ff6b00;
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 0.3rem;
-          cursor: pointer;
-          font-weight: 500;
-          transition: background 0.3s ease;
-        }
-
-        .popup-content button:hover {
-          background-color: #ff8c3f;
-        }
-
-        @media (max-width: 768px) {
-          .rental-details-container {
-            flex-direction: column;
-          }
-        }
-      `}</style>
-      <div className="popup-overlay" style={{display: showPopup ? 'flex' : 'none'}}>
-        <div className="popup-content">
-          <h2>Rental Status</h2>
-          <p>This car has been taken by someone for rental.</p>
-          <button onClick={closePopup}>Close</button>
+            <Link
+              to="/seller/view-rentals"
+              className="mt-6 inline-block bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 transition"
+            >
+              ← Back to Rentals
+            </Link>
+          </div>
         </div>
       </div>
-      <section className="rental-details-container">
-        <h1 className="rental-title">Rental Vehicle Details</h1>
-        
-        <div className="image-section">
-          <img src={rental.vehicleImage} alt={rental.vehicleName} className="rental-image" />
-          
-          <div className="basic-info">
-            <h3>{rental.vehicleName}</h3>
-            <p className="cost-info">Cost per day: ₹{rental.costPerDay}</p>
-            <p className="location-info">Location: {rental.location}</p>
-          </div>
-
-          {/* Rental Info Section */}
-          <div className="rental-info">
-            <h3>Rental Information</h3>
-            {rental.status === 'unavailable' && rental.buyerId ? (
-              <>
-                <p>
-                  <strong>Renter Name:</strong> {rental.buyerId.firstName} {rental.buyerId.lastName}
-                </p>
-                <p>
-                  <strong>Email:</strong> {rental.buyerId.email}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {rental.buyerId.phone}
-                </p>
-                <p>
-                  <strong>Pickup Date:</strong> {formattedPickupDate}
-                </p>
-                <p>
-                  <strong>Drop Date:</strong> {formattedDropDate}
-                </p>
-                <p>
-                  <strong>Money Received:</strong> ₹{moneyReceived !== null ? moneyReceived.toFixed(2) : 'Not specified'}
-                </p>
-              </>
-            ) : (
-              <p>No rental information available.</p>
-            )}
-          </div>
-        </div>
-        
-        <div className="details-section">
-          <h2>Vehicle Specifications</h2>
-          
-          <div className="detail-item">
-            <span className="detail-label">Year</span>
-            <span className="detail-value">{rental.year}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">AC</span>
-            <span className="detail-value">{rental.AC === 'available' ? 'Available' : 'Not Available'}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Capacity</span>
-            <span className="detail-value">{rental.capacity} passengers</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Condition</span>
-            <span className="detail-value">{rental.condition.charAt(0).toUpperCase() + rental.condition.slice(1)}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Fuel Type</span>
-            <span className="detail-value">{rental.fuelType.charAt(0).toUpperCase() + rental.fuelType.slice(1)}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Transmission</span>
-            <span className="detail-value">{rental.transmission.charAt(0).toUpperCase() + rental.transmission.slice(1)}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Driver Available</span>
-            <span className="detail-value">
-              {rental.driverAvailable ? 'Yes' : 'No'}
-              {rental.driverAvailable && (
-                <> (₹{rental.driverRate} per day)</>
-              )}
-            </span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Status</span>
-            <span className="detail-value">
-              {rental.status === 'available' ? 'Available' : 'Unavailable'}
-              <span className={`status-badge status-${rental.status}`}>
-                {rental.status}
-              </span>
-            </span>
-          </div>
-          
-          <Link to="/seller/view-rentals" className="back-button">Back to Rentals</Link>
-        </div>
-      </section>
-    </>
+    </div>
   );
 };
 

@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const UpdateRental = () => {
   const { id } = useParams();
-  const [rental, setRental] = useState(null);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    'vehicle-name': '',
+    'vehicle-year': '',
+    'vehicle-ac': '',
+    'vehicle-capacity': '',
+    'vehicle-condition': '',
+    'vehicle-fuel-type': '',
+    'vehicle-transmission': '',
     'rental-cost': '',
     'driver-available': '',
     'driver-rate': '',
-    status: ''
+    vehicleImage: null
   });
-  const [isBeforeReturnDate, setIsBeforeReturnDate] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,307 +27,262 @@ const UpdateRental = () => {
       try {
         const response = await axiosInstance.get(`/seller/rental-details/${id}`);
         if (response.data.success) {
-          const fetchedRental = response.data.data.rental;
-          setRental(fetchedRental);
+          const rental = response.data.data.rental;
           setFormData({
-            'rental-cost': fetchedRental.costPerDay,
-            'driver-available': fetchedRental.driverAvailable ? 'yes' : 'no',
-            'driver-rate': fetchedRental.driverRate || '',
-            status: fetchedRental.status
+            'vehicle-name': rental.vehicleName || '',
+            'vehicle-year': rental.year || '',
+            'vehicle-ac': rental.ac ? 'available' : 'not',
+            'vehicle-capacity': rental.capacity || '',
+            'vehicle-condition': rental.condition || '',
+            'vehicle-fuel-type': rental.fuelType || '',
+            'vehicle-transmission': rental.transmission || '',
+            'rental-cost': rental.costPerDay || '',
+            'driver-available': rental.driverAvailable ? 'yes' : 'no',
+            'driver-rate': rental.driverRate || '',
+            vehicleImage: null
           });
-          // Calculate isBeforeReturnDate
-          const currentDate = new Date();
-          setIsBeforeReturnDate(fetchedRental.dropDate && currentDate < new Date(fetchedRental.dropDate));
         } else {
           setError(response.data.message);
         }
       } catch (err) {
-        setError('Failed to load rental data');
+        setError('Failed to load rental details');
       }
     };
     fetchRental();
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: files ? files[0] : value
+    }));
   };
 
   const validateForm = () => {
-    let hasErrors = false;
+    let isValid = true;
     setError(null);
-
-    // Validate cost
-    const cost = parseFloat(formData['rental-cost']);
-    if (isNaN(cost) || cost <= 0) {
-      hasErrors = true;
-      setError('Cost per day must be greater than 0.');
+    if (formData['vehicle-name'].trim().length < 2) {
+      setError('Vehicle name is required and should be at least 2 characters.');
+      isValid = false;
     }
-
-    // Validate status
-    if (!formData.status) {
-      hasErrors = true;
-      setError('Please select a status.');
+    const currentYear = new Date().getFullYear();
+    if (formData['vehicle-year'] < 1900 || formData['vehicle-year'] > currentYear) {
+      setError('Year must be between 1900 and 2025.');
+      isValid = false;
     }
-
-    // Validate driver available
-    if (!formData['driver-available']) {
-      hasErrors = true;
-      setError('Please select if driver is available.');
+    if (formData['vehicle-capacity'] < 1) {
+      setError('Capacity must be at least 1 passenger.');
+      isValid = false;
     }
-
-    // Check driver rate if driver is available
-    if (formData['driver-available'] === 'yes') {
-      const driverRate = parseFloat(formData['driver-rate']);
-      if (isNaN(driverRate) || driverRate <= 0) {
-        hasErrors = true;
-        setError('Driver rate must be greater than 0.');
+    ['vehicle-ac', 'vehicle-condition', 'vehicle-fuel-type', 'vehicle-transmission', 'driver-available'].forEach(field => {
+      if (!formData[field]) {
+        setError(`Please select ${field.replace('-', ' ')}.`);
+        isValid = false;
       }
+    });
+    if (formData['rental-cost'] <= 0) {
+      setError('Cost must be a positive amount.');
+      isValid = false;
     }
-
-    // Prevent invalid status change
-    if (rental.status === 'unavailable' && formData.status === 'available' && isBeforeReturnDate) {
-      hasErrors = true;
-      setError('Cannot change status from unavailable to available before the return date');
+    if (formData['driver-available'] === 'yes' && formData['driver-rate'] <= 0) {
+      setError('Driver rate must be a positive amount if driver is available.');
+      isValid = false;
     }
-
-    return !hasErrors;
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     setIsSubmitting(true);
+    const submitData = new FormData();
+    Object.keys(formData).forEach(key => {
+      if (formData[key] !== null) {
+        submitData.append(key, formData[key]);
+      }
+    });
     try {
-      const response = await axiosInstance.post(`/seller/update-rental/${id}`, formData);
+      const response = await axiosInstance.put(`/seller/update-rental/${id}`, submitData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       if (response.data.success) {
         setSuccess('Rental updated successfully!');
+        setTimeout(() => navigate('/seller/view-rentals'), 2000);
       } else {
         setError(response.data.message);
       }
     } catch (err) {
-      setError('Unable to update: ' + err.message);
+      setError('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (error) {
-    return (
-      <div className="error-message">{error}</div>
-    );
-  }
-
-  if (!rental) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: "Montserrat", sans-serif;
-        }
-
-        body {
-          background-color: #f8f8f8;
-          color: #333333;
-        }
-
-        .update-container {
-          padding: 4rem 2rem;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
-        .update-title {
-          color: #ff6b00;
-          font-size: 2.5rem;
-          margin-bottom: 2rem;
-          text-align: center;
-        }
-
-        .update-form {
-          background-color: #ffffff;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-          padding: 2rem;
-        }
-
-        .form-group {
-          margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-          display: block;
-          font-weight: 500;
-          margin-bottom: 0.5rem;
-          color: #555;
-        }
-
-        .form-control {
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 0.3rem;
-          font-size: 1rem;
-        }
-
-        .form-control:focus {
-          outline: none;
-          border-color: #ff6b00;
-        }
-
-        .radio-group {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-
-        .radio-option {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .radio-option input[type="radio"] {
-          margin: 0;
-        }
-
-        .driver-rate-container {
-          margin-top: 1rem;
-          padding-left: 1.5rem;
-          border-left: 2px solid #ff6b00;
-          display: none;
-        }
-
-        .btn {
-          background-color: #ff6b00;
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 0.3rem;
-          font-weight: 500;
-          cursor: pointer;
-          font-size: 1rem;
-          transition: background 0.3s ease;
-        }
-
-        .btn:hover {
-          background-color: #ff8c3f;
-        }
-
-        .btn:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-
-        .back-btn {
-          display: inline-block;
-          margin-top: 1rem;
-          color: #ff6b00;
-          text-decoration: none;
-          font-weight: 500;
-        }
-
-        .back-btn:hover {
-          text-decoration: underline;
-        }
-
-        .error-message {
-          color: #ff0000;
-          margin-bottom: 1rem;
-          padding: 0.75rem;
-          background-color: #ffeeee;
-          border-radius: 0.3rem;
-        }
-
-        .success-message {
-          color: #2e7d32;
-          margin-bottom: 1rem;
-          padding: 0.75rem;
-          background-color: #e6f7e6;
-          border-radius: 0.3rem;
-        }
-
-        .select-dropdown {
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 0.3rem;
-          font-size: 1rem;
-          background-color: white;
-        }
-        
-        .note {
-          font-size: 0.9rem;
-          color: #666;
-          font-style: italic;
-          margin-top: 0.5rem;
-        }
-      `}</style>
-      <section className="update-container">
-        <h1 className="update-title">Update Rental Vehicle</h1>
-        
-        {error && <div className="error-message">{error}</div>}
-        
-        {success && <div className="success-message">{success}</div>}
-        
-        <form className="update-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Cost per day (₹)</label>
-            <input type="number" className="form-control" name="rental-cost" 
-                   value={formData['rental-cost']} onChange={handleChange} step="0.01" min="0" required />
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold text-center text-orange-600 mb-8">Update Rental Vehicle</h1>
+        {error && <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6 text-center font-medium">{error}</div>}
+        {success && <div className="bg-green-100 text-green-700 p-4 rounded-lg mb-6 text-center font-medium">{success}</div>}
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg space-y-6">
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">Vehicle Name</label>
+            <input 
+              type="text" 
+              name="vehicle-name" 
+              value={formData['vehicle-name']} 
+              onChange={handleChange} 
+              required 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+            />
           </div>
-          
-          <div className="form-group">
-            <label className="form-label">Driver Available</label>
-            <div className="radio-group">
-              <label className="radio-option">
-                <input type="radio" name="driver-available" value="yes" 
-                       checked={formData['driver-available'] === 'yes'} onChange={handleChange} />
-                Yes
-              </label>
-              <label className="radio-option">
-                <input type="radio" name="driver-available" value="no" 
-                       checked={formData['driver-available'] === 'no'} onChange={handleChange} />
-                No
-              </label>
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">Vehicle Image</label>
+            <input 
+              type="file" 
+              name="vehicleImage" 
+              onChange={handleChange} 
+              accept="image/*" 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Year</label>
+              <input 
+                type="number" 
+                name="vehicle-year" 
+                value={formData['vehicle-year']} 
+                onChange={handleChange} 
+                required 
+                min="1900" 
+                max="2025" 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+              />
             </div>
-            
-            <div className="driver-rate-container" style={{display: formData['driver-available'] === 'yes' ? 'block' : 'none'}}>
-              <label className="form-label">Driver Rate per day (₹)</label>
-              <input type="number" className="form-control" name="driver-rate" 
-                     value={formData['driver-rate']} onChange={handleChange} step="0.01" min="0" />
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">AC</label>
+              <select 
+                name="vehicle-ac" 
+                value={formData['vehicle-ac']} 
+                onChange={handleChange} 
+                required 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+              >
+                <option value="">Select</option>
+                <option value="available">Available</option>
+                <option value="not">Not Available</option>
+              </select>
             </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label">Status</label>
-            <select className="select-dropdown" name="status" value={formData.status} onChange={handleChange} required>
-              <option value="available">Available</option>
-              <option value="unavailable">Unavailable</option>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Capacity</label>
+              <input 
+                type="number" 
+                name="vehicle-capacity" 
+                value={formData['vehicle-capacity']} 
+                onChange={handleChange} 
+                required 
+                min="1" 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Condition</label>
+              <select 
+                name="vehicle-condition" 
+                value={formData['vehicle-condition']} 
+                onChange={handleChange} 
+                required 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+              >
+                <option value="">Select</option>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Fuel Type</label>
+              <select 
+                name="vehicle-fuel-type" 
+                value={formData['vehicle-fuel-type']} 
+                onChange={handleChange} 
+                required 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+              >
+                <option value="">Select</option>
+                <option value="petrol">Petrol</option>
+                <option value="diesel">Diesel</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Transmission</label>
+              <select 
+                name="vehicle-transmission" 
+                value={formData['vehicle-transmission']} 
+                onChange={handleChange} 
+                required 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+              >
+                <option value="">Select</option>
+                <option value="automatic">Automatic</option>
+                <option value="manual">Manual</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Cost/day (₹)</label>
+              <input 
+                type="number" 
+                name="rental-cost" 
+                value={formData['rental-cost']} 
+                onChange={handleChange} 
+                required 
+                min="0" 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">Driver Available</label>
+            <select 
+              name="driver-available" 
+              value={formData['driver-available']} 
+              onChange={handleChange} 
+              required 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+            >
+              <option value="">Select</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
             </select>
-            
-            {isBeforeReturnDate && rental.status === 'unavailable' && (
-              <p className="note">
-                Note: This rental cannot be changed from unavailable to available before the return date: 
-                {new Date(rental.dropDate).toLocaleDateString()}
-              </p>
-            )}
           </div>
-          
-          <button type="submit" className="btn" disabled={isSubmitting}>Update Rental</button>
-          <Link to="/seller/view-rentals" className="back-btn">Back to Rentals</Link>
+          {formData['driver-available'] === 'yes' && (
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Driver Rate (₹/day)</label>
+              <input 
+                type="number" 
+                name="driver-rate" 
+                value={formData['driver-rate']} 
+                onChange={handleChange} 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+              />
+            </div>
+          )}
+          <button 
+            type="submit" 
+            disabled={isSubmitting} 
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-70 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            {isSubmitting ? 'Updating...' : 'Update Rental'}
+          </button>
         </form>
-      </section>
-    </>
+      </div>
+    </div>
   );
 };
 

@@ -3,119 +3,65 @@ import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   return (
-    <>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: "Montserrat", sans-serif;
-        }
-
-        body {
-          background-color: #ffffff;
-          color: #333333;
-        }
-
-        /* Seller Dashboard Content */
-        .seller-dashboard {
-          padding: 4rem 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .seller-dashboard h1 {
-          color: #ff6b00;
-          font-size: 2.5rem;
-          margin-bottom: 2rem;
-          text-align: center;
-        }
-
-        .dashboard-cards {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 2rem;
-        }
-
-        .dashboard-card {
-          background-color: #ffffff;
-          padding: 1.5rem;
-          border-radius: 1rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          text-align: center;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .dashboard-card:hover {
-          transform: scale(1.05);
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .dashboard-card h2 {
-          color: #ff6b00;
-          font-size: 1.5rem;
-          margin-bottom: 1rem;
-        }
-
-        .dashboard-card p {
-          margin-bottom: 1.5rem;
-          color: #666666;
-        }
-
-        .card-btn {
-          display: inline-block;
-          background: linear-gradient(135deg, #ff6b00, #ff9a44);
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 0.5rem;
-          text-decoration: none;
-          font-weight: 500;
-          transition: background 0.3s ease;
-          margin: 0.5rem;
-        }
-
-        .card-btn:hover {
-          background: linear-gradient(135deg, #ff9a44, #ff6b00);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .dashboard-cards {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-      <section className="seller-dashboard">
-        <h1>Welcome, Seller!</h1>
-        <div className="dashboard-cards">
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold text-center text-orange-600 mb-10">Welcome, Seller!</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Auction Listings Card */}
-          <div className="dashboard-card">
-            <h2>Auction Listings</h2>
-            <p>Manage your vehicles listed for auction.</p>
-            <Link to="/seller/add-auction" className="card-btn">Add New Auction</Link>
-            <Link to="/seller/view-auctions" className="card-btn">View Auctions</Link>
+          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 text-center">
+            <h2 className="text-2xl font-semibold text-orange-600 mb-4">Auction Listings</h2>
+            <p className="text-gray-600 mb-6">Manage your vehicles listed for auction.</p>
+            <div className="space-y-3">
+              <Link 
+                to="/seller/add-auction" 
+                className="block w-full bg-orange-600 text-white py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+              >
+                Add New Auction
+              </Link>
+              <Link 
+                to="/seller/view-auctions" 
+                className="block w-full bg-white text-orange-600 border border-orange-600 py-2 rounded-lg font-medium hover:bg-orange-50 transition-colors duration-200"
+              >
+                View Auctions
+              </Link>
+            </div>
           </div>
 
           {/* Rental Listings Card */}
-          <div className="dashboard-card">
-            <h2>Rental Listings</h2>
-            <p>Manage your vehicles listed for rent.</p>
-            <Link to="/seller/add-rental" className="card-btn">Add New Rental</Link>
-            <Link to="/seller/view-rentals" className="card-btn">View Rentals</Link>
+          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 text-center">
+            <h2 className="text-2xl font-semibold text-orange-600 mb-4">Rental Listings</h2>
+            <p className="text-gray-600 mb-6">Manage your vehicles listed for rent.</p>
+            <div className="space-y-3">
+              <Link 
+                to="/seller/add-rental" 
+                className="block w-full bg-orange-600 text-white py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+              >
+                Add New Rental
+              </Link>
+              <Link 
+                to="/seller/view-rentals" 
+                className="block w-full bg-white text-orange-600 border border-orange-600 py-2 rounded-lg font-medium hover:bg-orange-50 transition-colors duration-200"
+              >
+                View Rentals
+              </Link>
+            </div>
           </div>
 
           {/* Earnings Card */}
-          <div className="dashboard-card">
-            <h2>Earnings</h2>
-            <p>View your total earnings and analytics.</p>
-            <Link to="/seller/view-earnings" className="card-btn">View Earnings</Link>
+          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 text-center">
+            <h2 className="text-2xl font-semibold text-orange-600 mb-4">Earnings</h2>
+            <p className="text-gray-600 mb-6">View your total earnings and analytics.</p>
+            <Link 
+              to="/seller/view-earnings" 
+              className="block w-full bg-orange-600 text-white py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              View Earnings
+            </Link>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 };
 

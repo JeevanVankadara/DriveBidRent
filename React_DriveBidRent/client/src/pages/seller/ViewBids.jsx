@@ -1,247 +1,152 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 
 const ViewBids = () => {
-  const { id } = useParams(); // auctionId
-  const [auction, setAuction] = useState(null);
-  const [currentBid, setCurrentBid] = useState(null);
-  const [bidHistory, setBidHistory] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
-
-  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-
-  const formatDate = (date) => new Date(date).toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  });
+  const { id } = useParams();
+  const [bids, setBids] = useState([]);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const fetchBids = async () => {
       try {
         const response = await axiosInstance.get(`/seller/view-bids/${id}`);
         if (response.data.success) {
-          const data = response.data.data;
-          setAuction(data.auction);
-          setCurrentBid(data.currentBid);
-          setBidHistory(data.bidHistory);
-          if (data.auction.started_auction === 'ended' && data.currentBid) {
-            setShowPopup(true);
-          }
+          setBids(response.data.data);
+        } else {
+          setError(response.data.message);
         }
       } catch (err) {
-        console.error(err);
+        setError('Failed to load bids');
       }
     };
     fetchBids();
   }, [id]);
 
-  const closePopup = () => {
-    setShowPopup(false);
+  const handleAcceptBid = async (bidId) => {
+    try {
+      const response = await axiosInstance.put(`/seller/accept-bid/${bidId}`);
+      if (response.data.success) {
+        setSuccess('Bid accepted successfully!');
+        setBids(bids.map(bid => 
+          bid._id === bidId ? { ...bid, status: 'accepted' } : bid
+        ));
+      } else {
+        setError(response.data.message);
+      }
+    } catch (err) {
+      setError('Failed to accept bid');
+    }
   };
 
+  const handleRejectBid = async (bidId) => {
+    try {
+      const response = await axiosInstance.put(`/seller/reject-bid/${bidId}`);
+      if (response.data.success) {
+        setSuccess('Bid rejected successfully!');
+        setBids(bids.map(bid => 
+          bid._id === bidId ? { ...bid, status: 'rejected' } : bid
+        ));
+      } else {
+        setError(response.data.message);
+      }
+    } catch (err) {
+      setError('Failed to reject bid');
+    }
+  };
+
+  const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4">{error}</div>
+          <Link to="/seller/view-auctions" className="text-orange-600 hover:text-orange-700 font-medium">
+            Back to Auctions
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: "Montserrat", sans-serif;
-        }
-
-        body {
-          background-color: #ffffff;
-          color: #333333;
-        }
-
-        /* Seller Dashboard Content */
-        .seller-dashboard {
-          padding: 4rem 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .seller-dashboard h1 {
-          color: #ff6b00;
-          font-size: 2.5rem;
-          margin-bottom: 2rem;
-          text-align: center;
-        }
-
-        /* Bids List */
-        .bids-list {
-          background-color: #ffffff;
-          padding: 1.5rem;
-          border-radius: 1rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          margin-bottom: 2rem;
-        }
-
-        .bids-list h2 {
-          color: #ff6b00;
-          margin-bottom: 1rem;
-        }
-
-        .bids-list h3 {
-          color: #333333;
-          margin: 1rem 0;
-          font-size: 1.2rem;
-        }
-
-        .bids-list ul {
-          list-style: none;
-          padding: 0;
-        }
-
-        .bids-list ul li {
-          padding: 0.75rem 0;
-          border-bottom: 1px solid #eee;
-          color: #333333;
-        }
-
-        .bids-list ul li:last-child {
-          border-bottom: none;
-        }
-
-        /* Buyer Info Section */
-        .buyer-info {
-          background-color: #ffffff;
-          padding: 1.5rem;
-          border-radius: 1rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          margin-bottom: 2rem;
-        }
-
-        .buyer-info h2 {
-          color: #ff6b00;
-          margin-bottom: 1rem;
-        }
-
-        .buyer-info p {
-          margin: 0.5rem 0;
-          color: #333333;
-        }
-
-        .buyer-info p strong {
-          color: #555555;
-        }
-
-        /* Popup Styles */
-        .popup-overlay {
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 1000;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .popup-content {
-          background: white;
-          padding: 2rem;
-          border-radius: 10px;
-          max-width: 500px;
-          width: 90%;
-          text-align: center;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .popup-content h2 {
-          color: #ff6b00;
-          margin-bottom: 1rem;
-        }
-
-        .popup-content p {
-          color: #333;
-          margin-bottom: 1rem;
-        }
-
-        .close-btn {
-          background: #ff6b00;
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background 0.3s ease;
-        }
-
-        .close-btn:hover {
-          background: #e65c00;
-        }
-      `}</style>
-      <section className="seller-dashboard">
-        <h1>Bids on {auction ? capitalize(auction.vehicleName) : ''}</h1>
-        
-        {/* Bids List */}
-        <div className="bids-list">
-          <h2>Bids</h2>
-          {/* Current Bid */}
-          <h3>Current Bid</h3>
-          <ul>
-            {currentBid ? (
-              <li>
-                ₹{currentBid.bidAmount.toLocaleString('en-IN')} - Bidder: 
-                <strong>{capitalize(currentBid.buyerId.firstName)} {capitalize(currentBid.buyerId.lastName)}</strong>
-                ({formatDate(currentBid.bidTime)})
-              </li>
-            ) : (
-              <li>No bids yet.</li>
-            )}
-          </ul>
-          {/* Bid History */}
-          <h3>Bid History (Last 3)</h3>
-          <ul>
-            {bidHistory.length > 0 ? (
-              bidHistory.map((bid, index) => (
-                <li key={index}>
-                  ₹{bid.bidAmount.toLocaleString('en-IN')} - Bidder: 
-                  <strong>{capitalize(bid.buyerId.firstName)} {capitalize(bid.buyerId.lastName)}</strong>
-                  ({formatDate(bid.bidTime)})
-                </li>
-              ))
-            ) : (
-              <li>No past bids available.</li>
-            )}
-          </ul>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-10">
+          <h1 className="text-4xl font-bold text-orange-600">Vehicle Bids</h1>
+          <Link 
+            to="/seller/view-auctions" 
+            className="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors duration-200"
+          >
+            Back to Auctions
+          </Link>
         </div>
 
-        {/* Buyer Information Section (Shown only if auction has ended and there is a current bid) */}
-        {auction.started_auction === 'ended' && currentBid && (
-          <div className="buyer-info">
-            <h2>Buyer Information</h2>
-            <p><strong>Name:</strong> {capitalize(currentBid.buyerId.firstName)} {capitalize(currentBid.buyerId.lastName)}</p>
-            <p><strong>Email:</strong> {currentBid.buyerId.email || 'Not specified'}</p>
-            <p><strong>Contact Number:</strong> {currentBid.buyerId.phone || 'Not specified'}</p>
+        {success && (
+          <div className="bg-green-100 text-green-700 p-4 rounded-lg mb-6 text-center font-medium">
+            {success}
           </div>
         )}
-      </section>
 
-      {/* Popup for Auction Ended */}
-      {showPopup && (
-        <div className="popup-overlay" style={{display: 'flex'}}>
-          <div className="popup-content">
-            <h2>Auction Ended</h2>
-            <p>The auction for {capitalize(auction.vehicleName)} has ended.</p>
-            <p><strong>Final Bid Amount:</strong> ₹{currentBid.bidAmount.toLocaleString('en-IN')}</p>
-            <p><strong>Winner:</strong> {capitalize(currentBid.buyerId.firstName)} {capitalize(currentBid.buyerId.lastName)} ({currentBid.buyerId.email})</p>
-            <button className="close-btn" onClick={closePopup}>Close</button>
+        {bids.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <p className="text-xl text-gray-600">No bids found for this vehicle.</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-6">
+            {bids.map((bid) => (
+              <div key={bid._id} className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Bid by: {bid.bidderName}</h3>
+                    <p className="text-gray-600">Email: {bid.bidderEmail}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    bid.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    bid.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                    bid.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                  </span>
+                </div>
 
-    </>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Bid Amount:</span>
+                    <span className="font-bold text-orange-600 text-lg">
+                      ₹{bid.bidAmount?.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Bid Date:</span>
+                    <span className="font-medium">{formatDate(bid.bidDate)}</span>
+                  </div>
+                </div>
+
+                {bid.status === 'pending' && (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleAcceptBid(bid._id)}
+                      className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+                    >
+                      Accept Bid
+                    </button>
+                    <button
+                      onClick={() => handleRejectBid(bid._id)}
+                      className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
+                    >
+                      Reject Bid
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
