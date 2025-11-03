@@ -18,7 +18,6 @@ export default function AssignMechanic() {
       try {
         setLoading(true);
         const res = await auctionManagerServices.getAssignMechanic(id);
-        // Handle axios response structure
         const responseData = res.data || res;
         
         if (responseData.success) {
@@ -28,7 +27,6 @@ export default function AssignMechanic() {
           setError(responseData.message || 'Failed to load data');
         }
       } catch (err) {
-        console.error('Assign mechanic fetch error:', err);
         setError(err.response?.data?.message || 'Failed to load data');
       } finally {
         setLoading(false);
@@ -64,7 +62,6 @@ export default function AssignMechanic() {
         alert(responseData.message || 'Failed to assign mechanic');
       }
     } catch (err) {
-      console.error('Assign mechanic error:', err);
       alert(err.response?.data?.message || 'Failed to assign mechanic');
     } finally {
       setAssigning(false);
@@ -105,7 +102,6 @@ export default function AssignMechanic() {
   return (
     <div className="max-w-6xl mx-auto p-6 font-montserrat">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left: Image */}
         <div className="lg:w-1/2">
           <div className="w-full h-96 rounded-xl overflow-hidden shadow-lg mb-6 bg-gray-100">
             <img
@@ -120,7 +116,6 @@ export default function AssignMechanic() {
           <h1 className="text-3xl font-bold text-center text-gray-800">{request.vehicleName}</h1>
         </div>
 
-        {/* Right: Info */}
         <div className="lg:w-1/2 space-y-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-orange-600 pb-2">Vehicle Information</h2>

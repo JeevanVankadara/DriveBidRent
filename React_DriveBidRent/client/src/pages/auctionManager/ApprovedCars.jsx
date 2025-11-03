@@ -21,7 +21,6 @@ export default function ApprovedCars() {
           setError(responseData.message || 'Failed to load approved cars');
         }
       } catch (err) {
-        console.error('Approved cars fetch error:', err);
         setError(err.response?.data?.message || 'Failed to load approved cars');
       } finally {
         setLoading(false);
@@ -42,7 +41,6 @@ export default function ApprovedCars() {
         alert(responseData.message || 'Failed to start auction');
       }
     } catch (err) {
-      console.error('Start auction error:', err);
       alert(err.response?.data?.message || 'Failed to start auction');
     }
   };
@@ -70,6 +68,7 @@ export default function ApprovedCars() {
   return (
     <div className="max-w-5xl mx-auto p-6 font-montserrat">
       <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Approved Cars</h2>
+      
       {cars.length > 0 ? (
         cars.map((car) => (
           <div
@@ -79,6 +78,7 @@ export default function ApprovedCars() {
             <div className="w-80 h-48 overflow-hidden rounded-lg mr-8">
               <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
             </div>
+            
             <div className="flex-1 flex flex-col justify-center">
               <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
               <p className="text-lg font-bold text-orange-600 mt-1">
@@ -89,6 +89,7 @@ export default function ApprovedCars() {
               </p>
               <p className="text-gray-600">Location: {car.sellerId.city}</p>
             </div>
+            
             <div className="flex items-end">
               {car.started_auction === 'no' ? (
                 <button

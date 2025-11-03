@@ -41,8 +41,6 @@ class ErrorBoundary extends Component {
 }
 
 export default function AuctionManagerLayout() {
-  console.log('AuctionManagerLayout rendering');
-  
   return (
     <ErrorBoundary>
       <div className="min-h-screen flex flex-col">

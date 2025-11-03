@@ -1,83 +1,98 @@
 // client/src/pages/auctionManager/components/Navbar.jsx
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authServices } from '../../../services/auth.services';
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const handleLogout = async () => {
-    await authServices.logout();
-    window.location.href = '/';
+    try {
+      // Call logout API to clear JWT cookie
+      await authServices.logout();
+      
+      // Clear local storage
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
+      
+      // Redirect to home
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if API fails, clear local storage and redirect
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
+      navigate('/');
+    }
   };
 
   const isActive = (path) => currentPath.includes(path);
 
   return (
-    <nav className="sticky top-0 w-full bg-white shadow-md z-50 h-16 flex items-center border-b border-gray-200 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-6 w-full flex justify-between items-center h-full">
-        <Link 
-          to="/auction-manager" 
-          className="text-2xl font-bold text-orange-600 tracking-tight whitespace-nowrap flex-shrink-0 hover:text-orange-700 transition-colors duration-200"
-        >
-          DriveBidRent
-        </Link>
-        
-        <div className="hidden md:flex items-center space-x-8 h-full">
+    <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex justify-between items-center h-16">
           <Link 
-            to="/auction-manager/requests" 
-            className={`font-medium text-sm transition-all duration-200 h-full flex items-center border-b-2 ${
-              isActive('/requests') 
-                ? 'text-orange-600 border-orange-600' 
-                : 'text-gray-600 border-transparent hover:text-orange-600 hover:border-orange-400'
-            }`}
+            to="/auction-manager/dashboard" 
+            className="text-2xl font-bold text-orange-600"
           >
-            Requests
-          </Link>
-          <Link 
-            to="/auction-manager/pending" 
-            className={`font-medium text-sm transition-all duration-200 h-full flex items-center border-b-2 ${
-              isActive('/pending') 
-                ? 'text-orange-600 border-orange-600' 
-                : 'text-gray-600 border-transparent hover:text-orange-600 hover:border-orange-400'
-            }`}
-          >
-            Pending Cars
-          </Link>
-          <Link 
-            to="/auction-manager/approved" 
-            className={`font-medium text-sm transition-all duration-200 h-full flex items-center border-b-2 ${
-              isActive('/approved') 
-                ? 'text-orange-600 border-orange-600' 
-                : 'text-gray-600 border-transparent hover:text-orange-600 hover:border-orange-400'
-            }`}
-          >
-            Approved Cars
-          </Link>
-        </div>
-        
-        <div className="flex items-center space-x-6">
-          <Link 
-            to="/auction-manager/profile" 
-            className="flex items-center space-x-2 relative group"
-          >
-            <img
-              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-gray-200 object-cover transition-all duration-200 group-hover:border-orange-400"
-            />
+            DriveBidRent
           </Link>
           
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-8">
+            <Link 
+              to="/auction-manager/dashboard" 
+              className={`font-medium transition ${
+                isActive('/dashboard') 
+                  ? 'text-orange-600' 
+                  : 'text-gray-700 hover:text-orange-600'
+              }`}
+            >
+              Dashboard
+            </Link>
+            <Link 
+              to="/auction-manager/requests" 
+              className={`font-medium transition ${
+                isActive('/requests') 
+                  ? 'text-orange-600' 
+                  : 'text-gray-700 hover:text-orange-600'
+              }`}
+            >
+              Requests
+            </Link>
+            <Link 
+              to="/auction-manager/pending" 
+              className={`font-medium transition ${
+                isActive('/pending') 
+                  ? 'text-orange-600' 
+                  : 'text-gray-700 hover:text-orange-600'
+              }`}
+            >
+              Pending Cars
+            </Link>
+            <Link 
+              to="/auction-manager/approved" 
+              className={`font-medium transition ${
+                isActive('/approved') 
+                  ? 'text-orange-600' 
+                  : 'text-gray-700 hover:text-orange-600'
+              }`}
+            >
+              Approved Cars
+            </Link>
+          </div>
+          
+          <div className="flex items-center space-x-4">
             <Link
               to="/auction-manager/profile"
-              className="text-orange-600 font-medium text-sm tracking-wide hover:text-orange-700 transition-colors duration-200"
+              className="text-orange-600 font-medium hover:text-orange-700 transition"
             >
-              My Profile
+              Profile
             </Link>
             <button
               onClick={handleLogout}
-              className="bg-orange-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-orange-700 transition-all duration-200 shadow-sm hover:shadow"
+              className="bg-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-700 transition"
             >
               Logout
             </button>

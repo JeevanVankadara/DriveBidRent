@@ -1,34 +1,31 @@
 // client/src/pages/auctionManager/ViewBids.jsx
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 
 export default function ViewBids() {
   const { id } = useParams();
-  const [auction, setAuction] = useState(null);
-  const [currentBid, setCurrentBid] = useState(null);
-  const [pastBids, setPastBids] = useState([]);
-  const [message, setMessage] = useState('');
+  const [bids, setBids] = useState([]);
+  const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [error, setError] = useState(null);
+  const [ending, setEnding] = useState(false);
 
   useEffect(() => {
     const fetchBids = async () => {
       try {
-          setLoading(true);
-        const res = await auctionManagerServices.viewBids(id);
-          const responseData = res.data || res;
+        setLoading(true);
+        const res = await auctionManagerServices.getBids(id);
+        const responseData = res.data || res;
         
-          if (responseData.success) {
-            setAuction(responseData.data.auction);
-            setCurrentBid(responseData.data.currentBid);
-            setPastBids(responseData.data.pastBids);
-          } else {
-            setError(responseData.message || 'Failed to load bids');
+        if (responseData.success) {
+          setBids(responseData.data.bids || []);
+          setCar(responseData.data.car);
+        } else {
+          setError(responseData.message || 'Failed to load bids');
         }
       } catch (err) {
-          console.error('View bids fetch error:', err);
-          setError(err.response?.data?.message || 'Failed to load bids');
+        setError(err.response?.data?.message || 'Failed to load bids');
       } finally {
         setLoading(false);
       }
@@ -36,151 +33,117 @@ export default function ViewBids() {
     fetchBids();
   }, [id]);
 
-  const stopAuction = async () => {
+  const endAuction = async () => {
+    if (!window.confirm('Are you sure you want to end this auction?')) return;
+    
     try {
-      const res = await auctionManagerServices.stopAuction(id);
-        const responseData = res.data || res;
+      setEnding(true);
+      const res = await auctionManagerServices.endAuction(id);
+      const responseData = res.data || res;
       
-        if (responseData.success) {
-        setMessage('Auction has been stopped.');
-        setAuction({ ...auction, auction_stopped: true });
-        } else {
-          setMessage(responseData.message || 'Failed to stop auction');
+      if (responseData.success) {
+        alert('Auction ended successfully!');
+        window.location.reload();
+      } else {
+        alert(responseData.message || 'Failed to end auction');
       }
     } catch (err) {
-        console.error('Stop auction error:', err);
-        setMessage(err.response?.data?.message || 'Failed to stop auction');
+      alert(err.response?.data?.message || 'Failed to end auction');
+    } finally {
+      setEnding(false);
     }
   };
 
-  const formatCurrency = (amount) => `₹${Number(amount).toLocaleString('en-IN')}`;
-  const formatDate = (date) => new Date(date).toLocaleString();
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+        <div className="text-center py-10 text-xl text-gray-600">Loading bids...</div>
+      </div>
+    );
+  }
 
-    if (loading) {
-      return (
-        <div className="max-w-6xl mx-auto p-6">
-          <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
-          <div className="text-center py-10 text-xl text-gray-600">Loading bids...</div>
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+          {error}
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (error) {
-      return (
-        <div className="max-w-6xl mx-auto p-6">
-          <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
-          <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
-            {error}
-          </div>
-          <div className="text-center mt-4">
-            <Link to="/auction-manager/approved" className="text-blue-600 hover:text-blue-700 font-medium">
-              Back to Approved Cars
-            </Link>
-          </div>
+  if (!car) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+        <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-center">
+          Car not found
         </div>
-      );
-    }
-
-    if (!auction) {
-      return (
-        <div className="max-w-6xl mx-auto p-6">
-          <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
-          <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-center">
-            Auction not found
-          </div>
-          <div className="text-center mt-4">
-            <Link to="/auction-manager/approved" className="text-blue-600 hover:text-blue-700 font-medium">
-              Back to Approved Cars
-            </Link>
-          </div>
-        </div>
-      );
-    }
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      {/* Auction Info */}
-      <div className="bg-white rounded-xl p-8 shadow-lg">
-        <h1 className="text-3xl font-bold text-orange-600 mb-6">{auction.vehicleName}</h1>
-        <img src={auction.vehicleImage} alt={auction.vehicleName} className="w-full max-w-sm rounded-lg mb-6" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
-          <p><strong>Seller:</strong> {auction.sellerId.firstName} {auction.sellerId.lastName}</p>
-          <p><strong>Email:</strong> {auction.sellerId.email}</p>
-          <p><strong>City:</strong> {auction.sellerId.city}</p>
-          <p><strong>Year:</strong> {auction.year}</p>
-          <p><strong>Condition:</strong> {auction.condition}</p>
-          <p><strong>Starting Bid:</strong> {formatCurrency(auction.startingBid)}</p>
-        </div>
-      </div>
-
-      {/* Bids Section */}
-      <div className="bg-white rounded-xl p-8 shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-orange-600">Bids on {auction.vehicleName}</h2>
+    <div className="max-w-5xl mx-auto p-6 font-montserrat">
+      <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+      
+      <div className="bg-white rounded-xl p-6 shadow-lg mb-8 border border-gray-200">
+        <div className="flex items-center mb-6">
+          <div className="w-64 h-48 overflow-hidden rounded-lg mr-6">
+            <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
+          </div>
           <div>
-            <Link to="/auction-manager/approved" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition mr-2">
-              Back to Cars
-            </Link>
-            {!auction.auction_stopped && auction.started_auction === 'yes' && (
-              <button
-                onClick={stopAuction}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition"
-              >
-                Stop Auction
-              </button>
-            )}
+            <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
+            <p className="text-lg text-orange-600 font-bold mt-1">
+              Condition: {car.condition.charAt(0).toUpperCase() + car.condition.slice(1)}
+            </p>
+            <p className="text-gray-600 mt-2">Starting Bid: ₹{car.startingBid}</p>
           </div>
         </div>
-
-        {message && (
-          <div className={`p-4 rounded-lg text-center font-medium mb-6 ${message.includes('stopped') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {message}
-          </div>
-        )}
-
-        {currentBid ? (
-          <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-orange-600 mb-8">
-            <div className="text-3xl font-bold text-orange-600 mb-2">
-              {formatCurrency(currentBid.bidAmount)}
-            </div>
-            <div className="flex flex-wrap justify-between text-gray-700">
-              <div>
-                <strong>Bidder:</strong> {currentBid.buyerId.firstName} {currentBid.buyerId.lastName} ({currentBid.buyerId.email})
-              </div>
-              <div>
-                <strong>Time:</strong> {formatDate(currentBid.bidTime)}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-600 italic">
-            No bids have been placed yet.
-          </div>
-        )}
-
-        {pastBids.length > 0 && (
-          <>
-            <h3 className="text-xl font-bold text-gray-700 mb-4">Bid History (Last 3)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {pastBids.map((bid) => (
-                <div key={bid._id} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-600">
-                  <div className="text-xl font-bold text-blue-600 mb-2">
-                    {formatCurrency(bid.bidAmount)}
-                  </div>
-                  <div className="text-sm text-gray-700">
-                    <div>
-                      <strong>Bidder:</strong> {bid.buyerId.firstName} {bid.buyerId.lastName} ({bid.buyerId.email})
-                    </div>
-                    <div>
-                      <strong>Time:</strong> {formatDate(bid.bidTime)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        
+        <button
+          onClick={endAuction}
+          disabled={ending}
+          className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {ending ? 'Ending Auction...' : 'End Auction'}
+        </button>
       </div>
+
+      <h3 className="text-2xl font-bold text-gray-800 mb-4">Bids ({bids.length})</h3>
+      
+      {bids.length > 0 ? (
+        <div className="space-y-4">
+          {bids.map((bid, index) => (
+            <div
+              key={bid._id}
+              className="bg-white rounded-lg p-4 shadow border border-gray-200 hover:shadow-md transition"
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-lg">
+                    {index + 1}. {bid.bidderId.firstName} {bid.bidderId.lastName}
+                  </p>
+                  <p className="text-gray-600">Contact: {bid.bidderId.phone || 'Not provided'}</p>
+                  <p className="text-gray-600">Location: {bid.bidderId.city || 'Not specified'}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold text-orange-600">₹{bid.bidAmount}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(bid.bidTime).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 text-gray-600 text-lg">
+          No bids placed yet
+        </div>
+      )}
     </div>
   );
 }

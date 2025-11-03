@@ -17,7 +17,6 @@ export default function ManagerProfile() {
       try {
         setLoading(true);
         const res = await auctionManagerServices.getProfile();
-        // Handle axios response structure
         const responseData = res.data || res;
         if (responseData.success) {
           setUser(responseData.data);
@@ -26,7 +25,6 @@ export default function ManagerProfile() {
           showAlert('error', responseData.message || 'Failed to load profile');
         }
       } catch (err) {
-        console.error('Profile fetch error:', err);
         showAlert('error', 'Failed to load profile');
       } finally {
         setLoading(false);
@@ -37,7 +35,7 @@ export default function ManagerProfile() {
 
   const showAlert = (type, msg) => {
     setAlert({ show: true, type, msg });
-    setTimeout(() => setAlert({ show: false, type: '', msg: '' }), 5000);
+    setTimeout(() => setAlert({ show: false, type: '', msg: '' }), 3000);
   };
 
   const handlePhoneUpdate = async (e) => {
@@ -57,7 +55,6 @@ export default function ManagerProfile() {
         showAlert('error', responseData.message || 'Failed to update phone');
       }
     } catch (err) {
-      console.error('Phone update error:', err);
       showAlert('error', 'Failed to update phone');
     } finally {
       setUpdating(false);
@@ -91,7 +88,6 @@ export default function ManagerProfile() {
         showAlert('error', responseData.message || 'Failed to change password');
       }
     } catch (err) {
-      console.error('Password change error:', err);
       showAlert('error', err.response?.data?.message || 'Failed to change password');
     } finally {
       setUpdating(false);
@@ -117,7 +113,6 @@ export default function ManagerProfile() {
       )}
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Personal Details */}
         <div className="flex-1 bg-white p-8 rounded-xl shadow-lg border border-orange-600">
           <h3 className="text-2xl font-bold text-orange-600 mb-6 border-b-2 border-orange-600 pb-3">Personal Details</h3>
           <form onSubmit={handlePhoneUpdate} className="space-y-6">
@@ -160,7 +155,6 @@ export default function ManagerProfile() {
           </form>
         </div>
 
-        {/* Change Password */}
         <div className="flex-1 bg-white p-8 rounded-xl shadow-lg border border-orange-600">
           <h3 className="text-2xl font-bold text-orange-600 mb-6 border-b-2 border-orange-600 pb-3">Change Password</h3>
           <form onSubmit={handlePasswordChange} className="space-y-6">

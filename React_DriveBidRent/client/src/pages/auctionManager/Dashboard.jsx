@@ -9,35 +9,19 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('Dashboard component mounted');
-    
     const fetchData = async () => {
       try {
-        console.log('Fetching dashboard data...');
         const res = await auctionManagerServices.getDashboard();
-        console.log('Dashboard API Response:', res);
-        
-        // Handle axios response structure (res.data contains the actual response)
         const responseData = res.data || res;
-        console.log('Response data:', responseData);
         
         if (responseData.success) {
-          console.log('Setting data:', responseData.data);
           setData(responseData.data || { pending: [], assigned: [], approved: [] });
         } else {
-          console.error('API returned success=false:', responseData.message);
           setError(responseData.message || 'Failed to load dashboard');
         }
       } catch (err) {
-        console.error('Dashboard fetch error:', err);
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status
-        });
         setError(err.response?.data?.message || err.message || 'Failed to load dashboard');
       } finally {
-        console.log('Setting loading to false');
         setLoading(false);
       }
     };
@@ -45,10 +29,7 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  console.log('Dashboard render - loading:', loading, 'error:', error, 'data:', data);
-
   if (loading) {
-    console.log('Rendering loading state');
     return (
       <div className="text-center py-10 text-xl">
         <p>Loading dashboard...</p>
@@ -57,7 +38,6 @@ export default function Dashboard() {
   }
   
   if (error) {
-    console.log('Rendering error state:', error);
     return (
       <div className="text-center py-10">
         <p className="text-red-600 text-xl mb-4">Error: {error}</p>
@@ -71,11 +51,8 @@ export default function Dashboard() {
     );
   }
 
-  console.log('Rendering dashboard content');
-
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-16 font-montserrat">
-      {/* REQUESTS */}
       <section>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">REQUESTS</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -111,7 +88,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* PENDING CARS */}
       <section>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">PENDING CARS</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -139,7 +115,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* APPROVED CARS */}
       <section>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">APPROVED CARS</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
