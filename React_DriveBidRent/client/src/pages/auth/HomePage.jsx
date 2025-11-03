@@ -6,15 +6,30 @@ const HomePage = () => {
   const [topRentals, setTopRentals] = useState([]);
   const [topAuctions, setTopAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loginMessage, setLoginMessage] = useState('');
   const navigate = useNavigate();
 
+  // show loginMessage once and auto-clear after 2s
+  useEffect(() => {
+    const message = localStorage.getItem('loginMessage');
+    if (message) {
+      setLoginMessage(message);
+      localStorage.removeItem('loginMessage');
+      const timer = setTimeout(() => setLoginMessage(''), 2000);
+      return () => clearTimeout(timer);
+    }
+    // no cleanup needed if no message
+    return undefined;
+  }, []);
+
+  // fetch home data on mount
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
         const response = await axiosInstance.get('/home/data');
-        if (response.data.success) {
-          setTopRentals(response.data.data.topRentals);
-          setTopAuctions(response.data.data.topAuctions);
+        if (response?.data?.success) {
+          setTopRentals(response.data.data.topRentals || []);
+          setTopAuctions(response.data.data.topAuctions || []);
         }
       } catch (err) {
         console.error('Error fetching home data:', err);
@@ -22,6 +37,7 @@ const HomePage = () => {
         setLoading(false);
       }
     };
+
     fetchHomeData();
   }, []);
 
@@ -502,6 +518,7 @@ const HomePage = () => {
           opacity: 0.8;
         }
       `}</style>
+
       <header className="navbar">
         <div className="logo">DriveBidRent</div>
         <nav>
@@ -519,6 +536,12 @@ const HomePage = () => {
           </button>
         </div>
       </header>
+
+      {loginMessage && (
+        <div className="bg-red-100 text-red-700 p-4 text-center font-medium">
+          {loginMessage}
+        </div>
+      )}
 
       <section className="hero">
         <img
@@ -657,10 +680,8 @@ const HomePage = () => {
           <div className="footercontainer">
             <h3>Contact us</h3>
             <p>
-              <strong>email :</strong
-              ><a href="mailto:jeevanvankadara@gmail.com"
-                >jeevanvankadara@gmail.com</a
-              >
+              <strong>email :</strong>
+              <a href="mailto:jeevanvankadara@gmail.com">jeevanvankadara@gmail.com</a>
             </p>
             <p>
               <strong>Phone no :</strong><a href="tel:9876543210">9876543210</a>
@@ -670,21 +691,9 @@ const HomePage = () => {
           <div className="footercontainer">
             <h3>Follow us</h3>
             <br /><br />
-            <a href="#instagram"
-              ><img
-                src="/css/photos/instagram.png"
-                alt="instagram"
-                className="soc-med-img"
-            /></a>
-            <a href="#facebook"
-              ><img
-                src="/css/photos/facebook.png"
-                alt="facebook"
-                className="soc-med-img"
-            /></a>
-            <a href="#X"
-              ><img src="/css/photos/X.png" alt="X" className="soc-med-img"
-            /></a>
+            <a href="#instagram"><img src="/css/photos/instagram.png" alt="instagram" className="soc-med-img" /></a>
+            <a href="#facebook"><img src="/css/photos/facebook.png" alt="facebook" className="soc-med-img" /></a>
+            <a href="#X"><img src="/css/photos/X.png" alt="X" className="soc-med-img" /></a>
           </div>
         </div>
         <p className="footer-copy">© 2025 DriveBidRent | All rights reserved.</p>
