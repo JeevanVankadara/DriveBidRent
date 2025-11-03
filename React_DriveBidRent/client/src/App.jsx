@@ -1,5 +1,5 @@
 // client/src/App.jsx
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Public
 import HomePage from './pages/auth/HomePage';
@@ -20,12 +20,26 @@ import ViewBids from './pages/seller/ViewBids';
 import ViewEarnings from './pages/seller/ViewEarnings';
 import ViewRentals from './pages/seller/ViewRentals';
 import UpdateRental from './pages/seller/UpdateRental';
-import RentalDetailsAlt from './pages/seller/RentalDetailsAlt'; // ← Use Alt
+import RentalDetailsAlt from './pages/seller/RentalDetailsAlt';
 import AuctionDetails from './pages/seller/AuctionDetails';
+
+// Auction Manager
+import AuctionManagerLayout from './pages/auctionManager/AuctionManagerLayout';
+import AuctionManagerDashboard from './pages/auctionManager/Dashboard';
+import ApprovedCars from './pages/auctionManager/ApprovedCars';
+import AssignMechanic from './pages/auctionManager/AssignMechanic';
+import ManagerProfile from './pages/auctionManager/ManagerProfile';
+import PendingCarDetails from './pages/auctionManager/PendingCarDetails';
+import PendingCars from './pages/auctionManager/PendingCars';
+import Requests from './pages/auctionManager/Requests';
+import ViewBidsPage from './pages/auctionManager/ViewBids';
 
 function App() {
   return (
     <Routes>
+      {/* LEGACY REDIRECT: Old URL → New URL */}
+      <Route path="/auction-manager-dashboard" element={<Navigate to="/auction-manager" replace />} />
+
       {/* Public */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
@@ -34,7 +48,7 @@ function App() {
       {/* Buyer */}
       <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
 
-      {/* === SELLER SPA === */}
+      {/* SELLER SPA */}
       <Route path="/seller" element={<SellerLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
@@ -46,12 +60,32 @@ function App() {
         <Route path="view-earnings" element={<ViewEarnings />} />
         <Route path="view-rentals" element={<ViewRentals />} />
         <Route path="update-rental/:id" element={<UpdateRental />} />
-        <Route path="rental-details-alt/:id" element={<RentalDetailsAlt />} /> {/* ← Both use Alt */}
+        <Route path="rental-details-alt/:id" element={<RentalDetailsAlt />} />
         <Route path="auction-details/:id" element={<AuctionDetails />} />
       </Route>
 
-      {/* 404 */}
-      <Route path="*" element={<div className="text-center py-20 text-2xl">404 - Page Not Found</div>} />
+      {/* AUCTION MANAGER SPA */}
+      <Route path="/auction-manager" element={<AuctionManagerLayout />}>
+        <Route index element={<AuctionManagerDashboard />} />
+        <Route path="dashboard" element={<AuctionManagerDashboard />} />
+        <Route path="requests" element={<Requests />} />
+        <Route path="pending" element={<PendingCars />} />
+        <Route path="pending-car-details/:id" element={<PendingCarDetails />} />
+        <Route path="approved" element={<ApprovedCars />} />
+        <Route path="assign-mechanic/:id" element={<AssignMechanic />} />
+        <Route path="view-bids/:id" element={<ViewBidsPage />} />
+        <Route path="profile" element={<ManagerProfile />} />
+      </Route>
+
+      {/* 404 - Page Not Found */}
+      <Route
+        path="*"
+        element={
+          <div className="flex items-center justify-center min-h-screen text-2xl font-bold text-gray-700">
+            404 - Page Not Found
+          </div>
+        }
+      />
     </Routes>
   );
 }

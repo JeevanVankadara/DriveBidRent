@@ -1,3 +1,4 @@
+// client/src/pages/auth/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authServices } from '../../services/auth.services';
@@ -13,24 +14,28 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
       const response = await authServices.login({ email, password });
 
       if (response.success) {
-        setSuccess('Login Successful');
+        setSuccess('Login Successful! Redirecting...');
+        
+        // Use backend-provided redirectUrl
+        const redirectUrl = response.data.redirectUrl || '/';
+        
         setTimeout(() => {
-          navigate(response.data.redirectUrl, { replace: true });
+          navigate(redirectUrl, { replace: true });
         }, 1000);
-      }
-      else {
+      } else {
         setError(response.message || 'Login failed');
       }
     } catch (err) {
-      if (err.response) {
-        const msg = err.response.data?.message || 'Invalid email or password';
-        setError(msg);
+      console.error('Login error:', err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
       } else if (err.request) {
         setError('Network error. Please check your connection.');
       } else {
@@ -44,10 +49,8 @@ const Login = () => {
   // Clear messages when user starts typing
   const handleInputChange = (setter) => (e) => {
     setter(e.target.value);
-    if (error || success) {
-      setError('');
-      setSuccess('');
-    }
+    setError('');
+    setSuccess('');
   };
 
   return (

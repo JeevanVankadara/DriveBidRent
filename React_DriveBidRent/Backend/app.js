@@ -1,5 +1,5 @@
+// Backend/app.js
 const express = require("express");
-const bodyParser = require("body-parser");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
@@ -17,6 +17,7 @@ const AuctionRequest = require("./models/AuctionRequest");
 const authRoutes = require("./routes/auth.routes");
 const homeRoutes = require("./routes/home.routes");
 const sellerRoutes = require("./routes/seller.routes");
+const auctionManagerRoutes = require("./routes/auctionManager.routes"); // NEW: Auction Manager API
 
 // Other routes (keep as-is for now; will extract later - commented out EJS renders to avoid errors in API mode)
 // const addAuctionRoute = require("./routes/Seller/AddAuction");
@@ -97,6 +98,7 @@ app.use(express.static(path.join(__dirname, "public"))); // Keep public for imag
 app.use("/api/auth", authRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/seller", sellerMiddleware, sellerRoutes);
+app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes); // NEW: Auction Manager API
 
 // Existing routes (without /api for now; add prefix later when extracting)
 // app.use("/", BuyerDashboardRoute);
