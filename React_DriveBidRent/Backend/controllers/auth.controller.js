@@ -5,6 +5,7 @@ const generateToken = require("../utils/generateToken");
 const authController = {
   signup: async (req, res) => {
     try {
+      console.log('Signup route called with body keys:', Object.keys(req.body));
       const {
         firstName,
         lastName,
@@ -24,12 +25,17 @@ const authController = {
       const googleAddressLink =
         userType === "mechanic" ? req.body.googleAddressLink : undefined;
 
-      let doorNo, street, city, state;
+      // normalize address fields from req.body (avoid using browser globals like `window` on server)
+      let doorNo = "", street = "", city = "", state = "";
       ["doorNo", "street", "city", "state"].forEach((field) => {
         const val = req.body[field];
-        window[field] = Array.isArray(val)
+        const normalized = Array.isArray(val)
           ? val.find((v) => v?.trim()) || ""
-          : val;
+          : val || "";
+        if (field === "doorNo") doorNo = normalized;
+        if (field === "street") street = normalized;
+        if (field === "city") city = normalized;
+        if (field === "state") state = normalized;
       });
 
       const repairBikes =
@@ -38,13 +44,31 @@ const authController = {
         req.body.repairCars === "on" || req.body.repairCars === true;
 
       // === VALIDATIONS ===
+      // Basic required fields
+      if (!firstName || !lastName || !email || !password) {
+        return res.status(400).json({ success: false, message: 'Missing required fields' });
+      }
+
+      // Validate userType
+      const allowedTypes = ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'auction_manager'];
+      if (!userType || !allowedTypes.includes(userType)) {
+        return res.status(400).json({ success: false, message: 'Invalid or missing userType' });
+      }
       if (!phone || !/^\d{10}$/.test(phone)) {
         return res
           .status(400)
           .json({ success: false, message: "Phone number must be 10 digits" });
       }
 
+      if (!dateOfBirth) {
+        return res.status(400).json({ success: false, message: 'Date of birth is required' });
+      }
+
       const dob = new Date(dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        return res.status(400).json({ success: false, message: 'Invalid dateOfBirth' });
+      }
+
       const age = new Date().getFullYear() - dob.getFullYear();
       if (age < 18) {
         return res
@@ -98,20 +122,33 @@ const authController = {
         repairCars,
       };
 
-      [
-        "doorNo",
-        "street",
-        "city",
-        "state",
-        "drivingLicense",
-        "shopName",
-        "googleAddressLink",
-      ].forEach((field) => {
-        if (window[field]) userData[field] = window[field];
+      // attach optional fields if provided
+      const collected = {
+        doorNo,
+        street,
+        city,
+        state,
+        drivingLicense: drivingLicense || req.body.drivingLicense || "",
+        shopName: shopName || req.body.shopName || "",
+        googleAddressLink: googleAddressLink || req.body.googleAddressLink || "",
+      };
+
+      Object.keys(collected).forEach((field) => {
+        if (collected[field]) userData[field] = collected[field];
       });
 
       const user = new User(userData);
-      await user.save();
+      try {
+        await user.save();
+      } catch (saveErr) {
+        console.error('User save error:', saveErr);
+        // Convert mongoose validation errors to client-friendly messages
+        if (saveErr.name === 'ValidationError') {
+          const messages = Object.values(saveErr.errors).map(e => e.message).join('; ');
+          return res.status(400).json({ success: false, message: messages });
+        }
+        throw saveErr;
+      }
 
       return res.status(201).json({
         success: true,
