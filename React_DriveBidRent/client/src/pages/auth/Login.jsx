@@ -13,21 +13,29 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setLoading(true);
 
     try {
       const response = await authServices.login({ email, password });
+
       if (response.success) {
-        setSuccess(response.message);
+        setSuccess('Login Successful');
         setTimeout(() => {
-          navigate(response.data.redirectUrl);
+          navigate(response.data.redirectUrl, { replace: true });
         }, 1000);
-      } else {
-        setError(response.message);
+      }
+      else {
+        setError(response.message || 'Login failed');
       }
     } catch (err) {
-      setError('Network error. Please check your connection and try again.');
+      if (err.response) {
+        const msg = err.response.data?.message || 'Invalid email or password';
+        setError(msg);
+      } else if (err.request) {
+        setError('Network error. Please check your connection.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }
@@ -184,53 +192,53 @@ const Login = () => {
           border: 1px solid #c3e6cb;
         }
       `}</style>
-      
+
       <div className="container">
         <div className="form-container">
           <h1 className="form-title">Login to Your Account</h1>
-          
+
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
-          
+
           <form onSubmit={handleSubmit} className={loading ? 'loading' : ''}>
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <div className="input-group">
                 <i className="fas fa-envelope"></i>
-                <input 
-                  type="email" 
-                  id="email" 
+                <input
+                  type="email"
+                  id="email"
                   value={email}
                   onChange={handleInputChange(setEmail)}
-                  required 
+                  required
                 />
               </div>
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <div className="input-group">
                 <i className="fas fa-lock"></i>
-                <input 
-                  type="password" 
-                  id="password" 
+                <input
+                  type="password"
+                  id="password"
                   value={password}
                   onChange={handleInputChange(setPassword)}
-                  required 
+                  required
                 />
               </div>
             </div>
-            
+
             <div className="form-group">
               <button type="submit" className="btn" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login'}
               </button>
             </div>
-            
+
             <div className="divider">
               <span>OR</span>
             </div>
-            
+
             <div className="social-login">
               <button type="button" className="btn btn-social btn-google">
                 <i className="fab fa-google"></i> Login with Google
@@ -239,7 +247,7 @@ const Login = () => {
                 <i className="fab fa-facebook-f"></i> Login with Facebook
               </button>
             </div>
-            
+
             <div className="login-link">
               Don't have an account? <a href="/signup">Sign up</a>
             </div>

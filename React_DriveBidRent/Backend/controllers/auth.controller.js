@@ -197,9 +197,7 @@ const authController = {
       const token = generateToken(user);
       res.cookie('jwt', token, { 
         httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 
       });
 
       let redirectUrl = '/';
@@ -208,7 +206,7 @@ const authController = {
           redirectUrl = "/buyer-dashboard";
           break;
         case "seller":
-          redirectUrl = "/seller/dashboard";  // ← CORRECT: Matches frontend nested route
+          redirectUrl = "/seller/dashboard";  
           break;
         case "driver":
           redirectUrl = "/driver-dashboard";
@@ -235,7 +233,7 @@ const authController = {
             email: user.email,
             userType: user.userType
           },
-          redirectUrl  // ← Frontend will use this
+          redirectUrl  
         }
       });
     } catch (err) {

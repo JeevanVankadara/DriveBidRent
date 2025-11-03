@@ -25,6 +25,18 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  // Auto-hide messages after 4 seconds
+  useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, error]);
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
