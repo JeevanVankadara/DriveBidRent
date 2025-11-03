@@ -6,16 +6,25 @@ import { auctionManagerServices } from '../../services/auctionManager.services';
 export default function PendingCars() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCar, setSelectedCar] = useState(null);
   const [review, setReview] = useState(null);
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
+        setLoading(true);
         const res = await auctionManagerServices.getPending();
-        if (res.success) setCars(res.data);
+        const responseData = res.data || res;
+        
+        if (responseData.success) {
+          setCars(responseData.data || []);
+        } else {
+          setError(responseData.message || 'Failed to load pending cars');
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Pending cars fetch error:', err);
+        setError(err.response?.data?.message || 'Failed to load pending cars');
       } finally {
         setLoading(false);
       }
@@ -26,13 +35,18 @@ export default function PendingCars() {
   const openModal = async (carId) => {
     try {
       const res = await auctionManagerServices.getReview(carId);
-      if (res.success) {
-        setReview(res.data);
+      const responseData = res.data || res;
+      
+      if (responseData.success) {
+        setReview(responseData.data);
         setSelectedCar(cars.find(c => c._id === carId));
         document.getElementById('reviewModal').style.display = 'block';
+      } else {
+        alert(responseData.message || 'Failed to load review');
       }
     } catch (err) {
-      alert('Failed to load review');
+      console.error('Review fetch error:', err);
+      alert(err.response?.data?.message || 'Failed to load review');
     }
   };
 
@@ -45,21 +59,45 @@ export default function PendingCars() {
   const updateStatus = async (status) => {
     if (!selectedCar) return;
     try {
-      const res = await auctionManagerServices.updateStatus(selectedCar._id, { status });
-      if (res.success) {
+      const res = await auctionManagerServices.updateStatus(selectedCar._id, status);
+      const responseData = res.data || res;
+      
+      if (responseData.success) {
         setCars(cars.map(c => c._id === selectedCar._id ? { ...c, status } : c));
         closeModal();
+      } else {
+        alert(responseData.message || 'Failed to update status');
       }
     } catch (err) {
-      alert('Failed to update status');
+      console.error('Update status error:', err);
+      alert(err.response?.data?.message || 'Failed to update status');
     }
   };
 
-  if (loading) return <div className="text-center py-10 text-xl">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Pending Cars</h2>
+        <div className="text-center py-10 text-xl text-gray-600">Loading pending cars...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Pending Cars</h2>
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="max-w-6xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Pending Cars</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {cars.length > 0 ? (
             cars.map((car) => (

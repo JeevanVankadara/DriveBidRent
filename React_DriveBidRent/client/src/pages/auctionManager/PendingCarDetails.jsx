@@ -8,17 +8,24 @@ export default function PendingCarDetails() {
   const [car, setCar] = useState(null);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCar = async () => {
       try {
+        setLoading(true);
         const res = await auctionManagerServices.getPendingCarDetails(id);
-        if (res.success) {
-          setCar(res.data);
-          setStatus(res.data.status);
+        const responseData = res.data || res;
+        
+        if (responseData.success) {
+          setCar(responseData.data);
+          setStatus(responseData.data.status);
+        } else {
+          setError(responseData.message || 'Failed to load car details');
         }
       } catch (err) {
-        console.error(err);
+        console.error('Pending car details fetch error:', err);
+        setError(err.response?.data?.message || 'Failed to load car details');
       } finally {
         setLoading(false);
       }
@@ -32,14 +39,51 @@ export default function PendingCarDetails() {
       return;
     }
     try {
-      const res = await auctionManagerServices.updateStatus(id, { status: newStatus });
-      if (res.success) setStatus(newStatus);
+      const res = await auctionManagerServices.updateStatus(id, newStatus);
+      const responseData = res.data || res;
+      
+      if (responseData.success) {
+        setStatus(newStatus);
+        alert(`Status updated to ${newStatus}`);
+      } else {
+        alert(responseData.message || 'Failed to update status');
+      }
     } catch (err) {
-      alert('Failed to update status');
+      console.error('Update status error:', err);
+      alert(err.response?.data?.message || 'Failed to update status');
     }
   };
 
-  if (loading) return <div className="text-center py-10 text-xl">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Car Details</h2>
+        <div className="text-center py-10 text-xl text-gray-600">Loading car details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Car Details</h2>
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!car) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Car Details</h2>
+        <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-center">
+          Car not found
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 font-montserrat">

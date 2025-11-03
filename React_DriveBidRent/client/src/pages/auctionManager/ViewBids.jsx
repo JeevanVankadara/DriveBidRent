@@ -10,18 +10,25 @@ export default function ViewBids() {
   const [pastBids, setPastBids] = useState([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchBids = async () => {
       try {
+          setLoading(true);
         const res = await auctionManagerServices.viewBids(id);
-        if (res.success) {
-          setAuction(res.data.auction);
-          setCurrentBid(res.data.currentBid);
-          setPastBids(res.data.pastBids);
+          const responseData = res.data || res;
+        
+          if (responseData.success) {
+            setAuction(responseData.data.auction);
+            setCurrentBid(responseData.data.currentBid);
+            setPastBids(responseData.data.pastBids);
+          } else {
+            setError(responseData.message || 'Failed to load bids');
         }
       } catch (err) {
-        console.error(err);
+          console.error('View bids fetch error:', err);
+          setError(err.response?.data?.message || 'Failed to load bids');
       } finally {
         setLoading(false);
       }
@@ -32,19 +39,63 @@ export default function ViewBids() {
   const stopAuction = async () => {
     try {
       const res = await auctionManagerServices.stopAuction(id);
-      if (res.success) {
+        const responseData = res.data || res;
+      
+        if (responseData.success) {
         setMessage('Auction has been stopped.');
         setAuction({ ...auction, auction_stopped: true });
+        } else {
+          setMessage(responseData.message || 'Failed to stop auction');
       }
     } catch (err) {
-      setMessage('Failed to stop auction');
+        console.error('Stop auction error:', err);
+        setMessage(err.response?.data?.message || 'Failed to stop auction');
     }
   };
 
   const formatCurrency = (amount) => `₹${Number(amount).toLocaleString('en-IN')}`;
   const formatDate = (date) => new Date(date).toLocaleString();
 
-  if (loading) return <div className="text-center py-10 text-xl">Loading...</div>;
+    if (loading) {
+      return (
+        <div className="max-w-6xl mx-auto p-6">
+          <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+          <div className="text-center py-10 text-xl text-gray-600">Loading bids...</div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="max-w-6xl mx-auto p-6">
+          <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+            {error}
+          </div>
+          <div className="text-center mt-4">
+            <Link to="/auction-manager/approved" className="text-blue-600 hover:text-blue-700 font-medium">
+              Back to Approved Cars
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
+    if (!auction) {
+      return (
+        <div className="max-w-6xl mx-auto p-6">
+          <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
+          <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-center">
+            Auction not found
+          </div>
+          <div className="text-center mt-4">
+            <Link to="/auction-manager/approved" className="text-blue-600 hover:text-blue-700 font-medium">
+              Back to Approved Cars
+            </Link>
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">

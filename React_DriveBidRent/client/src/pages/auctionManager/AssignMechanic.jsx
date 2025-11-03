@@ -10,17 +10,26 @@ export default function AssignMechanic() {
   const [selected, setSelected] = useState('');
   const [assigned, setAssigned] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const res = await auctionManagerServices.getAssignMechanic(id);
-        if (res.success) {
-          setRequest(res.data.request);
-          setMechanics(res.data.mechanics);
+        // Handle axios response structure
+        const responseData = res.data || res;
+        
+        if (responseData.success) {
+          setRequest(responseData.data.request);
+          setMechanics(responseData.data.mechanics || []);
+        } else {
+          setError(responseData.message || 'Failed to load data');
         }
       } catch (err) {
-        console.error(err);
+        console.error('Assign mechanic fetch error:', err);
+        setError(err.response?.data?.message || 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -29,31 +38,83 @@ export default function AssignMechanic() {
   }, [id]);
 
   const handleAssign = async () => {
-    if (!selected) return;
+    if (!selected) {
+      alert('Please select a mechanic');
+      return;
+    }
+    
     const mechanic = mechanics.find(m => m._id === selected);
+    if (!mechanic) {
+      alert('Invalid mechanic selected');
+      return;
+    }
+
     try {
+      setAssigning(true);
       const res = await auctionManagerServices.assignMechanic(id, {
         mechanicId: selected,
         mechanicName: `${mechanic.firstName} ${mechanic.lastName}`
       });
-      if (res.success) setAssigned(true);
+      
+      const responseData = res.data || res;
+      
+      if (responseData.success) {
+        setAssigned(true);
+      } else {
+        alert(responseData.message || 'Failed to assign mechanic');
+      }
     } catch (err) {
-      alert('Failed to assign mechanic');
+      console.error('Assign mechanic error:', err);
+      alert(err.response?.data?.message || 'Failed to assign mechanic');
+    } finally {
+      setAssigning(false);
     }
   };
 
-  if (loading) return <div className="text-center py-10 text-xl">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Assign Mechanic</h2>
+        <div className="text-center py-10 text-xl text-gray-600">Loading vehicle details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Assign Mechanic</h2>
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!request) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Assign Mechanic</h2>
+        <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-center">
+          Vehicle request not found
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6 font-montserrat">
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left: Image */}
         <div className="lg:w-1/2">
-          <div className="w-full h-96 rounded-xl overflow-hidden shadow-lg mb-6">
+          <div className="w-full h-96 rounded-xl overflow-hidden shadow-lg mb-6 bg-gray-100">
             <img
-              src={request.vehicleImage || '/images/default-car.jpg'}
+              src={request.vehicleImage}
               alt={request.vehicleName}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/600x400?text=Vehicle+Image';
+              }}
             />
           </div>
           <h1 className="text-3xl font-bold text-center text-gray-800">{request.vehicleName}</h1>
@@ -120,10 +181,17 @@ export default function AssignMechanic() {
                 {selected && (
                   <button
                     onClick={handleAssign}
-                    className="mt-4 bg-orange-600 text-white px-6 py-3 rounded-lg font-bold w-full hover:opacity-90 transition"
+                    disabled={assigning}
+                    className="mt-4 bg-orange-600 text-white px-6 py-3 rounded-lg font-bold w-full hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Confirm Assignment
+                    {assigning ? 'Assigning...' : 'Confirm Assignment'}
                   </button>
+                )}
+                
+                {mechanics.length === 0 && (
+                  <div className="mt-4 bg-yellow-100 text-yellow-800 p-4 rounded-lg text-center">
+                    No mechanics available. Please add mechanics first.
+                  </div>
                 )}
               </>
             )}

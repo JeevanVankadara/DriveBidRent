@@ -6,14 +6,23 @@ import { auctionManagerServices } from '../../services/auctionManager.services';
 export default function ApprovedCars() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
+        setLoading(true);
         const res = await auctionManagerServices.getApproved();
-        if (res.success) setCars(res.data);
+        const responseData = res.data || res;
+        
+        if (responseData.success) {
+          setCars(responseData.data || []);
+        } else {
+          setError(responseData.message || 'Failed to load approved cars');
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Approved cars fetch error:', err);
+        setError(err.response?.data?.message || 'Failed to load approved cars');
       } finally {
         setLoading(false);
       }
@@ -24,18 +33,43 @@ export default function ApprovedCars() {
   const startAuction = async (id) => {
     try {
       const res = await auctionManagerServices.startAuction(id);
-      if (res.success) {
+      const responseData = res.data || res;
+      
+      if (responseData.success) {
         setCars(cars.map(car => car._id === id ? { ...car, started_auction: 'yes' } : car));
+        alert('Auction started successfully!');
+      } else {
+        alert(responseData.message || 'Failed to start auction');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Start auction error:', err);
+      alert(err.response?.data?.message || 'Failed to start auction');
     }
   };
 
-  if (loading) return <div className="text-center py-10 text-xl">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Approved Cars</h2>
+        <div className="text-center py-10 text-xl text-gray-600">Loading approved cars...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Approved Cars</h2>
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6 font-montserrat">
+      <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Approved Cars</h2>
       {cars.length > 0 ? (
         cars.map((car) => (
           <div
