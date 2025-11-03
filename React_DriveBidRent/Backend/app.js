@@ -18,6 +18,7 @@ const authRoutes = require("./routes/auth.routes");
 const homeRoutes = require("./routes/home.routes");
 const sellerRoutes = require("./routes/seller.routes");
 const auctionManagerRoutes = require("./routes/auctionManager.routes"); // NEW: Auction Manager API
+const mechanicRoutes = require("./routes/mechanic.routes");               // NEW: Mechanic API
 
 // Other routes (keep as-is for now; will extract later - commented out EJS renders to avoid errors in API mode)
 // const addAuctionRoute = require("./routes/Seller/AddAuction");
@@ -99,6 +100,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/seller", sellerMiddleware, sellerRoutes);
 app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes); // NEW: Auction Manager API
+app.use("/api/mechanic", mechanicMiddleware, mechanicRoutes);                     // NEW: Mechanic API
 
 // Existing routes (without /api for now; add prefix later when extracting)
 // app.use("/", BuyerDashboardRoute);
@@ -172,7 +174,7 @@ app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes);
 //     console.error(err);
 //     res.render("seller_dashboard/view-rentals.ejs", {
 //       user: req.user,
-//       error: "Failed to load data",
+//       error: "|Failed to load data",
 //     });
 //   }
 // });

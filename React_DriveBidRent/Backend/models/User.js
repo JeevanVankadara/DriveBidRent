@@ -50,6 +50,8 @@ const userSchema = new mongoose.Schema({
     required: true, 
     match: [/^\d{10}$/, 'Phone number must be 10 digits']
   },
+  // list of auction requests assigned to this mechanic
+  assignedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AuctionRequest' }],
   notificationPreference: { 
     type: String,
     enum: ['all', 'important', 'none'],

@@ -28,6 +28,10 @@ export const auctionManagerServices = {
   // View Bids
   viewBids: (id) => axiosInstance.get(`/auction-manager/view-bids/${id}`),
 
+  // Backwards-compatible aliases
+  getBids: (id) => axiosInstance.get(`/auction-manager/view-bids/${id}`),
+  endAuction: (id) => axiosInstance.post(`/auction-manager/stop-auction/${id}`),
+
   // Profile
   getProfile: () => axiosInstance.get('/auction-manager/profile'),
   updatePhone: (phone) => axiosInstance.post('/auction-manager/update-phone', { phone }),

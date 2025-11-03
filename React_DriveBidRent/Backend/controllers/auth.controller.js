@@ -183,7 +183,7 @@ const authController = {
         buyer: "/buyer-dashboard",
         seller: "/seller",
         driver: "/driver-dashboard",
-        mechanic: "/mechanic-dashboard",
+        mechanic: "/mechanic/dashboard",
         admin: "/admin-dashboard",
         auction_manager: "/auction-manager", // CORRECT
       };
@@ -200,6 +200,7 @@ const authController = {
             lastName: user.lastName,
             email: user.email,
             userType: user.userType,
+            approved_status: user.approved_status,
           },
           redirectUrl,
         },

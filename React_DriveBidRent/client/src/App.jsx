@@ -34,10 +34,19 @@ import PendingCars from './pages/auctionManager/PendingCars';
 import Requests from './pages/auctionManager/Requests';
 import ViewBidsPage from './pages/auctionManager/ViewBids';
 
+// Mechanic
+import MechanicLayout from './pages/mechanic/MechanicLayout';
+import MechanicDashboard from './pages/mechanic/dashboard/Dashboard';
+import CurrentTasks from './pages/mechanic/current-tasks/CurrentTasks';
+import PastTasks from './pages/mechanic/past-tasks/PastTasks';
+import PendingTasks from './pages/mechanic/pending-tasks/PendingTasks';
+import CarDetails from './pages/mechanic/car-details/CarDetails';
+import MechanicProfile from './pages/mechanic/profile/Profile';
+
 function App() {
   return (
     <Routes>
-      {/* LEGACY REDIRECT: Old URL → New URL */}
+      {/* LEGACY REDIRECT */}
       <Route path="/auction-manager-dashboard" element={<Navigate to="/auction-manager" replace />} />
 
       {/* Public */}
@@ -77,7 +86,17 @@ function App() {
         <Route path="profile" element={<ManagerProfile />} />
       </Route>
 
-      {/* 404 - Page Not Found */}
+      {/* MECHANIC SPA */}
+      <Route element={<MechanicLayout />}>
+        <Route path="/mechanic/dashboard" element={<MechanicDashboard />} />
+        <Route path="/mechanic/current-tasks" element={<CurrentTasks />} />
+        <Route path="/mechanic/past-tasks" element={<PastTasks />} />
+        <Route path="/mechanic/pending-tasks" element={<PendingTasks />} />
+        <Route path="/mechanic/car-details/:id" element={<CarDetails />} />
+        <Route path="/mechanic/profile" element={<MechanicProfile />} />
+      </Route>
+
+      {/* 404 */}
       <Route
         path="*"
         element={

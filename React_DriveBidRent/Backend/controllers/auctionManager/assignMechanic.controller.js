@@ -42,6 +42,19 @@ exports.assignMechanic = async (req, res) => {
 
     if (!updated) return res.json(send(false, 'Request not found'));
 
+    // Also update mechanic's user document to reflect the assignment
+    try {
+      await User.findByIdAndUpdate(
+        mechanicId,
+        { $addToSet: { assignedRequests: updated._id } },
+        { new: true }
+      );
+    } catch (uErr) {
+      console.error('Failed to update mechanic assignedRequests:', uErr);
+      // Not blocking - still send success for request update, but include note
+      return res.json(send(true, 'Mechanic assigned successfully, but failed to update mechanic record'));
+    }
+
     res.json(send(true, 'Mechanic assigned successfully'));
   } catch (err) {
     console.error('Assign mechanic save error:', err);

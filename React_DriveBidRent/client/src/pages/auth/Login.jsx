@@ -8,6 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -23,11 +24,25 @@ const Login = () => {
       if (response.success) {
         setSuccess('Login Successful! Redirecting...');
         
-        // Use backend-provided redirectUrl
-        const redirectUrl = response.data.redirectUrl || '/';
-        
+        // Use backend-provided redirectUrl (response is axios res.data -> { success, message, data })
+        const redirectUrl = response.data?.redirectUrl || '/';
+        const loggedUser = response.data?.user || {};
+
+        // If mechanic is not approved, show approval modal and do not redirect
+        if (loggedUser.userType === 'mechanic' && loggedUser.approved_status !== 'Yes') {
+          setShowApprovalModal(true);
+          setLoading(false);
+          return;
+        }
+
+        // Normalize known legacy redirect paths (server may still return old strings if not restarted)
+        let finalRedirect = redirectUrl || '/';
+        if (finalRedirect.includes('mechanic-dashboard')) {
+          finalRedirect = finalRedirect.replace('mechanic-dashboard', 'mechanic/dashboard');
+        }
+
         setTimeout(() => {
-          navigate(redirectUrl, { replace: true });
+          navigate(finalRedirect, { replace: true });
         }, 1000);
       } else {
         setError(response.message || 'Login failed');
@@ -195,6 +210,29 @@ const Login = () => {
           border: 1px solid #c3e6cb;
         }
       `}</style>
+
+      {showApprovalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+            <h2 className="text-xl font-bold mb-4">Account Pending Approval</h2>
+            <p className="mb-4">Your account is pending admin approval. Please wait until an administrator approves your mechanic account.</p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowApprovalModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded mr-2"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => { setShowApprovalModal(false); navigate('/'); }}
+                className="px-4 py-2 bg-orange-600 text-white rounded"
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container">
         <div className="form-container">
