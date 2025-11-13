@@ -1,6 +1,7 @@
 // Backend/routes/auctionManager.routes.js
 const express = require('express');
 const router = express.Router();
+const isAuctionManager = require('../middlewares/auction_manager.middleware');
 
 // Import controllers
 const dashboard = require('../controllers/auctionManager/dashboard.controller');
@@ -11,8 +12,12 @@ const assign = require('../controllers/auctionManager/assignMechanic.controller'
 const auction = require('../controllers/auctionManager/auction.controller');
 const profile = require('../controllers/auctionManager/profile.controller');
 
+router.use(isAuctionManager);
+
 // Dashboard
 router.get('/dashboard', dashboard.getDashboard);
+
+
 
 // Requests
 router.get('/requests', requests.getRequests);
@@ -36,7 +41,7 @@ router.post('/stop-auction/:id', auction.stopAuction);
 router.get('/view-bids/:id', auction.viewBids);
 
 // Profile
-router.get('/profile', profile.getProfile);
+router.get('/profile', isAuctionManager, profile.getProfile);
 router.post('/update-phone', profile.updatePhone);
 router.post('/change-password', profile.changePassword);
 

@@ -11,7 +11,9 @@ const { postUpdateRental } = require('../controllers/sellerControllers/updateRen
 const { getViewAuctions, getViewBids } = require('../controllers/sellerControllers/viewAuctions.controller');
 const { getViewEarnings } = require('../controllers/sellerControllers/viewEarnings.controller');
 const { getViewRentals, postToggleRentalStatus } = require('../controllers/sellerControllers/viewRentals.controller');
+const sellerMiddleware = require('../middlewares/seller.middleware');
 
+router.use(sellerMiddleware)
 // POST: Add auction
 router.post('/add-auction', upload.single('vehicleImage'), postAddAuction);
 

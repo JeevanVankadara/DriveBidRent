@@ -5,7 +5,7 @@ const generateToken = require("../utils/generateToken");
 const authController = {
   signup: async (req, res) => {
     try {
-      console.log('Signup route called with body keys:', Object.keys(req.body));
+      // console.log('Signup route called with body keys:', Object.keys(req.body));
       const {
         firstName,
         lastName,
@@ -22,6 +22,7 @@ const authController = {
         approved_status,
       } = req.body;
 
+      console.log(req.body);
       const googleAddressLink =
         userType === "mechanic" ? req.body.googleAddressLink : undefined;
 
@@ -184,7 +185,7 @@ const authController = {
         seller: "/seller",
         driver: "/driver-dashboard",
         mechanic: "/mechanic/dashboard",
-        admin: "/admin-dashboard",
+        admin: "/admin/dashboard",
         auction_manager: "/auction-manager", // CORRECT
       };
 

@@ -4,7 +4,7 @@ const AuctionBid = require('../../models/AuctionBid');
 // GET: Get seller auctions
 const getViewAuctions = async (req, res) => {
   try {
-    // Fetch all auctions for this seller, populate assignedMechanic
+    // Fetch all auctions for this seller, populate assignedMechanic;
     const auctions = await AuctionRequest.find({ sellerId: req.user._id })
       .populate('assignedMechanic', 'firstName lastName doorNo street city state')
       .sort({ createdAt: -1 })

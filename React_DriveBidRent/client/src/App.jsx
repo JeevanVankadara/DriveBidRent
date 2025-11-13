@@ -6,12 +6,20 @@ import HomePage from './pages/auth/HomePage';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 
+// Admin
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/Dashboard';
+import ManageUsers from './pages/admin/ManageUsers';
+import Analytics from './pages/admin/Analytics';
+import ManageEarnings from './pages/admin/ManageEarnings';
+import AdminProfile from './pages/admin/AdminProfile';
+
 // Buyer
 import BuyerDashboard from './pages/buyer/Dashboard';
 
 // Seller
 import SellerLayout from './pages/seller/SellerLayout';
-import Dashboard from './pages/seller/Dashboard';
+import SellerDashboard from './pages/seller/Dashboard';
 import AddAuction from './pages/seller/AddAuction';
 import AddRental from './pages/seller/AddRental';
 import Profile from './pages/seller/Profile';
@@ -54,13 +62,23 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
+      {/* ADMIN SPA */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="manage-users" element={<ManageUsers />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="manage-earnings" element={<ManageEarnings />} />
+        <Route path="admin-profile" element={<AdminProfile />} />
+      </Route>
+
       {/* Buyer */}
       <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
 
       {/* SELLER SPA */}
       <Route path="/seller" element={<SellerLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route index element={<SellerDashboard />} />
+        <Route path="dashboard" element={<SellerDashboard />} />
         <Route path="add-auction" element={<AddAuction />} />
         <Route path="add-rental" element={<AddRental />} />
         <Route path="profile" element={<Profile />} />
