@@ -1,8 +1,10 @@
-const express = require('express');
+// routes/home.routes.js
+import express from 'express';
+import homeController from '../controllers/home.controller.js';
+
 const router = express.Router();
-const homeController = require('../controllers/home.controller');
 
 // GET /api/home/data
 router.get('/data', homeController.getHomeData);
 
-module.exports = router;
+export default router;

@@ -1,8 +1,8 @@
-// Backend/controllers/auctionManager/auction.controller.js
-const AuctionRequest = require('../../models/AuctionRequest');
-const AuctionBid = require('../../models/AuctionBid');
-const Purchase = require('../../models/Purchase');
-const User = require('../../models/User');
+// controllers/auctionManager/auction.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
+import AuctionBid from '../../models/AuctionBid.js';
+import Purchase from '../../models/Purchase.js';
+import User from '../../models/User.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -10,7 +10,7 @@ const send = (success, message, data = null) => ({
   data
 });
 
-exports.startAuction = async (req, res) => {
+export const startAuction = async (req, res) => {
   try {
     const auction = await AuctionRequest.findByIdAndUpdate(
       req.params.id,
@@ -25,7 +25,7 @@ exports.startAuction = async (req, res) => {
   }
 };
 
-exports.stopAuction = async (req, res) => {
+export const stopAuction = async (req, res) => {
   try {
     const auction = await AuctionRequest.findById(req.params.id);
     if (!auction || auction.started_auction !== 'yes' || auction.auction_stopped) {
@@ -67,7 +67,7 @@ exports.stopAuction = async (req, res) => {
   }
 };
 
-exports.viewBids = async (req, res) => {
+export const viewBids = async (req, res) => {
   try {
     const auction = await AuctionRequest.findById(req.params.id)
       .populate('sellerId', 'firstName lastName email city')

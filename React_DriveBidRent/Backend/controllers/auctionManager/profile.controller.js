@@ -1,5 +1,5 @@
-// Backend/controllers/auctionManager/profile.controller.js
-const User = require('../../models/User');
+// controllers/auctionManager/profile.controller.js
+import User from '../../models/User.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -7,11 +7,11 @@ const send = (success, message, data = null) => ({
   data
 });
 
-exports.getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
   res.json(send(true, 'Profile loaded', req.user));
 };
 
-exports.updatePhone = async (req, res) => {
+export const updatePhone = async (req, res) => {
   const { phone } = req.body;
   if (!/^\d{10}$/.test(phone)) {
     return res.json(send(false, 'Invalid phone number'));
@@ -26,7 +26,7 @@ exports.updatePhone = async (req, res) => {
   }
 };
 
-exports.changePassword = async (req, res) => {
+export const changePassword = async (req, res) => {
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword || !newPassword || newPassword.length < 8) {
     return res.json(send(false, 'Invalid password'));

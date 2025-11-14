@@ -1,10 +1,9 @@
-// server/middlewares/seller.middleware.js
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+// middlewares/seller.middleware.js
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 const sellerMiddleware = async (req, res, next) => {
   const token = req.cookies?.jwt;
-
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -15,8 +14,8 @@ const sellerMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev');
-
     const user = await User.findById(decoded.id).select("-password");
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -45,4 +44,4 @@ const sellerMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = sellerMiddleware;
+export default sellerMiddleware;

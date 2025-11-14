@@ -1,4 +1,4 @@
-const User = require("../../models/User");
+import User from '../../models/User.js';
 
 const getManageUsers = async (req, res) => {
   try {
@@ -86,4 +86,4 @@ const deleteSeller = async (req, res) => {
   }
 };
 
-module.exports = { getManageUsers, approveMechanic, declineUser, deleteBuyer, deleteSeller };
+export default { getManageUsers, approveMechanic, declineUser, deleteBuyer, deleteSeller };

@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/Wishlist.js
+import mongoose from 'mongoose';
 
 const WishlistSchema = new mongoose.Schema({
   userId: {
@@ -9,7 +10,7 @@ const WishlistSchema = new mongoose.Schema({
   },
   auctions: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Auction'  // Reference to future Auction model
+    ref: 'AuctionRequest'  // Fixed: was 'Auction'
   }],
   rentals: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -31,4 +32,4 @@ WishlistSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('Wishlist', WishlistSchema);
+export default mongoose.model('Wishlist', WishlistSchema);

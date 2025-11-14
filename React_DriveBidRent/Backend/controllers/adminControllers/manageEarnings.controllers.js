@@ -1,7 +1,7 @@
-const User = require("../../models/User");
-const RentalCost = require("../../models/RentalCost");
-const RentalRequest = require("../../models/RentalRequest");
-const AuctionCost = require("../../models/AuctionCost");
+import User from '../../models/User.js';
+import RentalCost from '../../models/RentalCost.js';
+import RentalRequest from '../../models/RentalRequest.js';
+import AuctionCost from '../../models/AuctionCost.js';
 
 const getManageEarnings = async (req, res) => {
   try {
@@ -61,4 +61,4 @@ const getManageEarnings = async (req, res) => {
   }
 };
 
-module.exports = { getManageEarnings };
+export default { getManageEarnings };

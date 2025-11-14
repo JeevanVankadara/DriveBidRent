@@ -1,7 +1,8 @@
-// server/routes/auth.routes.js
-const express = require('express');
+// routes/auth.routes.js
+import express from 'express';
+import authController from '../controllers/auth.controller.js';
+
 const router = express.Router();
-const authController = require('../controllers/auth.controller');
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
@@ -15,8 +16,8 @@ router.get('/logout', (req, res) => {
   return res.json({
     success: true,
     message: 'Logged out successfully',
-    redirectUrl: '/' 
+    redirectUrl: '/'
   });
 });
 
-module.exports = router;
+export default router;

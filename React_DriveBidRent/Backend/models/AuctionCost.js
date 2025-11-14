@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/AuctionCost.js
+import mongoose from 'mongoose';
 
 const auctionCostSchema = new mongoose.Schema({
   auctionId: {
@@ -34,6 +35,4 @@ const auctionCostSchema = new mongoose.Schema({
   }
 });
 
-const AuctionCost = mongoose.model('AuctionCost', auctionCostSchema);
-
-module.exports = AuctionCost;
+export default mongoose.model('AuctionCost', auctionCostSchema);

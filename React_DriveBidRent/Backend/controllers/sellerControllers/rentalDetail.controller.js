@@ -1,14 +1,13 @@
-const RentalRequest = require('../../models/RentalRequest');
-const RentalCost = require('../../models/RentalCost');
+// controllers/sellerControllers/rentalDetail.controller.js
+import RentalRequest from '../../models/RentalRequest.js';
+import RentalCost from '../../models/RentalCost.js';
 
-// GET: Get rental details
-const getRentalDetail = async (req, res) => {
+export const getRentalDetail = async (req, res) => {
   try {
     const rental = await RentalRequest.findOne({
       _id: req.params.id,
       sellerId: req.user._id
-    })
-    .populate('buyerId', 'firstName lastName email phone'); // Populate buyerId with specific fields
+    }).populate('buyerId', 'firstName lastName email phone');
     
     if (!rental) {
       return res.status(404).json({
@@ -17,7 +16,6 @@ const getRentalDetail = async (req, res) => {
       });
     }
     
-    // Fetch the rental cost to get the total money received
     const rentalCost = await RentalCost.findOne({ rentalCarId: rental._id });
     const moneyReceived = rentalCost ? rentalCost.totalCost : null;
 
@@ -27,11 +25,6 @@ const getRentalDetail = async (req, res) => {
     });
   } catch (err) {
     console.error('Error:', err);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch rental details'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch rental details' });
   }
 };
-
-module.exports = { getRentalDetail };

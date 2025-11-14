@@ -1,5 +1,5 @@
-const User = require("../../models/User");
-const bcrypt = require("bcrypt");
+import User from '../../models/User.js';
+import bcrypt from 'bcrypt';
 
 const getAdminProfile = async (req, res) => {
   try {
@@ -77,4 +77,4 @@ const updateAdminPassword = async (req, res) => {
   }
 };
 
-module.exports = { getAdminProfile, updateAdminPassword };
+export default { getAdminProfile, updateAdminPassword };

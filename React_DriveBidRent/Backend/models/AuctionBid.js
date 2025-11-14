@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const Notification = require('./Notification'); // Add this import
+// models/AuctionBid.js
+import mongoose from 'mongoose';
+import Notification from './Notification.js'; // ESM import
 
 const auctionBidSchema = new mongoose.Schema({
   auctionId: {
@@ -36,25 +37,25 @@ auctionBidSchema.pre('save', async function(next) {
   try {
     // Only check for new bids, not updates to existing bids
     if (!this.isNew) return next();
-    
+
     const AuctionRequest = mongoose.model('AuctionRequest');
     const auction = await AuctionRequest.findById(this.auctionId);
-    
+
     if (!auction) {
       return next(new Error('Auction not found'));
     }
-    
+
     // Check if auction is started
     if (auction.started_auction !== 'yes') {
       return next(new Error('Auction has not started yet'));
     }
-    
+
     // Get the previous highest bidder
     const previousBid = await this.constructor.findOne({
       auctionId: this.auctionId,
       isCurrentBid: true
     });
-    
+
     // If this is a new bid, make all previous bids for this auction no longer current
     if (this.isCurrentBid) {
       await this.constructor.updateMany(
@@ -62,7 +63,7 @@ auctionBidSchema.pre('save', async function(next) {
         { isCurrentBid: false }
       );
     }
-    
+
     // Create notification for previous bidder if they got outbid
     if (previousBid && previousBid.buyerId.toString() !== this.buyerId.toString()) {
       await Notification.create({
@@ -74,7 +75,7 @@ auctionBidSchema.pre('save', async function(next) {
         relatedBidId: this._id
       });
     }
-    
+
     next();
   } catch (error) {
     next(error);
@@ -88,7 +89,7 @@ auctionBidSchema.statics.getBidsForAuction = async function(auctionId) {
       .populate('buyerId', 'firstName lastName email')
       .sort({ bidTime: -1 })
       .limit(4);
-    
+
     return bids;
   } catch (error) {
     throw error;
@@ -99,10 +100,10 @@ auctionBidSchema.statics.getBidsForAuction = async function(auctionId) {
 auctionBidSchema.statics.notifyAuctionWinner = async function(auctionId, winnerId) {
   try {
     console.log('Notifying auction winner:', { auctionId, winnerId });
-    
+
     const AuctionRequest = mongoose.model('AuctionRequest');
     const auction = await AuctionRequest.findById(auctionId);
-    
+
     if (!auction) {
       throw new Error('Auction not found');
     }
@@ -135,6 +136,6 @@ auctionBidSchema.statics.notifyAuctionWinner = async function(auctionId, winnerI
   }
 };
 
+// Export model
 const AuctionBid = mongoose.model('AuctionBid', auctionBidSchema);
-
-module.exports = AuctionBid;
+export default AuctionBid;

@@ -1,15 +1,15 @@
-// Backend/routes/mechanic.routes.js
-const express = require('express');
+// routes/mechanic.routes.js
+import express from 'express';
+import AuctionRequest from '../models/AuctionRequest.js';
+import User from '../models/User.js';
+import mechanicMiddleware from '../middlewares/mechanic.middleware.js';
+
 const router = express.Router();
-const AuctionRequest = require('../models/AuctionRequest');
-const User = require('../models/User');
-const mechanicMiddleware = require('../middlewares/mechanic.middleware');
 
 /* ---------- Dashboard (index) ---------- */
 router.get('/dashboard', mechanicMiddleware, async (req, res) => {
   try {
     const user = req.user;
-
     if (user.approved_status !== 'Yes') {
       return res.json({
         success: true,
@@ -47,7 +47,7 @@ router.get('/dashboard', mechanicMiddleware, async (req, res) => {
   }
 });
 
-/* ---------- Pending Tasks (dynamic from AuctionRequest) ---------- */
+/* ---------- Pending Tasks ---------- */
 router.get('/pending-tasks', mechanicMiddleware, async (req, res) => {
   try {
     const pendingTasks = await AuctionRequest.find({
@@ -68,7 +68,7 @@ router.get('/pending-tasks', mechanicMiddleware, async (req, res) => {
   }
 });
 
-/* ---------- Accept Pending Task ---------- */
+/* ---------- Accept / Decline Task ---------- */
 router.post('/pending-tasks/:id/accept', mechanicMiddleware, async (req, res) => {
   try {
     const task = await AuctionRequest.findOneAndUpdate(
@@ -76,11 +76,7 @@ router.post('/pending-tasks/:id/accept', mechanicMiddleware, async (req, res) =>
       { status: 'assignedMechanic' },
       { new: true }
     );
-
-    if (!task) {
-      return res.status(400).json({ success: false, message: 'Task not found or not pending' });
-    }
-
+    if (!task) return res.status(400).json({ success: false, message: 'Task not found or not pending' });
     res.json({ success: true, message: 'Task accepted' });
   } catch (err) {
     console.error(err);
@@ -88,7 +84,6 @@ router.post('/pending-tasks/:id/accept', mechanicMiddleware, async (req, res) =>
   }
 });
 
-/* ---------- Decline Pending Task ---------- */
 router.post('/pending-tasks/:id/decline', mechanicMiddleware, async (req, res) => {
   try {
     const task = await AuctionRequest.findOneAndUpdate(
@@ -96,11 +91,7 @@ router.post('/pending-tasks/:id/decline', mechanicMiddleware, async (req, res) =
       { status: 'rejected' },
       { new: true }
     );
-
-    if (!task) {
-      return res.status(400).json({ success: false, message: 'Task not found or not pending' });
-    }
-
+    if (!task) return res.status(400).json({ success: false, message: 'Task not found or not pending' });
     res.json({ success: true, message: 'Task declined' });
   } catch (err) {
     console.error(err);
@@ -108,14 +99,13 @@ router.post('/pending-tasks/:id/decline', mechanicMiddleware, async (req, res) =
   }
 });
 
-/* ---------- Current Tasks ---------- */
+/* ---------- Current / Past Tasks ---------- */
 router.get('/current-tasks', mechanicMiddleware, async (req, res) => {
   try {
     const assignedVehicles = await AuctionRequest.find({
       assignedMechanic: req.user._id,
       status: 'assignedMechanic'
     }).sort({ createdAt: -1 });
-
     res.json({ success: true, message: 'Current tasks', data: { assignedVehicles } });
   } catch (err) {
     console.error(err);
@@ -123,14 +113,12 @@ router.get('/current-tasks', mechanicMiddleware, async (req, res) => {
   }
 });
 
-/* ---------- Past Tasks ---------- */
 router.get('/past-tasks', mechanicMiddleware, async (req, res) => {
   try {
     const completedTasks = await AuctionRequest.find({
       assignedMechanic: req.user._id,
       reviewStatus: 'completed'
     }).sort({ createdAt: -1 });
-
     res.json({ success: true, message: 'Past tasks', data: { completedTasks } });
   } catch (err) {
     console.error(err);
@@ -138,16 +126,12 @@ router.get('/past-tasks', mechanicMiddleware, async (req, res) => {
   }
 });
 
-/* ---------- Vehicle Details ---------- */
+/* ---------- Vehicle Details & Review ---------- */
 router.get('/vehicle-details/:id', mechanicMiddleware, async (req, res) => {
   try {
     const vehicle = await AuctionRequest.findById(req.params.id)
       .populate('sellerId', 'firstName lastName phone doorNo street city state googleAddressLink');
-
-    if (!vehicle) {
-      return res.status(404).json({ success: false, message: 'Vehicle not found' });
-    }
-
+    if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({
       success: true,
       message: 'Vehicle details',
@@ -159,16 +143,13 @@ router.get('/vehicle-details/:id', mechanicMiddleware, async (req, res) => {
   }
 });
 
-/* ---------- Submit Review ---------- */
 router.post('/submit-review/:id', mechanicMiddleware, async (req, res) => {
   try {
     const { mechanicalCondition, bodyCondition, recommendations, conditionRating } = req.body;
-
     await AuctionRequest.findByIdAndUpdate(req.params.id, {
       mechanicReview: { mechanicalCondition, bodyCondition, recommendations, conditionRating },
       reviewStatus: 'completed'
     });
-
     res.json({ success: true, message: 'Review submitted', redirect: '/mechanic/dashboard' });
   } catch (err) {
     console.error(err);
@@ -210,4 +191,4 @@ router.post('/change-password', mechanicMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

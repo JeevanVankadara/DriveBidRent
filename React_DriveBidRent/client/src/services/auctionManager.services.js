@@ -4,37 +4,37 @@ import axiosInstance from "../utils/axiosInstance.util.js";
 
 export const auctionManagerServices = {
   // Dashboard
-  getDashboard: () => axiosInstance.get('/auctionmanager/dashboard'),
+  getDashboard: () => axiosInstance.get('/auction-manager/dashboard'),
 
   // Requests
-  getRequests: () => axiosInstance.get('/auctionmanager/requests'),
+  getRequests: () => axiosInstance.get('/auction-manager/requests'),
 
   // Pending Cars
-  getPending: () => axiosInstance.get('/auctionmanager/pending'),
-  getReview: (id) => axiosInstance.get(`/auctionmanager/get-review/${id}`),
-  updateStatus: (id, status) => axiosInstance.post(`/auctionmanager/update-status/${id}`, { status }),
-  getPendingCarDetails: (id) => axiosInstance.get(`/auctionmanager/pending-car-details/${id}`),
+  getPending: () => axiosInstance.get('/auction-manager/pending'),
+  getReview: (id) => axiosInstance.get(`/auction-manager/get-review/${id}`),
+  updateStatus: (id, status) => axiosInstance.post(`/auction-manager/update-status/${id}`, { status }),
+  getPendingCarDetails: (id) => axiosInstance.get(`/auction-manager/pending-car-details/${id}`),
 
   // Approved Cars
-  getApproved: () => axiosInstance.get('/auctionmanager/approved'),
+  getApproved: () => axiosInstance.get('/auction-manager/approved'),
 
   // Assign Mechanic
-  getAssignMechanic: (id) => axiosInstance.get(`/auctionmanager/assign-mechanic/${id}`),
-  assignMechanic: (id, data) => axiosInstance.post(`/auctionmanager/assign-mechanic/${id}`, data),
+  getAssignMechanic: (id) => axiosInstance.get(`/auction-manager/assign-mechanic/${id}`),
+  assignMechanic: (id, data) => axiosInstance.post(`/auction-manager/assign-mechanic/${id}`, data),
 
   // Auction Actions
-  startAuction: (id) => axiosInstance.post(`/auctionmanager/start-auction/${id}`),
-  stopAuction: (id) => axiosInstance.post(`/auctionmanager/stop-auction/${id}`),
+  startAuction: (id) => axiosInstance.post(`/auction-manager/start-auction/${id}`),
+  stopAuction: (id) => axiosInstance.post(`/auction-manager/stop-auction/${id}`),
 
   // View Bids
-  viewBids: (id) => axiosInstance.get(`/auctionmanager/view-bids/${id}`),
+  viewBids: (id) => axiosInstance.get(`/auction-manager/view-bids/${id}`),
 
   // Backwards-compatible aliases
-  getBids: (id) => axiosInstance.get(`/auctionmanager/view-bids/${id}`),
-  endAuction: (id) => axiosInstance.post(`/auctionmanager/stop-auction/${id}`),
+  getBids: (id) => axiosInstance.get(`/auction-manager/view-bids/${id}`),
+  endAuction: (id) => axiosInstance.post(`/auction-manager/stop-auction/${id}`),
 
   // Profile
-  getProfile: () => axiosInstance.get('/auctionmanager/profile'),
-  updatePhone: (phone) => axiosInstance.post('/auctionmanager/update-phone', { phone }),
-  changePassword: (data) => axiosInstance.post('/auctionmanager/change-password', data)
+  getProfile: () => axiosInstance.get('/auction-manager/profile'),
+  updatePhone: (phone) => axiosInstance.post('/auction-manager/update-phone', { phone }),
+  changePassword: (data) => axiosInstance.post('/auction-manager/change-password', data)
 };  

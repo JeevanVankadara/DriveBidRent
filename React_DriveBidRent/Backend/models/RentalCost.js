@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/RentalCost.js
+import mongoose from 'mongoose';
 
 const RentalCostSchema = new mongoose.Schema({
   rentalCarId: {
@@ -26,4 +27,4 @@ const RentalCostSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('RentalCost', RentalCostSchema);
+export default mongoose.model('RentalCost', RentalCostSchema);

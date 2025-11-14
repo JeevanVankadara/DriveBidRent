@@ -1,48 +1,53 @@
 // Backend/routes/auctionManager.routes.js
-const express = require('express');
+import express from 'express';
+import isAuctionManager from '../middlewares/auction_manager.middleware.js';
+
+// Controllers - using named imports (clean & consistent)
+import { getDashboard } from '../controllers/auctionManager/dashboard.controller.js';
+import { getRequests } from '../controllers/auctionManager/requests.controller.js';
+import {
+  getPending,
+  getReview,
+  updateStatus,
+  getPendingCarDetails
+} from '../controllers/auctionManager/pending.controller.js';
+import { getApproved } from '../controllers/auctionManager/approved.controller.js';
+import { getAssignMechanic, assignMechanic } from '../controllers/auctionManager/assignMechanic.controller.js';
+import { startAuction, stopAuction, viewBids } from '../controllers/auctionManager/auction.controller.js';
+import { getProfile, updatePhone, changePassword } from '../controllers/auctionManager/profile.controller.js';
+
 const router = express.Router();
-const isAuctionManager = require('../middlewares/auction_manager.middleware');
 
-// Import controllers
-const dashboard = require('../controllers/auctionManager/dashboard.controller');
-const requests = require('../controllers/auctionManager/requests.controller');
-const pending = require('../controllers/auctionManager/pending.controller');
-const approved = require('../controllers/auctionManager/approved.controller');
-const assign = require('../controllers/auctionManager/assignMechanic.controller');
-const auction = require('../controllers/auctionManager/auction.controller');
-const profile = require('../controllers/auctionManager/profile.controller');
-
+// Apply authentication middleware to ALL routes
 router.use(isAuctionManager);
 
-// Dashboard
-router.get('/dashboard', dashboard.getDashboard);
+// === Dashboard ===
+router.get('/dashboard', getDashboard);
 
+// === Requests ===
+router.get('/requests', getRequests);
 
+// === Pending Cars ===
+router.get('/pending', getPending);
+router.get('/get-review/:id', getReview);
+router.post('/update-status/:id', updateStatus);
+router.get('/pending-car-details/:id', getPendingCarDetails);
 
-// Requests
-router.get('/requests', requests.getRequests);
+// === Approved Cars ===
+router.get('/approved', getApproved);
 
-// Pending
-router.get('/pending', pending.getPending);
-router.get('/get-review/:id', pending.getReview);
-router.post('/update-status/:id', pending.updateStatus);
-router.get('/pending-car-details/:id', pending.getPendingCarDetails);
+// === Assign Mechanic ===
+router.get('/assign-mechanic/:id', getAssignMechanic);
+router.post('/assign-mechanic/:id', assignMechanic);
 
-// Approved
-router.get('/approved', approved.getApproved);
+// === Auction Control ===
+router.post('/start-auction/:id', startAuction);
+router.post('/stop-auction/:id', stopAuction);
+router.get('/view-bids/:id', viewBids);
 
-// Assign Mechanic
-router.get('/assign-mechanic/:id', assign.getAssignMechanic);
-router.post('/assign-mechanic/:id', assign.assignMechanic);
+// === Profile ===
+router.get('/profile', getProfile);
+router.post('/update-phone', updatePhone);
+router.post('/change-password', changePassword);
 
-// Auction Actions
-router.post('/start-auction/:id', auction.startAuction);
-router.post('/stop-auction/:id', auction.stopAuction);
-router.get('/view-bids/:id', auction.viewBids);
-
-// Profile
-router.get('/profile', isAuctionManager, profile.getProfile);
-router.post('/update-phone', profile.updatePhone);
-router.post('/change-password', profile.changePassword);
-
-module.exports = router;
+export default router;

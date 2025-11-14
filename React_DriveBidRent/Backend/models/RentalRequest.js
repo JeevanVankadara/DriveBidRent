@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/RentalRequest.js
+import mongoose from 'mongoose';
 
 const RentalRequestSchema = new mongoose.Schema({
   vehicleName: {
@@ -75,4 +76,4 @@ const RentalRequestSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('RentalRequest', RentalRequestSchema);
+export default mongoose.model('RentalRequest', RentalRequestSchema);

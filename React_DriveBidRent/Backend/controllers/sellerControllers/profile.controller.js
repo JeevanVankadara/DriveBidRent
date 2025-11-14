@@ -1,10 +1,7 @@
-// Assuming this is the content for profileController.js - update based on old code if available
-// Placeholder based on typical profile ops; user mentioned "similarly in same path profileController.js" but didn't provide code, so assuming standard
+// controllers/sellerControllers/profile.controller.js
+import User from '../../models/User.js';
 
-const User = require('../../models/User');
-
-// GET: Get seller profile
-const getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password').lean();
     if (!user) {
@@ -13,21 +10,14 @@ const getProfile = async (req, res) => {
         message: 'User not found'
       });
     }
-    res.json({
-      success: true,
-      data: user
-    });
+    res.json({ success: true, data: user });
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch profile'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch profile' });
   }
 };
 
-// POST: Update profile
-const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
@@ -41,15 +31,11 @@ const updateProfile = async (req, res) => {
       data: updatedUser
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update profile'
-    });
+    res.status(500).json({ success: false, message: 'Failed to update profile' });
   }
 };
 
-// POST: Update notification preferences
-const updatePreferences = async (req, res) => {
+export const updatePreferences = async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
@@ -63,15 +49,11 @@ const updatePreferences = async (req, res) => {
       data: updatedUser
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update preferences'
-    });
+    res.status(500).json({ success: false, message: 'Failed to update preferences' });
   }
 };
 
-// POST: Change password
-const changePassword = async (req, res) => {
+export const changePassword = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!await user.comparePassword(req.body.oldPassword)) {
@@ -83,16 +65,8 @@ const changePassword = async (req, res) => {
     user.password = req.body.newPassword;
     await user.save();
     
-    res.json({
-      success: true,
-      message: 'Password changed successfully'
-    });
+    res.json({ success: true, message: 'Password changed successfully' });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to change password'
-    });
+    res.status(500).json({ success: false, message: 'Failed to change password' });
   }
 };
-
-module.exports = { getProfile, updateProfile, updatePreferences, changePassword };

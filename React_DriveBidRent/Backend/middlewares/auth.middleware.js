@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 const isAdminLoggedin = async (req, res, next) => {
   const token = req.cookies.jwt;
@@ -36,4 +36,4 @@ const isAdminLoggedin = async (req, res, next) => {
   }
 };
 
-module.exports = isAdminLoggedin;
+export default isAdminLoggedin;

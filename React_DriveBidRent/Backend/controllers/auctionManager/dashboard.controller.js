@@ -1,5 +1,5 @@
-// Backend/controllers/auctionManager/dashboard.controller.js
-const AuctionRequest = require('../../models/AuctionRequest');
+// controllers/auctionManager/dashboard.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -7,7 +7,7 @@ const send = (success, message, data = null) => ({
   data
 });
 
-exports.getDashboard = async (req, res) => {
+export const getDashboard = async (req, res) => {
   try {
     const [pending, assigned, approved] = await Promise.all([
       AuctionRequest.find({ status: 'pending' })

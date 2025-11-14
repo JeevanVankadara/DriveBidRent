@@ -1,5 +1,6 @@
-const RentalRequest = require("../models/RentalRequest");
-const AuctionRequest = require("../models/AuctionRequest");
+// controllers/home.controller.js
+import RentalRequest from '../models/RentalRequest.js';
+import AuctionRequest from '../models/AuctionRequest.js';
 
 const homeController = {
   getHomeData: async (req, res) => {
@@ -8,7 +9,7 @@ const homeController = {
         .sort({ createdAt: -1 })
         .limit(4);
 
-      const topAuctions = await AuctionRequest.find({ started_auction: 'yes'})
+      const topAuctions = await AuctionRequest.find({ started_auction: 'yes' })
         .sort({ auctionDate: -1 })
         .limit(4);
 
@@ -28,4 +29,4 @@ const homeController = {
   }
 };
 
-module.exports = homeController;
+export default homeController;

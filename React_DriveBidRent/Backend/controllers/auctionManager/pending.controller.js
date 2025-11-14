@@ -1,5 +1,5 @@
-// Backend/controllers/auctionManager/pending.controller.js
-const AuctionRequest = require('../../models/AuctionRequest');
+// controllers/auctionManager/pending.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -7,7 +7,7 @@ const send = (success, message, data = null) => ({
   data
 });
 
-exports.getPending = async (req, res) => {
+export const getPending = async (req, res) => {
   try {
     const cars = await AuctionRequest.find({ status: 'assignedMechanic' })
       .populate('sellerId', 'firstName lastName city')
@@ -20,7 +20,7 @@ exports.getPending = async (req, res) => {
   }
 };
 
-exports.getReview = async (req, res) => {
+export const getReview = async (req, res) => {
   try {
     const car = await AuctionRequest.findById(req.params.id)
       .populate('assignedMechanic', 'firstName lastName');
@@ -43,7 +43,7 @@ exports.getReview = async (req, res) => {
   }
 };
 
-exports.updateStatus = async (req, res) => {
+export const updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const car = await AuctionRequest.findById(req.params.id);
@@ -71,7 +71,7 @@ exports.updateStatus = async (req, res) => {
   }
 };
 
-exports.getPendingCarDetails = async (req, res) => {
+export const getPendingCarDetails = async (req, res) => {
   try {
     const car = await AuctionRequest.findById(req.params.id)
       .populate('assignedMechanic', 'firstName lastName');

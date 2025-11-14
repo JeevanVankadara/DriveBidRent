@@ -1,9 +1,8 @@
-const AuctionRequest = require('../../models/AuctionRequest');
+// controllers/sellerControllers/auctionDetail.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
 
-// GET: Get auction details
-const getAuctionDetail = async (req, res) => {
+export const getAuctionDetail = async (req, res) => {
   try {
-    // Fetch specific auction by ID
     const auction = await AuctionRequest.findOne({
       _id: req.params.id,
       sellerId: req.user._id
@@ -16,17 +15,9 @@ const getAuctionDetail = async (req, res) => {
       });
     }
     
-    res.json({
-      success: true,
-      data: auction
-    });
+    res.json({ success: true, data: auction });
   } catch (err) {
     console.error('Error fetching auction details:', err);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch auction details'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch auction details' });
   }
 };
-
-module.exports = { getAuctionDetail };

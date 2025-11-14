@@ -1,7 +1,7 @@
-const RentalRequest = require('../../models/RentalRequest');
+// controllers/sellerControllers/updateRental.controller.js
+import RentalRequest from '../../models/RentalRequest.js';
 
-// POST: Handle rental update
-const postUpdateRental = async (req, res) => {
+export const postUpdateRental = async (req, res) => {
   try {
     const rental = await RentalRequest.findOne({
       _id: req.params.id,
@@ -15,11 +15,9 @@ const postUpdateRental = async (req, res) => {
       });
     }
     
-    // Check if current date is before return date
     const currentDate = new Date();
     const isBeforeReturnDate = rental.dropDate && currentDate < new Date(rental.dropDate);
     
-    // If changing from unavailable to available when before return date, show error
     if (rental.status === 'unavailable' && req.body['status'] === 'available' && isBeforeReturnDate) {
       return res.status(400).json({ 
         success: false,
@@ -27,7 +25,6 @@ const postUpdateRental = async (req, res) => {
       });
     }
     
-    // Validate required fields
     const requiredFields = ['rental-cost', 'driver-available', 'status'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     if (missingFields.length > 0) {
@@ -37,7 +34,6 @@ const postUpdateRental = async (req, res) => {
       });
     }
     
-    // Validate cost
     const cost = parseFloat(req.body['rental-cost']);
     if (isNaN(cost) || cost <= 0) {
       return res.status(400).json({ 
@@ -46,7 +42,6 @@ const postUpdateRental = async (req, res) => {
       });
     }
     
-    // Add additional validation for driver rate if driver is available
     if (req.body['driver-available'] === 'yes' && (!req.body['driver-rate'] || isNaN(parseFloat(req.body['driver-rate'])))) {
       return res.status(400).json({ 
         success: false,
@@ -54,7 +49,6 @@ const postUpdateRental = async (req, res) => {
       });
     }
     
-    // Update fields
     rental.costPerDay = cost;
     rental.driverAvailable = req.body['driver-available'] === 'yes';
     rental.status = req.body['status'];
@@ -81,5 +75,3 @@ const postUpdateRental = async (req, res) => {
     });
   }
 };
-
-module.exports = { postUpdateRental };

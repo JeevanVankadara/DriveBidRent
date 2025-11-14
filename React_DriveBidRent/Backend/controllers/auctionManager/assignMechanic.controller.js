@@ -1,6 +1,6 @@
-// Backend/controllers/auctionManager/assignMechanic.controller.js
-const AuctionRequest = require('../../models/AuctionRequest');
-const User = require('../../models/User');
+// controllers/auctionManager/assignMechanic.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
+import User from '../../models/User.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -8,7 +8,7 @@ const send = (success, message, data = null) => ({
   data
 });
 
-exports.getAssignMechanic = async (req, res) => {
+export const getAssignMechanic = async (req, res) => {
   try {
     const request = await AuctionRequest.findById(req.params.id).populate('sellerId');
     if (!request) return res.json(send(false, 'Request not found'));
@@ -26,7 +26,7 @@ exports.getAssignMechanic = async (req, res) => {
   }
 };
 
-exports.assignMechanic = async (req, res) => {
+export const assignMechanic = async (req, res) => {
   try {
     const { mechanicId, mechanicName } = req.body;
 
@@ -42,7 +42,6 @@ exports.assignMechanic = async (req, res) => {
 
     if (!updated) return res.json(send(false, 'Request not found'));
 
-    // Also update mechanic's user document to reflect the assignment
     try {
       await User.findByIdAndUpdate(
         mechanicId,
@@ -51,7 +50,6 @@ exports.assignMechanic = async (req, res) => {
       );
     } catch (uErr) {
       console.error('Failed to update mechanic assignedRequests:', uErr);
-      // Not blocking - still send success for request update, but include note
       return res.json(send(true, 'Mechanic assigned successfully, but failed to update mechanic record'));
     }
 

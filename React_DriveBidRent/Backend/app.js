@@ -1,120 +1,139 @@
 // Backend/app.js
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const cors = require('cors');
-require("dotenv").config();
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import "dotenv/config";                 // Loads environment variables
+import morgan from "morgan";
 
-const connectDB = require('./config/db');
-connectDB();
+// Database connection
+import connectDB from "./config/db.js";
 
+// Import models (ensures schemas are registered with Mongoose)
+import "./models/User.js";
+import "./models/RentalRequest.js";
+import "./models/AuctionRequest.js";
 
-// Import models (for reference, but not used directly here)
-const User = require("./models/User");
-const RentalRequest = require("./models/RentalRequest");
-const AuctionRequest = require("./models/AuctionRequest");
+// === ROUTES ===
+import authRoutes from "./routes/auth.routes.js";
+import homeRoutes from "./routes/home.routes.js";
+import sellerRoutes from "./routes/seller.routes.js";
+import auctionManagerRoutes from "./routes/auctionManager.routes.js";   // NEW: Auction Manager API
+import mechanicRoutes from "./routes/mechanic.routes.js";               // NEW: Mechanic API
+import adminRoutes from "./routes/admin.routes.js";                     // NEW: Admin API routes
+import buyerRoutes from "./routes/buyer.routes.js";                     // NEW: Buyer API Routes (Single Consolidated File)
 
-// Import routes (renamed to dot notation where applicable; extracted auth and home)
-const authRoutes = require("./routes/auth.routes");
-const homeRoutes = require("./routes/home.routes");
-const sellerRoutes = require("./routes/seller.routes");
-const auctionManagerRoutes = require("./routes/auctionManager.routes"); // NEW: Auction Manager API
-const mechanicRoutes = require("./routes/mechanic.routes");               // NEW: Mechanic API
-const adminRoutes = require("./routes/admin.routes");              // NEW: Admin API routes
-const morgan = require("morgan");
+// === MIDDLEWARES ===
+import sellerMiddleware from "./middlewares/seller.middleware.js";
+import mechanicMiddleware from "./middlewares/mechanic.middleware.js";
+import adminMiddleware from "./middlewares/admin.middleware.js";
+import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
+import buyerMiddleware from "./middlewares/buyer.middleware.js";
 
-// Other routes (keep as-is for now; will extract later - commented out EJS renders to avoid errors in API mode)
-// const addAuctionRoute = require("./routes/Seller/AddAuction");
-// const auctionDetailsRoutes = require("./routes/Seller/AuctionDetail");
-// const addRentalRoute = require("./routes/Seller/AddRental");
-// const seller_profileRoute = require("./routes/Seller/profile");
-// const viewAuctionsRoute = require("./routes/Seller/ViewAuctions.js");
-// const viewRentalsRoute = require("./routes/Seller/ViewRentals.js");
-// const viewearningsRoute = require("./routes/Seller/ViewEarnings.js");
-// const rentalDetailsRoute = require("./routes/Seller/RentalDetails");
-// const updateRentalRoute = require('./routes/Seller/UpdateRental');
-
-// const AuctionManagerHomeRoute = require("./routes/AuctionManager/Home.js");
-// const Auctionrequests = require("./routes/AuctionManager/Requests.js");
-// const AssignMechanic = require("./routes/AuctionManager/AssignMechanic.js");
-// const Pendingcars = require("./routes/AuctionManager/Pending.js");
-// const approvedCars = require("./routes/AuctionManager/ApprovedCars.js");
-// const PendingCarDetails = require("./routes/AuctionManager/PendingCarDetails.js");
-// const AuctionProfile=require("./routes/AuctionManager/Profile.js")
-
-// const AdminHomepage = require("./routes/Admin/AdminHome.js");
-// const ManageUsers = require("./routes/Admin/ManageUSers.js");
-// const adminProfile = require("./routes/Admin/AdminProfile.js");
-// const Analytics = require("./routes/Admin/Analytics.js");
-// const ManageEarnings = require("./routes/Admin/ManageEarnings.js");
-
-// const Aboutus = require("./routes/Buyer/Aboutus.js");
-
-// const BuyerDashboar...(truncated 4921 characters)...le.error(err);
-//     res.render("seller_dashboard/view-bids.ejs", {
-  //       user: req.user,
-  //       error: "Failed to load data",
-  //     });
-  //   }
-  // });
-  
-  // app.get("/seller_dashboard/view-rentals", isSellerLoggedin, async (req, res) => {
-    //   try {
-      //     res.render("seller_dashboard/view-rentals.ejs", { user: req.user });
-      //   } catch (err) {
-        //     console.error(err);
-        //     res.render("seller_dashboard/view-rentals.ejs", {
-          //       user: req.user,
-          //       error: "|Failed to load data",
-//     });
-//   }
-// });
-
-// app.use("/auctionmanager", isAuctionManager, AuctionManagerHomeRoute);
-// app.use("/auctionmanager", isAuctionManager, Auctionrequests);
-// app.use("/auctionmanager", isAuctionManager, AssignMechanic);
-// app.use("/auctionmanager", isAuctionManager, Pendingcars);
-// app.use("/auctionmanager", isAuctionManager, approvedCars);
-// app.use("/auctionmanager", isAuctionManager, PendingCarDetails);
-// app.use("/auctionmanager", isAuctionManager, AuctionProfile);
-
-// app.use("/admin", isAdminLoggedin, AdminHomepage);
-// app.use("/admin", isAdminLoggedin, ManageUsers);
-// app.use("/admin", isAdminLoggedin, adminProfile);
-// app.use("/admin", isAdminLoggedin, Analytics);
-// app.use("/admin", isAdminLoggedin, ManageEarnings);
-
-// app.use("/mechanic_dashboard", isMechanicLoggedin, currentTasks);
-// app.use("/mechanic_dashboard", isMechanicLoggedin, pendingTasks);
-// app.use("/mechanic_dashboard", isMechanicLoggedin, pastTasks);
-// app.use("/mechanic_dashboard", isMechanicLoggedin, profile);
-// app.use("/mechanic_dashboard", isMechanicLoggedin, index);
-// app.use("/mechanic_dashboard", isMechanicLoggedin, mcardetails);
+// Resolve __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://yourdomain.com' : 'http://localhost:5173', // Adjust for your React app
-  credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(morgan('dev'));
+// === CORS Setup (Flexible & Secure) ===
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://yourdomain.com", // Replace with your actual domain in production
+].filter(Boolean);
 
-// Global /api prefix for all routes
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS policy: Origin not allowed"));
+    },
+    credentials: true, // Important for cookies/jwt
+  })
+);
+
+// === Global Middlewares ===
+app.use(morgan("dev"));                                     // HTTP request logging
+app.use(express.json());                                    // Parse JSON bodies
+app.use(express.urlencoded({ extended: true }));            // Parse form data
+app.use(cookieParser());                                    // Parse cookies
+app.use(express.static(path.join(__dirname, "public")));   // Serve static files (uploads, images, etc.)
+
+// === API ROUTES (Clean /api prefix) ===
 app.use("/api/auth", authRoutes);
 app.use("/api/home", homeRoutes);
-app.use("/api/seller", sellerRoutes);
-app.use("/api/auctionmanager", auctionManagerRoutes);
-app.use("/api/mechanic", mechanicRoutes);
-app.use("/api/admin", adminRoutes); // Admin routes with /api prefix
+app.use("/api/seller", sellerMiddleware, sellerRoutes);
+app.use("/api/buyer", buyerMiddleware, buyerRoutes);
+app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes);   // NEW
+app.use("/api/mechanic", mechanicMiddleware, mechanicRoutes);                     // NEW
+app.use("/api/admin", adminMiddleware, adminRoutes);                              // NEW
 
-const PORT = process.env.PORT || 8000;
+// === PRODUCTION: Serve React/Vite Build (SPA Support) ===
+if (process.env.NODE_ENV === "production") {
+  const clientDistPath = path.join(__dirname, "..", "client", "dist");
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  // Dynamically import fs only when needed (top-level await not allowed in all envs)
+  (async () => {
+    try {
+      const fs = await import("fs");
+      if (fs.existsSync(clientDistPath)) {
+        app.use(express.static(clientDistPath));
+
+        // Serve index.html for all non-API routes (critical for React Router)
+        app.get("*", (req, res) => {
+          if (req.path.startsWith("/api")) {
+            return res.status(404).json({ error: "API route not found" });
+          }
+          res.sendFile(path.join(clientDistPath, "index.html"));
+        });
+
+        console.log("Production mode: Serving client build from", clientDistPath);
+      } else {
+        console.warn("Client build not found at:", clientDistPath, "- skipping static serving.");
+      }
+    } catch (err) {
+      console.error("Error checking client build:", err);
+    }
+  })();
+}
+
+// === 404 Handler for API routes ===
+// Use the base path "/api" so Express mounts the handler for that path
+// and all its subpaths. Using "/api/*" causes path-to-regexp errors
+// with newer versions of the matcher.
+app.use("/api", (req, res) => {
+  res.status(404).json({ success: false, message: "API route not found" });
 });
 
-module.exports = app;
+// === Global Error Handler ===
+app.use((err, req, res, next) => {
+  console.error("Unhandled Error:", err);
+  res.status(500).json({ success: false, message: "Internal Server Error" });
+});
+
+// === Start Server Only After DB Connection ===
+const PORT = process.env.PORT || 8000;
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+  } catch (err) {
+    console.error("Failed to connect to database or start server:", err);
+    process.exit(1);
+  }
+};
+
+startServer();
+
+export default app;

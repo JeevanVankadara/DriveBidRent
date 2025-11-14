@@ -1,7 +1,7 @@
-// server/controllers/sellerControllers/addAuction.controller.js
-const AuctionRequest = require('../../models/AuctionRequest');
+// controllers/sellerControllers/addAuction.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
 
-const postAddAuction = async (req, res) => {
+export const postAddAuction = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'Image required' });
   }
@@ -28,5 +28,3 @@ const postAddAuction = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
-module.exports = { postAddAuction };

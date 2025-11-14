@@ -1,12 +1,12 @@
 // client/src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-// Public
+// === PUBLIC ROUTES ===
 import HomePage from './pages/auth/HomePage';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 
-// Admin
+// === ADMIN ===
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import ManageUsers from './pages/admin/ManageUsers';
@@ -14,24 +14,38 @@ import Analytics from './pages/admin/Analytics';
 import ManageEarnings from './pages/admin/ManageEarnings';
 import AdminProfile from './pages/admin/AdminProfile';
 
-// Buyer
+// === BUYER ===
+import BuyerLayout from './pages/buyer/BuyerLayout';
 import BuyerDashboard from './pages/buyer/Dashboard';
+import AuctionsList from './pages/buyer/AuctionsList';
+import AuctionDetails from './pages/buyer/AuctionDetails';
+import BidPage from './pages/buyer/BidPage';
+import RentalsList from './pages/buyer/RentalsList';
+import RentalDetails from './pages/buyer/RentalDetails';
+import BookRental from './pages/buyer/BookRental';
+import PurchasesList from './pages/buyer/PurchasesList';
+import PurchaseDetails from './pages/buyer/PurchaseDetails';
+import MyBids from './pages/buyer/MyBids';
+import Wishlist from './pages/buyer/Wishlist';
+import BuyerProfile from './pages/buyer/Profile';           // Renamed for clarity
+import Notifications from './pages/buyer/Notifications';
+import AboutUs from './pages/buyer/AboutUs';
 
-// Seller
+// === SELLER ===
 import SellerLayout from './pages/seller/SellerLayout';
 import SellerDashboard from './pages/seller/Dashboard';
 import AddAuction from './pages/seller/AddAuction';
 import AddRental from './pages/seller/AddRental';
-import Profile from './pages/seller/Profile';
+import SellerProfile from './pages/seller/Profile';           // Consistent name
 import ViewAuctions from './pages/seller/ViewAuctions';
 import ViewBids from './pages/seller/ViewBids';
 import ViewEarnings from './pages/seller/ViewEarnings';
 import ViewRentals from './pages/seller/ViewRentals';
 import UpdateRental from './pages/seller/UpdateRental';
 import RentalDetailsAlt from './pages/seller/RentalDetailsAlt';
-import AuctionDetails from './pages/seller/AuctionDetails';
+import AuctionDetailsSeller from './pages/seller/AuctionDetails';  // Clear distinction
 
-// Auction Manager
+// === AUCTION MANAGER ===
 import AuctionManagerLayout from './pages/auctionManager/AuctionManagerLayout';
 import AuctionManagerDashboard from './pages/auctionManager/Dashboard';
 import ApprovedCars from './pages/auctionManager/ApprovedCars';
@@ -42,7 +56,7 @@ import PendingCars from './pages/auctionManager/PendingCars';
 import Requests from './pages/auctionManager/Requests';
 import ViewBidsPage from './pages/auctionManager/ViewBids';
 
-// Mechanic
+// === MECHANIC ===
 import MechanicLayout from './pages/mechanic/MechanicLayout';
 import MechanicDashboard from './pages/mechanic/dashboard/Dashboard';
 import CurrentTasks from './pages/mechanic/current-tasks/CurrentTasks';
@@ -54,15 +68,16 @@ import MechanicProfile from './pages/mechanic/profile/Profile';
 function App() {
   return (
     <Routes>
-      {/* LEGACY REDIRECT */}
+      {/* === LEGACY REDIRECTS === */}
       <Route path="/auction-manager-dashboard" element={<Navigate to="/auction-manager" replace />} />
+      <Route path="/buyer-dashboard" element={<Navigate to="/buyer" replace />} />
 
-      {/* Public */}
+      {/* === PUBLIC ROUTES === */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* ADMIN SPA */}
+      {/* === ADMIN SPA === */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
@@ -72,26 +87,42 @@ function App() {
         <Route path="admin-profile" element={<AdminProfile />} />
       </Route>
 
-      {/* Buyer */}
-      <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
+      {/* === BUYER SPA === */}
+      <Route path="/buyer" element={<BuyerLayout />}>
+        <Route index element={<BuyerDashboard />} />
+        <Route path="dashboard" element={<BuyerDashboard />} />
+        <Route path="auctions" element={<AuctionsList />} />
+        <Route path="auctions/:id" element={<AuctionDetails />} />
+        <Route path="auctions/:id/bid" element={<BidPage />} />
+        <Route path="rentals" element={<RentalsList />} />
+        <Route path="rentals/:id" element={<RentalDetails />} />
+        <Route path="rentals/:id/book" element={<BookRental />} />
+        <Route path="purchases" element={<PurchasesList />} />
+        <Route path="purchases/:id" element={<PurchaseDetails />} />
+        <Route path="my-bids" element={<MyBids />} />
+        <Route path="wishlist" element={<Wishlist />} />
+        <Route path="profile" element={<BuyerProfile />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="about" element={<AboutUs />} />
+      </Route>
 
-      {/* SELLER SPA */}
+      {/* === SELLER SPA === */}
       <Route path="/seller" element={<SellerLayout />}>
         <Route index element={<SellerDashboard />} />
         <Route path="dashboard" element={<SellerDashboard />} />
         <Route path="add-auction" element={<AddAuction />} />
         <Route path="add-rental" element={<AddRental />} />
-        <Route path="profile" element={<Profile />} />
+        <Route path="profile" element={<SellerProfile />} />
         <Route path="view-auctions" element={<ViewAuctions />} />
         <Route path="view-bids/:id" element={<ViewBids />} />
         <Route path="view-earnings" element={<ViewEarnings />} />
         <Route path="view-rentals" element={<ViewRentals />} />
         <Route path="update-rental/:id" element={<UpdateRental />} />
         <Route path="rental-details-alt/:id" element={<RentalDetailsAlt />} />
-        <Route path="auction-details/:id" element={<AuctionDetails />} />
+        <Route path="auction-details/:id" element={<AuctionDetailsSeller />} />
       </Route>
 
-      {/* AUCTION MANAGER SPA */}
+      {/* === AUCTION MANAGER SPA === */}
       <Route path="/auction-manager" element={<AuctionManagerLayout />}>
         <Route index element={<AuctionManagerDashboard />} />
         <Route path="dashboard" element={<AuctionManagerDashboard />} />
@@ -104,22 +135,29 @@ function App() {
         <Route path="profile" element={<ManagerProfile />} />
       </Route>
 
-      {/* MECHANIC SPA */}
-      <Route element={<MechanicLayout />}>
-        <Route path="/mechanic/dashboard" element={<MechanicDashboard />} />
-        <Route path="/mechanic/current-tasks" element={<CurrentTasks />} />
-        <Route path="/mechanic/past-tasks" element={<PastTasks />} />
-        <Route path="/mechanic/pending-tasks" element={<PendingTasks />} />
-        <Route path="/mechanic/car-details/:id" element={<CarDetails />} />
-        <Route path="/mechanic/profile" element={<MechanicProfile />} />
+      {/* === MECHANIC SPA === */}
+      <Route path="/mechanic" element={<MechanicLayout />}>
+        <Route index element={<MechanicDashboard />} />
+        <Route path="dashboard" element={<MechanicDashboard />} />
+        <Route path="current-tasks" element={<CurrentTasks />} />
+        <Route path="past-tasks" element={<PastTasks />} />
+        <Route path="pending-tasks" element={<PendingTasks />} />
+        <Route path="car-details/:id" element={<CarDetails />} />
+        <Route path="profile" element={<MechanicProfile />} />
       </Route>
 
-      {/* 404 */}
+      {/* === 404 NOT FOUND === */}
       <Route
         path="*"
         element={
-          <div className="flex items-center justify-center min-h-screen text-2xl font-bold text-gray-700">
-            404 - Page Not Found
+          <div className="flex items-center justify-center min-h-screen text-2xl font-bold text-gray-700 bg-gray-50">
+            <div className="text-center">
+              <h1 className="text-6xl mb-4">404</h1>
+              <p>Page Not Found</p>
+              <p className="text-sm text-gray-500 mt-4">
+                The page you're looking for doesn't exist.
+              </p>
+            </div>
           </div>
         }
       />

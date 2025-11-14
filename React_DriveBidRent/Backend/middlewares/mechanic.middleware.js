@@ -1,22 +1,23 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+// middlewares/mechanic.middleware.js
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 const mechanicMiddleware = async (req, res, next) => {
   let token = req.cookies.jwt;
-
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev');
-
       req.user = await User.findById(decoded.id).select("-password");
 
-      if (!req.user || req.user.userType !== "mechanic" || decoded.userType !== "mechanic" || decoded.email !== req.user.email) {
+      if (!req.user || 
+          req.user.userType !== "mechanic" || 
+          decoded.userType !== "mechanic" || 
+          decoded.email !== req.user.email) {
         return res.status(401).json({
           success: false,
           message: 'Access denied. Mechanic authentication required.'
         });
       }
-
       next();
     } catch (error) {
       console.error('Error in mechanic.middleware:', error);
@@ -33,4 +34,4 @@ const mechanicMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = mechanicMiddleware;
+export default mechanicMiddleware;

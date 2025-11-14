@@ -20,20 +20,36 @@ const Login = () => {
 
     try {
       const response = await authServices.login({ email, password });
+      console.log('=== LOGIN RESPONSE ===');
+      console.log('Full response:', response);
+      console.log('response.success:', response.success);
+      console.log('response.redirect:', response.redirect);
+      console.log('response.user:', response.user);
+      console.log('response.user.approved_status:', response.user?.approved_status);
+      console.log('=== END RESPONSE ===');
 
       if (response.success) {
         setSuccess('Login Successful! Redirecting...');
-        
-        // Use backend-provided redirectUrl (response is axios res.data -> { success, message, data })
-        const redirectUrl = response.data?.redirectUrl || '/';
-        const loggedUser = response.data?.user || {};
+
+        // Backend now returns { success, message, redirect, user }
+        const redirectUrl = response.redirect || '/';
+        const loggedUser = response.user || {};
+
+        console.log('Parsed redirectUrl:', redirectUrl);
+        console.log('Parsed loggedUser:', loggedUser);
 
         // If mechanic is not approved, show approval modal and do not redirect
+        // Only block if userType is 'mechanic' AND status is not 'Yes' (i.e., is 'No' or missing)
         if (loggedUser.userType === 'mechanic' && loggedUser.approved_status !== 'Yes') {
+          console.log('BLOCKING: Mechanic not approved');
+          console.log('userType:', loggedUser.userType);
+          console.log('approved_status:', loggedUser.approved_status);
           setShowApprovalModal(true);
           setLoading(false);
           return;
         }
+        
+        console.log('ALLOWING: User approved or not mechanic, proceeding to redirect');
 
         // Normalize known legacy redirect paths (server may still return old strings if not restarted)
         let finalRedirect = redirectUrl || '/';
@@ -41,14 +57,23 @@ const Login = () => {
           finalRedirect = finalRedirect.replace('mechanic-dashboard', 'mechanic/dashboard');
         }
 
+        console.log('Final redirect URL:', finalRedirect);
+
         setTimeout(() => {
+          console.log('Navigating to:', finalRedirect);
           navigate(finalRedirect, { replace: true });
         }, 1000);
       } else {
+        console.log('Login failed with message:', response.message);
         setError(response.message || 'Login failed');
       }
     } catch (err) {
+      console.error('=== LOGIN ERROR ===');
       console.error('Login error:', err);
+      console.error('Full error object:', JSON.stringify(err, null, 2));
+      console.error('err.response:', err.response);
+      console.error('err.response?.data:', err.response?.data);
+      console.error('=== END ERROR ===');
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.request) {

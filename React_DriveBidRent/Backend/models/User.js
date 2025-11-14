@@ -1,40 +1,44 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+// models/User.js
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  userType: { type: String, required: true, enum: ['buyer', 'seller', 'driver', 'mechanic', 'admin','auction_manager'] },
+  userType: { 
+    type: String, 
+    required: true, 
+    enum: ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'auction_manager'] 
+  },
   dateOfBirth: { type: Date },
-  doorNo: { 
+  doorNo: {
     type: String,
     set: function(v) {
       return Array.isArray(v) ? v.find(val => val && val.trim() !== '') || '' : v;
     }
   },
-  street: { 
+  street: {
     type: String,
     set: function(v) {
       return Array.isArray(v) ? v.find(val => val && val.trim() !== '') || '' : v;
     }
   },
-  city: { 
+  city: {
     type: String,
     set: function(v) {
       return Array.isArray(v) ? v.find(val => val && val.trim() !== '') || '' : v;
     }
   },
-  state: { 
+  state: {
     type: String,
     set: function(v) {
       return Array.isArray(v) ? v.find(val => val && val.trim() !== '') || '' : v;
     }
   },
-  googleAddressLink: { 
+  googleAddressLink: {
     type: String,
-    // Only required for mechanics
     required: function() {
       return this.userType === 'mechanic';
     }
@@ -45,14 +49,13 @@ const userSchema = new mongoose.Schema({
   repairCars: { type: Boolean, default: false },
   experienceYears: { type: Number },
   approved_status: { type: String, enum: ['Yes', 'No'], default: 'No' },
-  phone: { 
-    type: String, 
-    required: true, 
+  phone: {
+    type: String,
+    required: true,
     match: [/^\d{10}$/, 'Phone number must be 10 digits']
   },
-  // list of auction requests assigned to this mechanic
   assignedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AuctionRequest' }],
-  notificationPreference: { 
+  notificationPreference: {
     type: String,
     enum: ['all', 'important', 'none'],
     default: 'all'
@@ -63,7 +66,7 @@ const userSchema = new mongoose.Schema({
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -78,6 +81,4 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+export default mongoose.model('User', userSchema);

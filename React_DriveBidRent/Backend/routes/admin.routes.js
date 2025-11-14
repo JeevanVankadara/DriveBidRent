@@ -1,11 +1,12 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const dashboardControllers = require("../controllers/adminControllers/dashboard.controllers");
-const manageUsersControllers = require("../controllers/adminControllers/manageUsers.controllers");
-const analyticsControllers = require("../controllers/adminControllers/analytics.controllers");
-const manageEarningsControllers = require("../controllers/adminControllers/manageEarnings.controllers");
-const adminProfileControllers = require("../controllers/adminControllers/adminProfile.controllers");
-const isAdminLoggedin = require("../middlewares/auth.middleware");
+
+import dashboardControllers from '../controllers/adminControllers/dashboard.controllers.js';
+import manageUsersControllers from '../controllers/adminControllers/manageUsers.controllers.js';
+import analyticsControllers from '../controllers/adminControllers/analytics.controllers.js';
+import manageEarningsControllers from '../controllers/adminControllers/manageEarnings.controllers.js';
+import adminProfileControllers from '../controllers/adminControllers/adminProfile.controllers.js';
+import isAdminLoggedin from '../middlewares/auth.middleware.js';
 
 // Dashboard
 router.get("/admin", isAdminLoggedin, dashboardControllers.getAdminDashboard);
@@ -27,4 +28,4 @@ router.get("/manage-earnings", isAdminLoggedin, manageEarningsControllers.getMan
 router.get("/admin-profile", isAdminLoggedin, adminProfileControllers.getAdminProfile);
 router.post("/update-admin-password", isAdminLoggedin, adminProfileControllers.updateAdminPassword);
 
-module.exports = router;
+export default router;

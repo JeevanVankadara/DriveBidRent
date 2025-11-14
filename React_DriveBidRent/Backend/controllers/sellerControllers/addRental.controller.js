@@ -1,10 +1,9 @@
-const RentalRequest = require('../../models/RentalRequest');
+// controllers/sellerControllers/addRental.controller.js
+import RentalRequest from '../../models/RentalRequest.js';
 
-// Controller for POST: Handle rental submission
-const postAddRental = async (req, res) => {
-  console.log('Request Body:', req.body); // Debug log
-  
-  // Check if a file was successfully uploaded
+export const postAddRental = async (req, res) => {
+  console.log('Request Body:', req.body);
+
   if (!req.file) {
     return res.status(400).json({ 
       success: false,
@@ -13,7 +12,6 @@ const postAddRental = async (req, res) => {
   }
 
   try {
-    // Validate required fields
     const requiredFields = [
       'vehicle-name', 
       'vehicle-year',
@@ -27,7 +25,6 @@ const postAddRental = async (req, res) => {
     ];
     
     const missingFields = requiredFields.filter(field => !req.body[field]);
-    
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
@@ -35,7 +32,6 @@ const postAddRental = async (req, res) => {
       });
     }
 
-    // Add additional validation for driver rate if driver is available
     if (req.body['driver-available'] === 'yes' && !req.body['driver-rate']) {
       return res.status(400).json({
         success: false,
@@ -43,11 +39,9 @@ const postAddRental = async (req, res) => {
       });
     }
 
-    // Create new rental
     const newRental = new RentalRequest({
       vehicleName: req.body['vehicle-name'],
-      // Use the Cloudinary URL from req.file.path
-      vehicleImage: req.file.path, 
+      vehicleImage: req.file.path,
       year: parseInt(req.body['vehicle-year']),
       AC: req.body['vehicle-ac'],
       capacity: parseInt(req.body['vehicle-capacity']),
@@ -61,11 +55,9 @@ const postAddRental = async (req, res) => {
       status: 'available'
     });
 
-    // Save to database
     const savedRental = await newRental.save();
-    console.log('Saved Rental:', savedRental); // Debug log
+    console.log('Saved Rental:', savedRental);
 
-    // Return JSON with redirect info on success
     return res.json({
       success: true,
       message: 'Rental Request Submitted',
@@ -80,5 +72,3 @@ const postAddRental = async (req, res) => {
     });
   }
 };
-
-module.exports = { postAddRental };

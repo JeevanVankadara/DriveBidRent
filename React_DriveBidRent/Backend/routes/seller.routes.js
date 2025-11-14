@@ -1,19 +1,25 @@
-const express = require('express');
-const router = express.Router();
-const { upload } = require('../config/cloudinary');
-const { postAddAuction } = require('../controllers/sellerControllers/addAuction.controller');
-const { postAddRental } = require('../controllers/sellerControllers/addRental.controller');
-const { getAuctionDetail } = require('../controllers/sellerControllers/auctionDetail.controller');
-const { getProfile, updateProfile, updatePreferences, changePassword } = require('../controllers/sellerControllers/profile.controller');
-const { getRentalDetail } = require('../controllers/sellerControllers/rentalDetail.controller');
-const { getSellerDashboard } = require('../controllers/sellerControllers/sellerDashboard.controller');
-const { postUpdateRental } = require('../controllers/sellerControllers/updateRental.controller');
-const { getViewAuctions, getViewBids } = require('../controllers/sellerControllers/viewAuctions.controller');
-const { getViewEarnings } = require('../controllers/sellerControllers/viewEarnings.controller');
-const { getViewRentals, postToggleRentalStatus } = require('../controllers/sellerControllers/viewRentals.controller');
-const sellerMiddleware = require('../middlewares/seller.middleware');
+// routes/seller.routes.js
+import express from 'express';
+import { upload } from '../config/cloudinary.js';
+import sellerMiddleware from '../middlewares/seller.middleware.js';
 
-router.use(sellerMiddleware)
+// Controllers
+import { postAddAuction } from '../controllers/sellerControllers/addAuction.controller.js';
+import { postAddRental } from '../controllers/sellerControllers/addRental.controller.js';
+import { getAuctionDetail } from '../controllers/sellerControllers/auctionDetail.controller.js';
+import { getProfile, updateProfile, updatePreferences, changePassword } from '../controllers/sellerControllers/profile.controller.js';
+import { getRentalDetail } from '../controllers/sellerControllers/rentalDetail.controller.js';
+import { getSellerDashboard } from '../controllers/sellerControllers/sellerDashboard.controller.js';
+import { postUpdateRental } from '../controllers/sellerControllers/updateRental.controller.js';
+import { getViewAuctions, getViewBids } from '../controllers/sellerControllers/viewAuctions.controller.js';
+import { getViewEarnings } from '../controllers/sellerControllers/viewEarnings.controller.js';
+import { getViewRentals, postToggleRentalStatus } from '../controllers/sellerControllers/viewRentals.controller.js';
+
+const router = express.Router();
+
+// Apply seller authentication middleware to all routes
+router.use(sellerMiddleware);
+
 // POST: Add auction
 router.post('/add-auction', upload.single('vehicleImage'), postAddAuction);
 
@@ -23,13 +29,10 @@ router.post('/add-rental', upload.single('vehicleImage'), postAddRental);
 // GET: Auction detail
 router.get('/auction-details/:id', getAuctionDetail);
 
-// GET: Profile
+// Profile routes
 router.get('/profile', getProfile);
-// POST: Update profile
 router.post('/update-profile', updateProfile);
-// POST: Update preferences
 router.post('/update-preferences', updatePreferences);
-// POST: Change password
 router.post('/change-password', changePassword);
 
 // GET: Rental detail
@@ -41,17 +44,15 @@ router.get('/seller', getSellerDashboard);
 // POST: Update rental
 router.post('/update-rental/:id', postUpdateRental);
 
-// GET: View auctions
+// View auctions & bids
 router.get('/view-auctions', getViewAuctions);
-// GET: View bids
 router.get('/view-bids/:id', getViewBids);
 
-// GET: View earnings
+// View earnings
 router.get('/view-earnings', getViewEarnings);
 
-// GET: View rentals
+// View rentals & toggle status
 router.get('/view-rentals', getViewRentals);
-// POST: Toggle rental status
 router.post('/toggle-rental-status/:id', postToggleRentalStatus);
 
-module.exports = router;
+export default router;

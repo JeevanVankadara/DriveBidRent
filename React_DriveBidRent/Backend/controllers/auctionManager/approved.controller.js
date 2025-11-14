@@ -1,5 +1,5 @@
-// Backend/controllers/auctionManager/approved.controller.js
-const AuctionRequest = require('../../models/AuctionRequest');
+// controllers/auctionManager/approved.controller.js
+import AuctionRequest from '../../models/AuctionRequest.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -7,7 +7,7 @@ const send = (success, message, data = null) => ({
   data
 });
 
-exports.getApproved = async (req, res) => {
+export const getApproved = async (req, res) => {
   try {
     const cars = await AuctionRequest.find({ status: 'approved' })
       .populate('sellerId', 'firstName lastName city email')

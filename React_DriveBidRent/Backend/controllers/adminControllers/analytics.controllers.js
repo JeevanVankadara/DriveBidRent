@@ -1,8 +1,8 @@
-const User = require("../../models/User");
-const RentalRequest = require("../../models/RentalRequest");
-const AuctionRequest = require("../../models/AuctionRequest");
-const RentalCost = require("../../models/RentalCost");
-const AuctionCost = require("../../models/AuctionCost");
+import User from '../../models/User.js';
+import RentalRequest from '../../models/RentalRequest.js';
+import AuctionRequest from '../../models/AuctionRequest.js';
+import RentalCost from '../../models/RentalCost.js';
+import AuctionCost from '../../models/AuctionCost.js';
 
 const getAnalytics = async (req, res) => {
   try {
@@ -51,4 +51,4 @@ const getAnalytics = async (req, res) => {
   }
 };
 
-module.exports = { getAnalytics };
+export default { getAnalytics };

@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/Purchase.js
+import mongoose from 'mongoose';
 
 const purchaseSchema = new mongoose.Schema({
   auctionId: {
@@ -51,6 +52,4 @@ const purchaseSchema = new mongoose.Schema({
   }
 });
 
-const Purchase = mongoose.model('Purchase', purchaseSchema);
-
-module.exports = Purchase;
+export default mongoose.model('Purchase', purchaseSchema);

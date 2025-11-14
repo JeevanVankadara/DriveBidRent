@@ -1,8 +1,8 @@
-const User = require("../../models/User");
-const RentalCost = require("../../models/RentalCost");
-const AuctionCost = require("../../models/AuctionCost");
-const AuctionBid = require("../../models/AuctionBid");
-const AuctionRequest = require("../../models/AuctionRequest");
+import User from '../../models/User.js';
+import RentalCost from '../../models/RentalCost.js';
+import AuctionCost from '../../models/AuctionCost.js';
+import AuctionBid from '../../models/AuctionBid.js';
+import AuctionRequest from '../../models/AuctionRequest.js';
 
 const getAdminDashboard = async (req, res) => {
   try {
@@ -102,4 +102,4 @@ const getAdminDashboard = async (req, res) => {
   }
 };
 
-module.exports = { getAdminDashboard };
+export default { getAdminDashboard };

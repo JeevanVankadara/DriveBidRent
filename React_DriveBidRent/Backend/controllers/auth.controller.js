@@ -1,11 +1,11 @@
-// Backend/controllers/auth.controller.js
-const User = require("../models/User");
-const generateToken = require("../utils/generateToken");
+// controllers/auth.controller.js
+import User from '../models/User.js';
+import generateToken from '../utils/generateToken.js';
 
 const authController = {
+  // === SIGNUP ===
   signup: async (req, res) => {
     try {
-      // console.log('Signup route called with body keys:', Object.keys(req.body));
       const {
         firstName,
         lastName,
@@ -13,209 +13,183 @@ const authController = {
         password,
         confirmPassword,
         userType,
-        dateOfBirth,
-        drivingLicense,
-        shopName,
-        termsAccepted,
         phone,
+        dateOfBirth,
+        termsAccepted,
         experienceYears,
         approved_status,
       } = req.body;
 
-      console.log(req.body);
-      const googleAddressLink =
-        userType === "mechanic" ? req.body.googleAddressLink : undefined;
+      // Optional field for mechanics only
+      const googleAddressLink = userType === "mechanic" ? req.body.googleAddressLink : undefined;
 
-      // normalize address fields from req.body (avoid using browser globals like `window` on server)
+      // Normalize address fields (handles both string and array from frontend)
       let doorNo = "", street = "", city = "", state = "";
       ["doorNo", "street", "city", "state"].forEach((field) => {
         const val = req.body[field];
-        const normalized = Array.isArray(val)
-          ? val.find((v) => v?.trim()) || ""
-          : val || "";
+        const normalized = Array.isArray(val) ? val.find(v => v?.trim()) || "" : val || "";
         if (field === "doorNo") doorNo = normalized;
         if (field === "street") street = normalized;
         if (field === "city") city = normalized;
         if (field === "state") state = normalized;
       });
 
-      const repairBikes =
-        req.body.repairBikes === "on" || req.body.repairBikes === true;
-      const repairCars =
-        req.body.repairCars === "on" || req.body.repairCars === true;
+      const repairBikes = req.body.repairBikes === "on" || req.body.repairBikes === true;
+      const repairCars = req.body.repairCars === "on" || req.body.repairCars === true;
 
       // === VALIDATIONS ===
-      // Basic required fields
       if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
       }
 
-      // Validate userType
       const allowedTypes = ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'auction_manager'];
       if (!userType || !allowedTypes.includes(userType)) {
         return res.status(400).json({ success: false, message: 'Invalid or missing userType' });
       }
+
       if (!phone || !/^\d{10}$/.test(phone)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Phone number must be 10 digits" });
+        return res.status(400).json({ success: false, message: "Phone number must be 10 digits" });
       }
 
       if (!dateOfBirth) {
-        return res.status(400).json({ success: false, message: 'Date of birth is required' });
+        return res.status(400).json({ success: false, message: "Date of birth is required" });
       }
 
       const dob = new Date(dateOfBirth);
-      if (isNaN(dob.getTime())) {
-        return res.status(400).json({ success: false, message: 'Invalid dateOfBirth' });
-      }
-
       const age = new Date().getFullYear() - dob.getFullYear();
       if (age < 18) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "You must be at least 18 years old",
-          });
+        return res.status(400).json({ success: false, message: "You must be at least 18 years old" });
       }
 
       if (password !== confirmPassword) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Passwords do not match" });
+        return res.status(400).json({ success: false, message: "Passwords do not match" });
       }
 
       if (password.length < 8) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Password must be at least 8 characters",
-          });
+        return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
       }
 
       if (!termsAccepted) {
-        return res
-          .status(400)
-          .json({ success: false, message: "You must accept terms" });
+        return res.status(400).json({ success: false, message: "You must accept terms" });
       }
 
-      if (await User.findOne({ $or: [{ email }, { phone }] })) {
-        return res
-          .status(409)
-          .json({ success: false, message: "Email or phone already exists" });
+      // Check for existing user
+      const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+      if (existingUser) {
+        return res.status(409).json({ success: false, message: "Email or phone already exists" });
       }
 
+      // Build user data
       const userData = {
         firstName,
         lastName,
         email,
         password,
         userType,
-        dateOfBirth,
+        dateOfBirth: dob,
         phone,
-        experienceYears: experienceYears
-          ? parseInt(experienceYears)
-          : undefined,
+        address: { doorNo, street, city, state },
+        experienceYears: experienceYears ? parseInt(experienceYears) : undefined,
         approved_status: approved_status || "No",
         repairBikes,
         repairCars,
+        googleAddressLink,
       };
-
-      // attach optional fields if provided
-      const collected = {
-        doorNo,
-        street,
-        city,
-        state,
-        drivingLicense: drivingLicense || req.body.drivingLicense || "",
-        shopName: shopName || req.body.shopName || "",
-        googleAddressLink: googleAddressLink || req.body.googleAddressLink || "",
-      };
-
-      Object.keys(collected).forEach((field) => {
-        if (collected[field]) userData[field] = collected[field];
-      });
 
       const user = new User(userData);
-      try {
-        await user.save();
-      } catch (saveErr) {
-        console.error('User save error:', saveErr);
-        // Convert mongoose validation errors to client-friendly messages
-        if (saveErr.name === 'ValidationError') {
-          const messages = Object.values(saveErr.errors).map(e => e.message).join('; ');
-          return res.status(400).json({ success: false, message: messages });
-        }
-        throw saveErr;
-      }
+      await user.save();
+
+      const token = generateToken(user);
+      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict"});
 
       return res.status(201).json({
         success: true,
-        message: "Account created! Redirecting...",
-        data: { userId: user._id, userType: user.userType },
+        message: "User registered successfully",
+        user: {
+          id: user._id,
+          userType: user.userType,
+          firstName: user.firstName,
+        }
       });
+
     } catch (err) {
       console.error("Signup error:", err);
-      const message =
-        err.code === 11000 ? "User already exists" : "Signup failed";
-      return res
-        .status(err.code === 11000 ? 409 : 500)
-        .json({ success: false, message });
+
+      if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(e => e.message).join('; ');
+        return res.status(400).json({ success: false, message: messages });
+      }
+
+      const message = err.code === 11000 ? "User already exists" : "Signup failed";
+      return res.status(err.code === 11000 ? 409 : 500).json({ success: false, message });
     }
   },
 
+  // === LOGIN ===
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log('Login attempt for email:', email);
+      
       const user = await User.findOne({ email });
+      console.log('User found:', user ? 'YES' : 'NO');
+      if (user) {
+        console.log('User data:', {
+          id: user._id,
+          userType: user.userType,
+          firstName: user.firstName,
+          email: user.email,
+          approved_status: user.approved_status
+        });
+      }
+
       if (!user || !(await user.comparePassword(password))) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid email or password" });
+        return res.status(401).json({ success: false, message: "Invalid email or password" });
       }
 
       const token = generateToken(user);
-      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict" });
+      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict", maxAge: 30 * 24 * 60 * 60 * 1000 });
 
-      // FIXED: Correct redirect paths
+      // CRITICAL FIX: These now match your current frontend routes (from App.jsx)
       const redirectMap = {
-        buyer: "/buyer-dashboard",
-        seller: "/seller",
-        driver: "/driver-dashboard",
-        mechanic: "/mechanic/dashboard",
-        admin: "/admin/dashboard",
-        auction_manager: "/auction-manager", // CORRECT
+        buyer: "/buyer",                    // Updated: now uses BuyerLayout
+        seller: "/seller",                  // Correct
+        driver: "/driver-dashboard",        // Adjust if you have a driver layout
+        mechanic: "/mechanic/dashboard",    // Correct
+        admin: "/admin",                    // Updated: now uses /admin base
+        auction_manager: "/auction-manager" // Correct
       };
 
       const redirectUrl = redirectMap[user.userType] || "/";
 
+      const responseUser = {
+        id: user._id,
+        userType: user.userType,
+        firstName: user.firstName,
+        email: user.email,
+        approved_status: user.approved_status
+      };
+
+      console.log('Sending response with user:', responseUser);
+
       return res.json({
         success: true,
         message: "Login successful",
-        data: {
-          user: {
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            userType: user.userType,
-            approved_status: user.approved_status,
-          },
-          redirectUrl,
-        },
+        redirect: redirectUrl,
+        user: responseUser
       });
+
     } catch (err) {
       console.error("Login error:", err);
       return res.status(500).json({ success: false, message: "Login failed" });
     }
   },
 
-  logout: async (req, res) => {
+  // === LOGOUT ===
+  logout: (req, res) => {
     res.clearCookie("jwt");
-    return res.json({ success: true, message: "Logged out" });
-  },
+    return res.json({ success: true, message: "Logged out successfully" });
+  }
 };
 
-module.exports = authController;
+export default authController;
