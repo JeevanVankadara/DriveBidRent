@@ -1,15 +1,14 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import './admin.css';
 
 const AdminLayout = () => {
   return (
-    <div className="admin-app">
+    <>
       <Navbar />
       <Outlet />
       <Footer />
-    </div>
+    </>
   );
 };
 
