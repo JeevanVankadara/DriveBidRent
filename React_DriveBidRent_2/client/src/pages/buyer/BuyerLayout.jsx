@@ -10,7 +10,7 @@ export default function BuyerLayout() {
 
       {/* 90% Scale - Makes everything feel light & premium */}
       <div className="scale-[0.93] origin-top-left w-[107.52688172%]">
-        <main>
+        <main style={{ marginBottom: '10pt' }}>
           <Outlet />
         </main>
       </div>

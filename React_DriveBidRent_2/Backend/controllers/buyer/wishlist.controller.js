@@ -2,6 +2,7 @@
 import Wishlist from '../../models/Wishlist.js';
 import RentalRequest from '../../models/RentalRequest.js';
 import AuctionRequest from '../../models/AuctionRequest.js';
+import AuctionBid from '../../models/AuctionBid.js';
 
 export const getWishlist = async (req, res) => {
   try {
@@ -25,6 +26,26 @@ export const getWishlist = async (req, res) => {
       status: 'approved',
       started_auction: 'yes'
     }).populate('sellerId', 'firstName lastName').lean();
+
+    // Attach currentHighestBid to each auction by querying AuctionBid
+    for (let i = 0; i < auctionWishlist.length; i++) {
+      const auc = auctionWishlist[i];
+      try {
+        const currentBid = await AuctionBid.findOne({ auctionId: auc._id, isCurrentBid: true }).lean();
+        if (currentBid && currentBid.bidAmount != null) {
+          auc.currentHighestBid = currentBid.bidAmount;
+          auc.currentHighestBidBy = currentBid.userId || null;
+        } else {
+          // fallback to starting bid if no current bid
+          auc.currentHighestBid = auc.startingBid != null ? auc.startingBid : 0;
+          auc.currentHighestBidBy = null;
+        }
+      } catch (e) {
+        console.error('Error fetching current bid for wishlist auction', auc._id, e);
+        auc.currentHighestBid = auc.startingBid != null ? auc.startingBid : 0;
+        auc.currentHighestBidBy = null;
+      }
+    }
 
     res.json({
       success: true,

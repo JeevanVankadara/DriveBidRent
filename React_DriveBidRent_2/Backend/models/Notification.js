@@ -38,5 +38,16 @@ const notificationSchema = new mongoose.Schema({
   }
 });
 
-// Export as default
+// After saving a notification, set the user's notificationFlag to true so frontend can show a badge
+notificationSchema.post('save', async function(doc) {
+  try {
+    const User = (await import('./User.js')).default;
+    if (doc && doc.userId) {
+      await User.findByIdAndUpdate(doc.userId, { notificationFlag: true });
+    }
+  } catch (err) {
+    console.error('Failed to update user notificationFlag:', err);
+  }
+});
+
 export default mongoose.model('Notification', notificationSchema);

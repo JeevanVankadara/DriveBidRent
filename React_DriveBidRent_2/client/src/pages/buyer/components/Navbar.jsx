@@ -28,6 +28,22 @@ export default function Navbar() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    // Listen for notificationsSeen event to refresh badge/profile
+    const handler = async () => {
+      try {
+        const [profileData, count] = await Promise.all([getProfile(), getUnreadNotificationCount()]);
+        setUser(profileData);
+        setUnreadCount(count);
+      } catch (err) {
+        console.error('Failed to refresh profile after notificationsSeen', err);
+      }
+    };
+
+    window.addEventListener('notificationsSeen', handler);
+    return () => window.removeEventListener('notificationsSeen', handler);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -77,10 +93,8 @@ export default function Navbar() {
               >
                 Notifications
               </Link>
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-4 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
+              {user?.notificationFlag && (
+                <span className="absolute -top-3 -right-6 bg-orange-500 rounded-full h-3 w-3 shadow-md" aria-hidden="true" />
               )}
             </div>
             <Link

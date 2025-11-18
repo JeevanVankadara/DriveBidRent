@@ -19,6 +19,14 @@ export default function Notifications() {
       if (res.data.success) {
         // backend returns { success, message, data: { notifications, unreadCount } }
         setNotifications(res.data.data?.notifications || []);
+        // mark the notification-flag as seen for the current user (so badge disappears)
+        try {
+          await axiosInstance.put('/buyer/notifications/seen');
+          // notify other components (Navbar) to refresh profile/badge
+          window.dispatchEvent(new Event('notificationsSeen'));
+        } catch (err) {
+          console.error('Failed to clear notification flag:', err);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -54,28 +62,57 @@ export default function Notifications() {
 
     try {
       await axiosInstance.post('/buyer/notifications/mark-all-read');
+      // remove from UI immediately
       setNotifications([]);
+      // inform other components (Navbar) to refresh and remove the dot
+      window.dispatchEvent(new Event('notificationsSeen'));
       showMessage('All notifications have been cleared successfully!', 'success');
     } catch (err) {
       showMessage('Failed to clear notifications', 'error');
     }
   };
 
-  const getNotificationIcon = (type) => {
+  const Icon = ({ type }) => {
+    const common = 'w-6 h-6';
     switch (type) {
-      case 'outbid': return 'Lightning Bolt';
-      case 'auction_ended': return 'Clock';
-      case 'auction_won': return 'Trophy';
-      default: return 'Bell';
+      case 'outbid':
+        return (
+          <svg className={common} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M12 2v14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M5 9l7-7 7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M19 22H5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+      case 'auction_ended':
+        return (
+          <svg className={common} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M12 7v6l4 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+      case 'auction_won':
+        return (
+          <svg className={common} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M12 2l2.6 5.3L20 8.2l-4 3.9L17 18l-5-2.5L7 18l1-5.9L4 8.2l5.4-.9L12 2z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className={common} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M15 17H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12 3v1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M18 8a6 6 0 10-12 0v4l-2 2h16l-2-2V8z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
     }
   };
 
-  const getIconColor = (type) => {
+  const getIconStyles = (type) => {
     switch (type) {
-      case 'outbid': return 'bg-red-50 text-red-600';
-      case 'auction_ended': return 'bg-gray-100 text-gray-600';
-      case 'auction_won': return 'bg-green-50 text-green-600';
-      default: return 'bg-yellow-50 text-yellow-600';
+      case 'outbid': return 'bg-red-50 text-red-600 ring-1 ring-red-100';
+      case 'auction_ended': return 'bg-gray-100 text-gray-700 ring-1 ring-gray-100';
+      case 'auction_won': return 'bg-green-50 text-green-600 ring-1 ring-green-100';
+      default: return 'bg-yellow-50 text-yellow-600 ring-1 ring-yellow-100';
     }
   };
 
@@ -128,17 +165,15 @@ export default function Notifications() {
               }`}
             >
               {/* Icon */}
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${getIconColor(notification.type)}`}>
-                {getNotificationIcon(notification.type)}
-              </div>
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getIconStyles(notification.type)}`}>
+                  <Icon type={notification.type} />
+                </div>
 
               {/* Content */}
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 text-lg">{notification.title}</h3>
-                <p className="text-gray-600 mt-1 leading-relaxed">{notification.message}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  {new Date(notification.createdAt).toLocaleString()}
-                </p>
+                <p className="text-gray-600 mt-2 leading-relaxed">{notification.message}</p>
+                <p className="text-sm text-gray-500 mt-2">{new Date(notification.createdAt).toLocaleString()}</p>
 
                 {/* Actions */}
                 {notification.auctionId && notification.type === 'outbid' && (

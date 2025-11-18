@@ -162,12 +162,14 @@ const authController = {
 
       const redirectUrl = redirectMap[user.userType] || "/";
 
+      // Include notification flag in response so frontend can show badge immediately
       const responseUser = {
         id: user._id,
         userType: user.userType,
         firstName: user.firstName,
         email: user.email,
-        approved_status: user.approved_status
+        approved_status: user.approved_status,
+        notificationFlag: !!user.notificationFlag
       };
 
       console.log('Sending response with user:', responseUser);

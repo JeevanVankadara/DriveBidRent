@@ -60,6 +60,11 @@ const userSchema = new mongoose.Schema({
     enum: ['all', 'important', 'none'],
     default: 'all'
   },
+  // Notification flag: true when user has unseen notifications (used for UI badge)
+  notificationFlag: {
+    type: Boolean,
+    default: false
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

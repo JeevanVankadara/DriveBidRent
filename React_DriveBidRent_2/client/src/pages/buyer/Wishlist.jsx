@@ -52,11 +52,13 @@ export default function Wishlist() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative h-96 md:h-[400px] bg-cover bg-center text-white" style={{ backgroundImage: "url('/images/wishlist-hero.jpg')", backgroundColor: '#403a2e' }}>
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 px-6 text-center">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">Your <span className="text-orange-500 font-black">Wishlist</span></h1>
-          <p className="mt-4 text-xl md:text-2xl font-medium text-gray-100">All your favorite auctions and rentals in one place.</p>
+      <section className="relative h-72 md:h-80 lg:h-96 bg-cover bg-center text-white" style={{ backgroundImage: "url('/images/wishlist-hero.jpg')", backgroundColor: '#403a2e' }}>
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="relative z-10 px-6 text-center flex items-center justify-center h-full">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight break-words">Your <span className="text-orange-500 font-black">Wishlist</span></h1>
+            <p className="mt-3 text-lg md:text-xl font-medium text-gray-100">All your favorite auctions and rentals in one place.</p>
+          </div>
         </div>
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-transparent" />
       </section>
@@ -103,13 +105,9 @@ export default function Wishlist() {
                       <p className="text-2xl font-black text-orange-600">₹{(ended && finalPrice ? Number(finalPrice) : currentPrice).toLocaleString()}</p>
                     </div>
 
-                    <div className="mt-6 space-y-3">
+                    <div className="mt-6">
                       {!ended && (
-                        <Link to={`/buyer/auctions/${id}`} className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg font-medium hover:bg-orange-600 transition shadow-md">More Details</Link>
-                      )}
-
-                      {!ended && (
-                        <Link to={`/buyer/auctions/${id}/bid`} className="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-medium hover:bg-green-700 transition shadow-md">Place a Bid</Link>
+                        <Link to={`/buyer/auctions/${id}`} className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-md">More Details</Link>
                       )}
                     </div>
                   </div>

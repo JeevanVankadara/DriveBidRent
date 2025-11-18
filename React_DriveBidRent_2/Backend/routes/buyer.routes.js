@@ -262,9 +262,24 @@ router.put('/notifications/:id/read', buyerMiddleware, async (req, res) => {
   }
 });
 
+// Mark the notifications 'seen' flag (clears notificationFlag)
+router.put('/notifications/seen', buyerMiddleware, async (req, res) => {
+  try {
+    const User = (await import('../models/User.js')).default;
+    await User.findByIdAndUpdate(req.user._id, { notificationFlag: false });
+    res.json({ success: true, message: 'Notification flag cleared' });
+  } catch (error) {
+    console.error('Error clearing notification flag:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear notification flag' });
+  }
+});
+
 router.post('/notifications/mark-all-read', buyerMiddleware, async (req, res) => {
   try {
     await Notification.deleteMany({ userId: req.user._id });
+    // clear the user's notificationFlag so badge/dot disappears
+    const User = (await import('../models/User.js')).default;
+    await User.findByIdAndUpdate(req.user._id, { notificationFlag: false });
     res.json({ success: true });
   } catch (error) {
     res.json({ success: false, message: 'Failed to delete all notifications' });
