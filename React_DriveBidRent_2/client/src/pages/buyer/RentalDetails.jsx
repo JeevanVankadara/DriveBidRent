@@ -1,3 +1,4 @@
+// client/src/pages/buyer/RentalDetails.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getRentalById, bookRental } from '../../services/buyer.services';
@@ -5,25 +6,23 @@ import DatePickerModal from './components/modals/DatePickerModal';
 import PaymentModal from './components/modals/PaymentModal';
 import ProcessingModal from './components/modals/ProcessingModal';
 import SuccessModal from './components/modals/SuccessModal';
-import './components/buyer.css';
 
 export default function RentalDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [rental, setRental] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showDateModal, setShowDateModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showProcessingModal, setShowProcessingModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
-  // State for rental details
-  const [pickupDate, setPickupDate] = useState('');
-  const [dropDate, setDropDate] = useState('');
+
+  const [pickupDate, setPickupDate] = useState("");
+  const [dropDate, setDropDate] = useState("");
   const [includeDriver, setIncludeDriver] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('upi');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("upi");
 
   useEffect(() => {
     fetchRentalDetails();
@@ -31,101 +30,44 @@ export default function RentalDetails() {
 
   const fetchRentalDetails = async () => {
     try {
-      console.log('Fetching rental details for ID:', id);
+      setLoading(true);
       const data = await getRentalById(id);
-      console.log('Rental data received:', data);
-      
-      if (!data) {
-        setError('Rental not found');
-        return;
-      }
-      
       setRental(data);
     } catch (error) {
-      console.error('Error fetching rental details:', error);
-      setError('Failed to load rental details');
+      console.error("Error fetching rental details:", error);
+      setError("Failed to load rental details");
     } finally {
       setLoading(false);
     }
   };
 
-const handleDateSelect = (pickup, drop, driverIncluded) => {
-  console.log('Date selection updated:', { pickup, drop, driverIncluded });
-  setPickupDate(pickup);
-  setDropDate(drop);
-  setIncludeDriver(driverIncluded);
-  
-  // Calculate cost immediately to ensure PaymentModal gets correct value
-  if (pickup && drop && rental) {
-    const pickupDateObj = new Date(pickup);
-    const dropDateObj = new Date(drop);
-    const days = Math.ceil((dropDateObj - pickupDateObj) / (1000 * 60 * 60 * 24));
-    const vehicleCost = days * rental.costPerDay;
-    const driverCost = driverIncluded && rental.driverAvailable ? days * rental.driverRate : 0;
-    const cost = vehicleCost + driverCost;
-    
-    console.log('Parent cost calculation:', { 
-      days, 
-      vehicleCost, 
-      driverCost, 
-      total: cost,
-      driverIncluded 
-    });
-    setTotalCost(cost);
-  }
-};
+  const handleDateSelect = (pickup, drop, driverIncluded) => {
+    setPickupDate(pickup);
+    setDropDate(drop);
+    setIncludeDriver(driverIncluded);
 
-  const handleRentNow = async () => {
-    console.log('Proceeding to payment with:', { 
-      pickupDate, 
-      dropDate, 
-      totalCost, 
-      includeDriver,
-      rentalId: id,
-      sellerId: rental?.seller?._id
-    });
-    
-    if (!pickupDate || !dropDate) {
-      alert('Please select both pickup and drop dates.');
-      return;
+    if (pickup && drop && rental) {
+      const days = Math.ceil((new Date(drop) - new Date(pickup)) / (1000 * 60 * 60 * 24));
+      const baseCost = days * (rental.costPerDay ?? 0);
+      const driverCost = driverIncluded && rental.driverAvailable ? days * rental.driverRate : 0;
+      setTotalCost(baseCost + driverCost);
     }
+  };
 
-    if (totalCost <= 0) {
-      alert('Please select valid dates to calculate the cost.');
-      return;
-    }
+  const handleRentNow = () => {
+    if (!pickupDate || !dropDate) return alert("Please select both pickup and drop dates.");
+    if (totalCost <= 0) return alert("Invalid rental period.");
 
-    // Validate dates
-    const pickupDateObj = new Date(pickupDate);
-    const dropDateObj = new Date(dropDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    if (pickupDateObj < today) {
-      alert('Pickup date cannot be in the past.');
-      return;
-    }
-
-    if (dropDateObj <= pickupDateObj) {
-      alert('Drop date must be after pickup date.');
-      return;
-    }
+    if (new Date(pickupDate) < today) return alert("Pickup date cannot be in the past.");
+    if (new Date(dropDate) <= new Date(pickupDate)) return alert("Drop date must be after pickup date.");
 
     setShowDateModal(false);
     setShowPaymentModal(true);
   };
 
   const handlePayment = async (paymentMethod) => {
-    console.log('Processing payment with method:', paymentMethod);
-    console.log('Booking data:', {
-      rentalCarId: id,
-      sellerId: rental.seller._id,
-      pickupDate,
-      dropDate,
-      totalCost,
-      includeDriver
-    });
-
     setShowPaymentModal(false);
     setShowProcessingModal(true);
 
@@ -136,43 +78,34 @@ const handleDateSelect = (pickup, drop, driverIncluded) => {
         pickupDate,
         dropDate,
         totalCost,
-        includeDriver
+        includeDriver,
       };
 
-      console.log('Sending booking request:', rentalData);
-
       const result = await bookRental(rentalData);
-      console.log('Booking response:', result);
-      
+
       if (result.success) {
         setTimeout(() => {
           setShowProcessingModal(false);
           setShowSuccessModal(true);
         }, 2000);
       } else {
-        throw new Error(result.message || 'Failed to book rental');
+        throw new Error(result.message || "Booking failed");
       }
     } catch (error) {
-      console.error('Error booking rental:', error);
       setShowProcessingModal(false);
-      alert('Error booking rental: ' + (error.response?.data?.message || error.message || 'Please try again.'));
+      alert("Booking failed: " + (error.response?.data?.message || error.message));
     }
   };
 
-  const redirectToDashboard = () => {
-    navigate('/buyer/dashboard');
-  };
-
-  const redirectToRentals = () => {
-    navigate('/buyer/rentals');
-  };
+  const redirectToDashboard = () => navigate("/buyer");
+  const redirectToRentals = () => navigate("/buyer/rentals");
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading rental details...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-2xl font-bold text-orange-600">Loading rental details...</p>
         </div>
       </div>
     );
@@ -180,12 +113,15 @@ const handleDateSelect = (pickup, drop, driverIncluded) => {
 
   if (error || !rental) {
     return (
-      <div className="page-container">
-        <div className="error-container">
-          <div className="error-icon">⚠️</div>
-          <h2>{error || 'Rental not found'}</h2>
-          <p>The rental you're looking for doesn't exist or may have been removed.</p>
-          <button className="btn btn-primary" onClick={redirectToRentals}>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center p-12 bg-white rounded-3xl shadow-2xl max-w-md">
+          <div className="text-6xl mb-6">Warning</div>
+          <h2 className="text-3xl font-bold text-red-600 mb-4">{error || "Rental Not Found"}</h2>
+          <p className="text-gray-600 mb-8">The rental you're looking for doesn't exist or has been removed.</p>
+          <button
+            onClick={redirectToRentals}
+            className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg mt-6"
+          >
             Back to Rentals
           </button>
         </div>
@@ -194,238 +130,126 @@ const handleDateSelect = (pickup, drop, driverIncluded) => {
   }
 
   return (
-    <div className="page-container">
-      <div className="rental-details">
-        <div className="page-header">
-          <h1>{rental.vehicleName}</h1>
-          <p>Complete vehicle details and rental information</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
 
-        <div className="rental-content">
-          {/* Main Image Section */}
-          <div className="rental-image-section">
-            <img 
-              src={rental.vehicleImage} 
+      {/* Main Container */}
+      <div className="max-w-5xl mx-auto my-20 px-6">
+
+        {/* Card Container */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-orange-500">
+
+          {/* Hero Image */}
+          <div className="relative h-80">
+            <img
+              src={rental.vehicleImage}
               alt={rental.vehicleName}
-              className="rental-main-image"
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/800x400/4A5568/FFFFFF?text=Car+Image+Not+Available';
-              }}
+              className="w-full h-full object-cover"
             />
-          </div>
-          
-          {/* Quick Info Cards */}
-          <div className="quick-info-cards">
-            <div className="info-card">
-              <div className="info-icon">📅</div>
-              <div className="info-content">
-                <span className="info-label">Year</span>
-                <span className="info-value">{rental.year}</span>
-              </div>
-            </div>
-            <div className="info-card">
-              <div className="info-icon">👥</div>
-              <div className="info-content">
-                <span className="info-label">Capacity</span>
-                <span className="info-value">{rental.capacity} persons</span>
-              </div>
-            </div>
-            <div className="info-card">
-              <div className="info-icon">⛽</div>
-              <div className="info-content">
-                <span className="info-label">Fuel</span>
-                <span className="info-value">{rental.fuelType?.charAt(0)?.toUpperCase() + rental.fuelType?.slice(1)}</span>
-              </div>
-            </div>
-            <div className="info-card">
-              <div className="info-icon">⚙️</div>
-              <div className="info-content">
-                <span className="info-label">Transmission</span>
-                <span className="info-value">{rental.transmission?.charAt(0)?.toUpperCase() + rental.transmission?.slice(1)}</span>
-              </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-8 left-8 text-white">
+              <h1 className="text-5xl md:text-6xl font-black mb-3">{rental.vehicleName}</h1>
+              <span className="bg-orange-500 text-white px-6 py-2 rounded-full text-xl font-bold">
+                ₹{rental.costPerDay}/day
+              </span>
             </div>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="rental-main-grid">
-            {/* Left Column - Specifications */}
-            <div className="specs-column">
-              <div className="specs-card">
-                <h3>🚗 Vehicle Specifications</h3>
-                <div className="specs-list">
-                  <div className="spec-item">
-                    <span className="spec-label">Manufacturing Year</span>
-                    <span className="spec-value">{rental.year}</span>
+          {/* Content */}
+          <div className="p-10 md:p-16">
+
+            {/* Quick Info */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-center">
+              <div>
+                <p className="text-gray-600 text-sm">Year</p>
+                <p className="text-3xl font-bold text-orange-600">{rental.year}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 text-sm">Capacity</p>
+                <p className="text-3xl font-bold text-orange-600">{rental.capacity} seats</p>
+              </div>
+              <div>
+                <p className="text-gray-600 text-sm">Fuel</p>
+                <p className="text-2xl font-bold text-orange-600 capitalize">{rental.fuelType}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 text-sm">Transmission</p>
+                <p className="text-2xl font-bold text-orange-600 capitalize">{rental.transmission}</p>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+              <div>
+                <h3 className="text-2xl font-bold text-orange-600 mb-6">Vehicle Details</h3>
+                <div className="space-y-5">
+                  <div className="flex justify-between py-3 border-b border-gray-200">
+                    <span className="font-medium">Condition</span>
+                    <span className="text-green-600 font-bold capitalize">{rental.condition}</span>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Vehicle Condition</span>
-                    <span className="spec-value badge-condition">
-                      {rental.condition?.charAt(0)?.toUpperCase() + rental.condition?.slice(1)}
+                  <div className="flex justify-between py-3 border-b border-gray-200">
+                    <span className="font-medium">AC</span>
+                    <span className={rental.AC === 'available' ? 'text-green-600' : 'text-red-600'}>
+                      {rental.AC === 'available' ? 'Yes' : 'No'}
                     </span>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Seating Capacity</span>
-                    <span className="spec-value">{rental.capacity} passengers</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Air Conditioning</span>
-                    <span className="spec-value">
-                      {rental.AC === 'available' ? (
-                        <span className="badge-available">Available</span>
-                      ) : (
-                        <span className="badge-unavailable">Not Available</span>
-                      )}
+                  <div className="flex justify-between py-3 border-b border-gray-200">
+                    <span className="font-medium">Driver</span>
+                    <span className={rental.driverAvailable ? 'text-green-600' : 'text-gray-600'}>
+                      {rental.driverAvailable ? 'Available' : 'Self-Drive Only'}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="specs-card">
-                <h3>🔧 Technical Details</h3>
-                <div className="specs-list">
-                  <div className="spec-item">
-                    <span className="spec-label">Fuel Type</span>
-                    <span className="spec-value">
-                      {rental.fuelType === 'petrol' ? '⛽ Petrol' : '⛽ Diesel'}
-                    </span>
+              <div>
+                <h3 className="text-2xl font-bold text-orange-600 mb-6">Seller Information</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Name</p>
+                    <p className="font-bold text-lg">{rental.seller.firstName} {rental.seller.lastName}</p>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Transmission</span>
-                    <span className="spec-value">
-                      {rental.transmission === 'automatic' ? '⚙️ Automatic' : '⚙️ Manual'}
-                    </span>
+                  <div>
+                    <p className="text-sm text-gray-600">Location</p>
+                    <p className="font-bold">{rental.seller.city}</p>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Driver Option</span>
-                    <span className="spec-value">
-                      {rental.driverAvailable ? (
-                        <span className="badge-available">Available</span>
-                      ) : (
-                        <span className="badge-unavailable">Self-drive Only</span>
-                      )}
-                    </span>
+                  <div>
+                    <p className="text-sm text-gray-600">Contact</p>
+                    <p className="font-bold">{rental.seller.email}</p>
+                    {rental.seller.phone && <p className="font-bold">{rental.seller.phone}</p>}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Pricing & Seller Info */}
-            <div className="info-column">
-              {/* Pricing Card */}
-              <div className="pricing-card highlight-card">
-                <h3>💰 Pricing Details</h3>
-                <div className="pricing-details">
-                  <div className="price-item main-price">
-                    <span className="price-label">Cost per day</span>
-                    <span className="price-value">₹{rental.costPerDay}</span>
-                  </div>
-                  {rental.driverAvailable ? (
-                    <>
-                      <div className="price-item">
-                        <span className="price-label">Driver Available</span>
-                        <span className="price-value">Yes</span>
-                      </div>
-                      <div className="price-item">
-                        <span className="price-label">Driver Rate</span>
-                        <span className="price-value">₹{rental.driverRate}/day</span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="price-item">
-                      <span className="price-label">Driver Available</span>
-                      <span className="price-value badge-unavailable">No</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="rental-summary">
-                  <div className="summary-item">
-                    <span>Minimum rental period:</span>
-                    <span>1 day</span>
-                  </div>
-                  <div className="summary-item">
-                    <span>Security deposit:</span>
-                    <span>₹5,000 (Refundable)</span>
-                  </div>
-                  <div className="summary-item">
-                    <span>Free cancellation:</span>
-                    <span>Within 24 hours</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Seller Information */}
-              <div className="seller-card">
-                <h3>👤 Seller Information</h3>
-                <div className="seller-details">
-                  <div className="seller-item">
-                    <span className="seller-label">Name</span>
-                    <span className="seller-value">{rental.seller.firstName} {rental.seller.lastName}</span>
-                  </div>
-                  <div className="seller-item">
-                    <span className="seller-label">Email</span>
-                    <span className="seller-value">{rental.seller.email}</span>
-                  </div>
-                  {rental.seller.phone && (
-                    <div className="seller-item">
-                      <span className="seller-label">Phone</span>
-                      <span className="seller-value">{rental.seller.phone}</span>
-                    </div>
-                  )}
-                  {rental.seller.city && (
-                    <div className="seller-item">
-                      <span className="seller-label">Location</span>
-                      <span className="seller-value">
-                        {rental.seller.city}
-                        {rental.seller.state && `, ${rental.seller.state}`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="seller-verification">
-                  <div className="verification-item">
-                    <span className="verified-badge">✓</span>
-                    <span>Email Verified</span>
-                  </div>
-                  <div className="verification-item">
-                    <span className="verified-badge">✓</span>
-                    <span>Phone Verified</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Action Buttons */}
-        <div className="action-section">
-          <div className="action-buttons">
-            <button 
-              className="btn btn-secondary btn-large"
-              onClick={() => navigate('/buyer/rentals')}
-            >
-              ← Back to Rentals
-            </button>
-            <div className="primary-actions">
-              <a 
-                href={`mailto:${rental.seller.email}?subject=Inquiry about ${rental.vehicleName}&body=Hello, I am interested in renting your ${rental.vehicleName}. Please provide more details.`}
-                className="btn btn-outline btn-large"
-              >
-                📧 Contact Seller
-              </a>
-              <button 
-                className="btn btn-primary btn-large rent-now-btn"
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 mt-12">
+              <button
                 onClick={() => setShowDateModal(true)}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-2xl font-bold py-6 rounded-2xl hover:from-orange-600 hover:to-orange-700 transition-all shadow-xl"
               >
-                🚗 Rent Now
+                Rent This Car
+              </button>
+              <a
+                href={`mailto:${rental.seller.email}?subject=Inquiry about ${rental.vehicleName}`}
+                className="flex-1 text-center bg-gray-700 text-white py-6 rounded-2xl font-bold hover:bg-gray-800 transition text-center"
+              >
+                Contact Seller
+              </a>
+            </div>
+
+            <div className="text-center mt-8">
+              <button
+                onClick={redirectToRentals}
+                className="text-orange-600 font-bold hover:text-orange-700 transition"
+              >
+                ← Back to Rentals
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal Components */}
+      {/* Modals */}
       <DatePickerModal
         isOpen={showDateModal}
         onClose={() => setShowDateModal(false)}
@@ -439,18 +263,14 @@ const handleDateSelect = (pickup, drop, driverIncluded) => {
         onClose={() => setShowPaymentModal(false)}
         onProcessPayment={handlePayment}
         totalCost={totalCost}
-        selectedPaymentMethod={selectedPaymentMethod}
-        onPaymentMethodSelect={setSelectedPaymentMethod}
       />
 
-      <ProcessingModal
-        isOpen={showProcessingModal}
-      />
+      <ProcessingModal isOpen={showProcessingModal} />
 
       <SuccessModal
         isOpen={showSuccessModal}
         onRedirect={redirectToDashboard}
-        message="Rental booked successfully! You will receive a confirmation email shortly."
+        message="Rental booked successfully!"
       />
     </div>
   );
