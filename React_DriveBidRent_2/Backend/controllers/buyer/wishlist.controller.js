@@ -65,14 +65,24 @@ export const getWishlistApi = async (req, res) => {
       await wishlist.save();
     }
 
+    // Populate the actual auction and rental documents for the API client
+    const rentalWishlist = await RentalRequest.find({
+      _id: { $in: wishlist.rentals || [] }
+    }).populate('sellerId', 'firstName lastName').lean();
+
+    const auctionWishlist = await AuctionRequest.find({
+      _id: { $in: wishlist.auctions || [] },
+      status: 'approved',
+      started_auction: 'yes'
+    }).populate('sellerId', 'firstName lastName').lean();
+
     res.json({
       success: true,
       message: 'Wishlist items fetched',
       data: {
-        wishlist: {
-          auctions: wishlist.auctions || [],
-          rentals: wishlist.rentals || []
-        }
+        auctionWishlist,
+        rentalWishlist,
+        user: req.user
       }
     });
   } catch (err) {
