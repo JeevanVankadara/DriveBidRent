@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
+import LoadingSpinner from './components/LoadingSpinner';
 
 export default function ViewBids() {
   const { id } = useParams();
@@ -61,14 +62,7 @@ export default function ViewBids() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
-        <div className="text-center py-10 text-xl text-gray-600">Loading bids...</div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner message="Loading bids..." />;
 
   if (error) {
     return (
@@ -140,7 +134,7 @@ export default function ViewBids() {
               <div>
                 <div className="text-3xl font-extrabold text-orange-600">₹{currentBid.bidAmount}</div>
                 <div className="mt-2 text-gray-700 font-semibold">
-                  Bidder: {currentBid.bidderId.firstName} {currentBid.bidderId.lastName} ({currentBid.bidderId.email})
+                  Bidder: {currentBid.buyerId?.firstName || ''} {currentBid.buyerId?.lastName || ''} ({currentBid.buyerId?.email || ''})
                 </div>
               </div>
               <div className="text-sm text-gray-500">
@@ -162,7 +156,7 @@ export default function ViewBids() {
               {pastBids.map((bid) => (
                 <div key={bid._id} className="past-bid-card bg-gray-50 p-4 rounded-md border-l-4 border-blue-500">
                   <div className="text-xl font-bold text-blue-600 mb-2">₹{bid.bidAmount}</div>
-                  <div className="text-sm text-gray-700 font-semibold">Bidder: {bid.bidderId.firstName} {bid.bidderId.lastName} ({bid.bidderId.email})</div>
+                  <div className="text-sm text-gray-700 font-semibold">Bidder: {bid.buyerId?.firstName || ''} {bid.buyerId?.lastName || ''} ({bid.buyerId?.email || ''})</div>
                   <div className="text-sm text-gray-500 mt-2">Time: {new Date(bid.bidTime).toLocaleString()}</div>
                 </div>
               ))}

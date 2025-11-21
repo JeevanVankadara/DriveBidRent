@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
+import LoadingSpinner from './components/LoadingSpinner';
 
 export default function Requests() {
   const [requests, setRequests] = useState([]);
@@ -29,14 +30,7 @@ export default function Requests() {
     fetchRequests();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Vehicle Requests</h2>
-        <div className="text-center py-10 text-xl text-gray-600">Loading requests...</div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner message="Loading requests..." />;
 
   if (error) {
     return (

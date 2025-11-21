@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
+import LoadingSpinner from './components/LoadingSpinner';
 
 export default function ApprovedCars() {
   const [cars, setCars] = useState([]);
@@ -62,14 +63,24 @@ export default function ApprovedCars() {
   const ongoingCars = cars.filter(c => (c.started_auction === 'yes' && !c.auction_stopped) && matchesSearch(c));
   const endedCars = cars.filter(c => ((c.auction_stopped === true) || c.started_auction === 'ended') && matchesSearch(c));
 
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Approved Cars</h2>
-        <div className="text-center py-10 text-xl text-gray-600">Loading approved cars...</div>
-      </div>
-    );
-  }
+  // helper to determine status string for a car
+  const getCarStatus = (c) => {
+    if (c.started_auction === 'no' || !c.started_auction) return 'not-started';
+    if (c.started_auction === 'yes' && !c.auction_stopped) return 'ongoing';
+    return 'ended';
+  };
+
+  // combined filtered list used when statusFilter is 'all'
+  const filteredCars = cars
+    .filter(matchesSearch)
+    .filter(c => (statusFilter === 'all' ? true : getCarStatus(c) === statusFilter))
+    .sort((a, b) => {
+      // desired order: not-started, ongoing, ended
+      const order = { 'not-started': 0, 'ongoing': 1, 'ended': 2 };
+      return order[getCarStatus(a)] - order[getCarStatus(b)];
+    });
+
+  if (loading) return <LoadingSpinner message="Loading approved cars..." />;
 
   if (error) {
     return (
@@ -118,79 +129,31 @@ export default function ApprovedCars() {
       </div>
 
       {statusFilter === 'all' ? (
-        <>
-          <section className="mb-8">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Yet to Start ({notStartedCars.length})</h3>
-            {notStartedCars.length > 0 ? (
-              notStartedCars.map(car => (
-                <div key={car._id} className="flex bg-white rounded-xl mb-6 p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition transform hover:-translate-y-1">
-                  <div className="w-80 h-48 overflow-hidden rounded-lg mr-8">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
-                    <p className="text-lg font-bold text-orange-600 mt-1">Condition: {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}</p>
-                    <p className="text-gray-600 mt-2">Seller: {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}</p>
-                    <p className="text-gray-600">Location: {car.sellerId?.city || ''}</p>
-                  </div>
-                  <div className="flex items-end">
-                    <button onClick={() => startAuction(car._id)} className="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition">Start Auction</button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-gray-600 mb-4">No cars waiting to be started.</div>
-            )}
-          </section>
-
-          <section className="mb-8">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Ongoing ({ongoingCars.length})</h3>
-            {ongoingCars.length > 0 ? (
-              ongoingCars.map(car => (
-                <div key={car._id} className="flex bg-white rounded-xl mb-6 p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition transform hover:-translate-y-1">
-                  <div className="w-80 h-48 overflow-hidden rounded-lg mr-8">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
-                    <p className="text-lg font-bold text-orange-600 mt-1">Condition: {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}</p>
-                    <p className="text-gray-600 mt-2">Seller: {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}</p>
-                    <p className="text-gray-600">Location: {car.sellerId?.city || ''}</p>
-                  </div>
-                  <div className="flex items-end">
-                    <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-gray-600 mb-4">No ongoing auctions.</div>
-            )}
-          </section>
-
-          <section className="mb-8">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Ended ({endedCars.length})</h3>
-            {endedCars.length > 0 ? (
-              endedCars.map(car => (
-                <div key={car._id} className="flex bg-white rounded-xl mb-6 p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition transform hover:-translate-y-1">
-                  <div className="w-80 h-48 overflow-hidden rounded-lg mr-8">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
-                    <p className="text-lg font-bold text-orange-600 mt-1">Condition: {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}</p>
-                    <p className="text-gray-600 mt-2">Seller: {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}</p>
-                    <p className="text-gray-600">Location: {car.sellerId?.city || ''}</p>
-                  </div>
-                  <div className="flex items-end">
-                    <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-gray-600 mb-4">No ended auctions.</div>
-            )}
-          </section>
-        </>
+        // combined list ordered: yet-to-start, ongoing, ended
+        <section>
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">All Approved Cars ({filteredCars.length})</h3>
+          {filteredCars.length === 0 && <div className="text-gray-600 mb-4">No cars found.</div>}
+          {filteredCars.map(car => (
+            <div key={car._id} className="flex bg-white rounded-xl mb-6 p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition transform hover:-translate-y-1">
+              <div className="w-80 h-48 overflow-hidden rounded-lg mr-8">
+                <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 flex flex-col justify-center">
+                <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
+                <p className="text-lg font-bold text-orange-600 mt-1">Condition: {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}</p>
+                <p className="text-gray-600 mt-2">Seller: {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}</p>
+                <p className="text-gray-600">Location: {car.sellerId?.city || ''}</p>
+              </div>
+              <div className="flex items-end">
+                {getCarStatus(car) === 'not-started' ? (
+                  <button onClick={() => startAuction(car._id)} className="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition">Start Auction</button>
+                ) : (
+                  <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
+                )}
+              </div>
+            </div>
+          ))}
+        </section>
       ) : (
         <section>
           <h3 className="text-2xl font-bold text-gray-800 mb-4">

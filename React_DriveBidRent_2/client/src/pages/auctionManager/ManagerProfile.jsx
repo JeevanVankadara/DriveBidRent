@@ -1,6 +1,7 @@
 // client/src/pages/auctionManager/ManagerProfile.jsx
 import { useState, useEffect } from 'react';
 import { auctionManagerServices } from '../../services/auctionManager.services';
+import LoadingSpinner from './components/LoadingSpinner';
 
 export default function ManagerProfile() {
   const [user, setUser] = useState({});
@@ -94,13 +95,7 @@ export default function ManagerProfile() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto p-6 text-center">
-        <div className="text-2xl text-gray-600">Loading profile...</div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner message="Loading profile..." />;
 
   return (
     <div className="max-w-6xl mx-auto p-6 font-montserrat">
