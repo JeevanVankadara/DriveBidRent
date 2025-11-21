@@ -63,9 +63,9 @@ export default function Dashboard() {
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-gray-800">{req.vehicleName}</h3>
                   <p className="text-sm text-gray-600">
-                    Seller: {req.sellerId.firstName} {req.sellerId.lastName}
+                    Seller: {req.sellerId?.firstName || ''} {req.sellerId?.lastName || ''}
                   </p>
-                  <p className="text-sm text-gray-600">Location: {req.sellerId.city}</p>
+                  <p className="text-sm text-gray-600">Location: {req.sellerId?.city || ''}</p>
                   <div className="text-center mt-4">
                     <Link
                       to={`/auction-manager/assign-mechanic/${req._id}`}
@@ -98,9 +98,14 @@ export default function Dashboard() {
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-gray-800">{car.vehicleName}</h3>
                   <p className="text-sm text-gray-600">
-                    Seller: {car.sellerId.firstName} {car.sellerId.lastName}
+                    Seller: {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}
                   </p>
-                  <p className="text-sm text-gray-600">Location: {car.sellerId.city}</p>
+                  <p className="text-sm text-gray-600">Location: {car.sellerId?.city || ''}</p>
+                </div>
+                <div className="p-4 border-t border-gray-100 text-center">
+                  <Link to={`/auction-manager/pending-car-details/${car._id}`} className="text-orange-600 font-bold hover:opacity-80 transition">
+                    More Details
+                  </Link>
                 </div>
               </div>
             ))
@@ -128,6 +133,11 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600">Mileage: {car.mileage} km</p>
                   <p className="text-sm text-gray-600">Status: Approved</p>
                   <p className="text-sm text-gray-600">Starting Bid: ₹{car.startingBid}</p>
+                <div className="p-4 border-t border-gray-100 text-center">
+                  <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 inline-block text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+                    View Bids
+                  </Link>
+                </div>
                 </div>
               </div>
             ))
