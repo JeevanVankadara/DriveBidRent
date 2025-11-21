@@ -5,10 +5,10 @@ import MechanicFooter from './components/MechanicFooter';
 
 export default function MechanicLayout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-white to-orange-50">
       <MechanicNavbar />
-      <main className="flex-grow bg-gray-50">
-        <Outlet />
+      <main className="flex-grow">
+        <Outlet />   {/* All mechanic pages load here with their own spinners */}
       </main>
       <MechanicFooter />
     </div>

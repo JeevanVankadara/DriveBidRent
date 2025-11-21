@@ -5,19 +5,31 @@ export default function CurrentTaskCard({ vehicle }) {
   return (
     <Link
       to={`/mechanic/car-details/${vehicle._id}`}
-      className="bg-white rounded-lg shadow-md p-5 text-center border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-96 flex flex-col justify-between"
+      className="block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-4 border-2 border-orange-300 overflow-hidden h-full flex flex-col"
     >
-      <img
-        src={vehicle.vehicleImage}
-        alt={vehicle.vehicleName}
-        className="w-full h-48 object-cover rounded-lg border border-gray-300"
-      />
-      <div>
-        <h3 className="text-xl font-bold text-gray-800 mt-3 truncate">{vehicle.vehicleName}</h3>
-        <p className="text-sm text-gray-600"><strong>Year:</strong> {vehicle.year}</p>
-        <p className="text-sm text-gray-600"><strong>Mileage:</strong> {vehicle.mileage.toLocaleString()} km</p>
-        <p className="text-sm text-gray-600"><strong>Condition:</strong> {vehicle.condition.charAt(0).toUpperCase() + vehicle.condition.slice(1)}</p>
-        <p className="text-sm text-gray-600"><strong>Auction Date:</strong> {new Date(vehicle.auctionDate).toLocaleDateString()}</p>
+      <div className="relative">
+        <img
+          src={vehicle.vehicleImage}
+          alt={vehicle.vehicleName}
+          className="w-full h-64 object-cover"
+        />
+        <div className="absolute top-4 left-4 bg-orange-600 text-white font-bold px-6 py-2 rounded-full text-sm shadow">
+          ASSIGNED
+        </div>
+      </div>
+      <div className="p-6 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-gray-800 mb-3">{vehicle.vehicleName}</h3>
+        <div className="text-gray-600 space-y-1 text-sm">
+          <p><strong>Year:</strong> {vehicle.year}</p>
+          <p><strong>Mileage:</strong> {vehicle.mileage.toLocaleString()} km</p>
+          <p><strong>Condition:</strong> {vehicle.condition}</p>
+          <p><strong>Auction:</strong> {new Date(vehicle.auctionDate).toLocaleDateString()}</p>
+        </div>
+        <div className="mt-auto pt-5">
+          <span className="block text-center bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition">
+            Inspect Vehicle
+          </span>
+        </div>
       </div>
     </Link>
   );

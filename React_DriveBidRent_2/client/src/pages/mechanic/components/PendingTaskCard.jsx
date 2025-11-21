@@ -1,29 +1,26 @@
-// client/src/pages/mechanic/components/PendingTaskCard.jsx
-export default function PendingTaskCard({ vehicle, onAccept, onDecline }) {
+// Example: CurrentTaskCard.jsx (update both Current & Past)
+import { Link } from 'react-router-dom';
+
+export default function CurrentTaskCard({ vehicle }) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-5 text-center border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all">
-      <img
-        src={vehicle.image}
-        alt={vehicle.name}
-        className="w-full h-48 object-cover rounded-lg border border-gray-300 hover:opacity-80 hover:scale-105 transition"
-      />
-      <h3 className="text-xl font-bold text-gray-800 mt-3">{vehicle.name}</h3>
-      <p className="text-sm text-gray-600"><strong>Owner:</strong> {vehicle.owner}</p>
-      <p className="text-sm text-gray-600"><strong>Mileage:</strong> {vehicle.mileage} km</p>
-      <div className="flex justify-center gap-3 mt-4">
-        <button
-          onClick={() => onAccept(vehicle.id)}
-          className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-        >
-          Accept
-        </button>
-        <button
-          onClick={() => onDecline(vehicle.id)}
-          className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700 transition"
-        >
-          Decline
-        </button>
+    <Link to={`/mechanic/car-details/${vehicle._id}`}
+      className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 border-2 border-orange-300 overflow-hidden flex flex-col h-full">
+      <div className="relative">
+        <img src={vehicle.vehicleImage} alt={vehicle.vehicleName} className="w-full h-56 object-cover" />
+        <span className="absolute top-4 left-4 bg-orange-600 text-white font-bold px-5 py-2 rounded-full text-sm shadow-lg">
+          CURRENT TASK
+        </span>
       </div>
-    </div>
+      <div className="p-6 flex-grow flex flex-col justify-between">
+        <div>
+          <h3 className="text-xl font-bold text-gray-800 mb-3">{vehicle.vehicleName}</h3>
+          <p className="text-gray-600">Year: {vehicle.year} • {vehicle.mileage.toLocaleString()} km</p>
+          <p className="text-gray-600">Condition: {vehicle.condition}</p>
+        </div>
+        <div className="mt-6 text-center">
+          <span className="bg-orange-600 text-white px-6 py-2 rounded-full font-bold">View Details →</span>
+        </div>
+      </div>
+    </Link>
   );
 }

@@ -13,16 +13,30 @@ export default function PastTasks() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center py-20 text-xl">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-600"></div>
+          <p className="mt-6 text-xl text-gray-700 font-medium">Loading past tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-orange-600 text-center mb-8">Past Tasks</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {tasks.length > 0 ? (
-          tasks.map(v => <PastTaskCard key={v._id} vehicle={v} />)
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-5xl font-bold text-center text-green-700 mb-12">Past Inspections</h1>
+
+        {tasks.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl shadow">
+            <p className="text-2xl text-gray-600">No past inspections found</p>
+          </div>
         ) : (
-          <p className="col-span-full text-center text-gray-600 text-lg">No past tasks available.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {tasks.map(v => <PastTaskCard key={v._id} vehicle={v} />)}
+          </div>
         )}
       </div>
     </div>
