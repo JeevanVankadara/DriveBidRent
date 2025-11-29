@@ -103,14 +103,35 @@ export const processRentalPayment = async (data) => {
   }
 };
 
+// === REVIEWS ===
+export const addReview = async (reviewData) => {
+  try {
+    const response = await axios.post('/buyer/reviews', reviewData);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding review:', error);
+    throw error;
+  }
+};
+
+export const getReviews = async (rentalId) => {
+  try {
+    const response = await axios.get(`/buyer/reviews/${rentalId}`);
+    return response.data.data?.reviews || [];
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
+};
+
 // === PURCHASES ===
 export const getPurchases = async () => {
   try {
     const response = await axios.get('/buyer/purchases');
-    return response.data.data || { auctionPurchases: [], rentals: [] };
+    return response.data.data || { auctionPurchases: [], activeRentals: [], pastRentals: [] };
   } catch (error) {
     console.error('Error fetching purchases:', error);
-    return { auctionPurchases: [], rentals: [] };
+    return { auctionPurchases: [], activeRentals: [], pastRentals: [] };
   }
 };
 
@@ -317,5 +338,3 @@ export const getAboutUs = async () => {
     return {};
   }
 };
-
-// Remove the React hooks from this file and create separate custom hooks
