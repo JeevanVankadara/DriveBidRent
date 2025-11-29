@@ -151,108 +151,111 @@ export default function RentalDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-white">
 
       {/* Main Container */}
-      <div className="max-w-5xl mx-auto my-20 px-6">
+      <div className="max-w-4xl mx-auto py-8 px-4 md:px-6">
 
         {/* Card Container */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-orange-500">
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
 
           {/* Hero Image */}
-          <div className="relative h-80">
+          <div className="relative h-64 md:h-80">
             <img
               src={rental.vehicleImage}
               alt={rental.vehicleName}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-8 left-8 text-white">
-              <h1 className="text-5xl md:text-6xl font-black mb-3">{rental.vehicleName}</h1>
-              <span className="bg-orange-500 text-white px-6 py-2 rounded-full text-xl font-bold">
-                ₹{rental.costPerDay}/day
-              </span>
-            </div>
           </div>
 
           {/* Content */}
-          <div className="p-10 md:p-16">
+          <div className="p-6 md:p-8">
 
-            {/* Quick Info */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-center">
+            {/* Title and Price */}
+            <div className="flex justify-between items-start mb-6">
               <div>
-                <p className="text-gray-600 text-sm">Year</p>
-                <p className="text-3xl font-bold text-orange-600">{rental.year}</p>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{rental.vehicleName}</h1>
+                <p className="text-2xl font-bold text-orange-600">₹{rental.costPerDay}/day</p>
+              </div>
+              {!isAvailable && (
+                <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold text-sm">
+                  Not Available
+                </div>
+              )}
+            </div>
+
+            {/* Quick Info Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-8 border-b border-gray-200">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold">Year</p>
+                <p className="text-xl font-bold text-gray-900 mt-1">{rental.year}</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Capacity</p>
-                <p className="text-3xl font-bold text-orange-600">{rental.capacity} seats</p>
+                <p className="text-gray-600 text-sm font-semibold">Capacity</p>
+                <p className="text-xl font-bold text-gray-900 mt-1">{rental.capacity} seats</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Fuel</p>
-                <p className="text-2xl font-bold text-orange-600 capitalize">{rental.fuelType}</p>
+                <p className="text-gray-600 text-sm font-semibold">Fuel</p>
+                <p className="text-xl font-bold text-gray-900 capitalize mt-1">{rental.fuelType}</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Transmission</p>
-                <p className="text-2xl font-bold text-orange-600 capitalize">{rental.transmission}</p>
+                <p className="text-gray-600 text-sm font-semibold">Transmission</p>
+                <p className="text-xl font-bold text-gray-900 capitalize mt-1">{rental.transmission}</p>
               </div>
             </div>
 
             {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div>
-                <h3 className="text-2xl font-bold text-orange-600 mb-6">Vehicle Details</h3>
-                <div className="space-y-5">
-                  <div className="flex justify-between py-3 border-b border-gray-200">
-                    <span className="font-medium">Condition</span>
-                    <span className="text-green-600 font-bold capitalize">{rental.condition}</span>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Vehicle Details</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-700 font-medium">Condition</span>
+                    <span className="text-gray-900 font-semibold capitalize">{rental.condition}</span>
                   </div>
-                  <div className="flex justify-between py-3 border-b border-gray-200">
-                    <span className="font-medium">AC</span>
-                    <span className={rental.AC === 'available' ? 'text-green-600' : 'text-red-600'}>
-                      {rental.AC === 'available' ? 'Yes' : 'No'}
-                    </span>
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-700 font-medium">AC</span>
+                    <span className="text-gray-900 font-semibold">{rental.AC === 'available' ? '✓ Yes' : '✗ No'}</span>
                   </div>
-                  <div className="flex justify-between py-3 border-b border-gray-200">
-                    <span className="font-medium">Driver</span>
-                    <span className={rental.driverAvailable ? 'text-green-600' : 'text-gray-600'}>
-                      {rental.driverAvailable ? 'Available' : 'Self-Drive Only'}
-                    </span>
+                  <div className="flex justify-between py-2">
+                    <span className="text-gray-700 font-medium">Driver</span>
+                    <span className="text-gray-900 font-semibold">{rental.driverAvailable ? '✓ Available' : 'Self-Drive Only'}</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-2xl font-bold text-orange-600 mb-6">Seller Information</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Name</p>
-                    <p className="font-bold text-lg">{rental.seller.firstName} {rental.seller.lastName}</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Seller Information</h3>
+                <div className="space-y-3">
+                  <div className="py-2 border-b border-gray-100">
+                    <p className="text-sm text-gray-600 font-medium mb-1">Name</p>
+                    <p className="text-gray-900 font-semibold">{rental.seller.firstName} {rental.seller.lastName}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Location</p>
-                    <p className="font-bold">{rental.seller.city}</p>
+                  <div className="py-2 border-b border-gray-100">
+                    <p className="text-sm text-gray-600 font-medium mb-1">Location</p>
+                    <p className="text-gray-900 font-semibold">{rental.seller.city}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Contact</p>
-                    <p className="font-bold">{rental.seller.email}</p>
-                    {rental.seller.phone && <p className="font-bold">{rental.seller.phone}</p>}
+                  <div className="py-2">
+                    <p className="text-sm text-gray-600 font-medium mb-1">Contact</p>
+                    <p className="text-gray-900 font-semibold">{rental.seller.email}</p>
+                    {rental.seller.phone && <p className="text-gray-900 font-semibold">{rental.seller.phone}</p>}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 mt-12">
+            {/* Action Buttons - Side by Side */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button
                 onClick={() => isAvailable && setShowDateModal(true)}
                 disabled={!isAvailable}
-                className={`flex-1 text-white text-2xl font-bold py-6 rounded-2xl transition-all shadow-xl ${isAvailable
-                  ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
-                  : "bg-gray-400 cursor-not-allowed"
-                  }`}
+                className={`flex-1 text-white font-bold py-3 rounded-lg transition ${
+                  isAvailable
+                    ? 'bg-orange-500 hover:bg-orange-600'
+                    : 'bg-gray-400 cursor-not-allowed'
+                }`}
               >
-                {isAvailable ? "Rent This Car" : "Already Rented"}
+                Rent This Car
               </button>
               <button
                 onClick={async () => {
@@ -268,13 +271,14 @@ export default function RentalDetails() {
                     alert('Unable to open chat.');
                   }
                 }}
-                className="flex-1 text-center bg-gray-700 text-white py-6 rounded-2xl font-bold hover:bg-gray-800 transition text-center"
+                className="flex-1 bg-gray-700 text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition"
               >
                 Contact Seller
               </button>
             </div>
 
-            <div className="text-center mt-8">
+            {/* Back Button */}
+            <div className="text-center">
               <button
                 onClick={redirectBack}
                 className="text-orange-600 font-bold hover:text-orange-700 transition"
@@ -300,6 +304,8 @@ export default function RentalDetails() {
         onClose={() => setShowPaymentModal(false)}
         onProcessPayment={handlePayment}
         totalCost={totalCost}
+        selectedPaymentMethod={selectedPaymentMethod}
+        onPaymentMethodSelect={setSelectedPaymentMethod}
       />
 
       <ProcessingModal isOpen={showProcessingModal} />

@@ -8,7 +8,7 @@ import { postAddAuction } from '../controllers/sellerControllers/addAuction.cont
 import { postAddRental } from '../controllers/sellerControllers/addRental.controller.js';
 import { getAuctionDetail } from '../controllers/sellerControllers/auctionDetail.controller.js';
 import { getProfile, updateProfile, updatePreferences, changePassword } from '../controllers/sellerControllers/profile.controller.js';
-import { getRentalDetail } from '../controllers/sellerControllers/rentalDetail.controller.js';
+import { getRentalDetail, postMarkRentalReturned } from '../controllers/sellerControllers/rentalDetail.controller.js';
 import { getSellerDashboard } from '../controllers/sellerControllers/sellerDashboard.controller.js';
 import { postUpdateRental } from '../controllers/sellerControllers/updateRental.controller.js';
 import { getViewAuctions, getViewBids } from '../controllers/sellerControllers/viewAuctions.controller.js';
@@ -38,11 +38,15 @@ router.post('/change-password', changePassword);
 // GET: Rental detail
 router.get('/rental-details/:id', getRentalDetail);
 
+// POST: Mark rental as returned
+router.post('/rental/mark-returned/:id', postMarkRentalReturned);
+
 // GET: Seller dashboard
 router.get('/seller', getSellerDashboard);
 
-// POST: Update rental
-router.post('/update-rental/:id', postUpdateRental);
+// POST/PUT: Update rental
+router.post('/update-rental/:id', upload.single('vehicleImage'), postUpdateRental);
+router.put('/update-rental/:id', upload.single('vehicleImage'), postUpdateRental);
 
 // View auctions & bids
 router.get('/view-auctions', getViewAuctions);

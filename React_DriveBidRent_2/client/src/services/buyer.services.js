@@ -107,10 +107,10 @@ export const processRentalPayment = async (data) => {
 export const getPurchases = async () => {
   try {
     const response = await axios.get('/buyer/purchases');
-    return response.data.data || { auctionPurchases: [], rentals: [] };
+    return response.data.data || { auctionPurchases: [], rentals: [], pastRentals: [] };
   } catch (error) {
     console.error('Error fetching purchases:', error);
-    return { auctionPurchases: [], rentals: [] };
+    return { auctionPurchases: [], rentals: [], pastRentals: [] };
   }
 };
 

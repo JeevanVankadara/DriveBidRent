@@ -6,6 +6,8 @@ const RentalDetails = () => {
   const { id } = useParams();
   const [rental, setRental] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const fetchRental = async () => {
@@ -22,6 +24,38 @@ const RentalDetails = () => {
     };
     fetchRental();
   }, [id]);
+
+  const handleMarkAsReturned = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axiosInstance.post(`/seller/rental/mark-returned/${id}`);
+      if (response.data.success) {
+        setSuccess('Vehicle marked as returned and is now available for rent!');
+        setRental(prev => ({
+          ...prev,
+          status: 'available',
+          buyerId: null,
+          pickupDate: null,
+          dropDate: null
+        }));
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError(response.data.message);
+      }
+    } catch (err) {
+      setError('Failed to mark rental as returned. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isRentalCompleted = () => {
+    if (!rental?.dropDate) return false;
+    const currentDate = new Date();
+    const dropDate = new Date(rental.dropDate);
+    return currentDate > dropDate;
+  };
 
   if (error) {
     return (
@@ -48,13 +82,13 @@ const RentalDetails = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-orange-600 mb-10">Rental Vehicle Details</h1>
-        
+
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="flex flex-col md:flex-row">
             <div className="md:w-1/2 p-6">
-              <img 
-                src={rental.vehicleImage} 
-                alt={rental.vehicleName} 
+              <img
+                src={rental.vehicleImage}
+                alt={rental.vehicleName}
                 className="w-full h-auto rounded-lg shadow-md mb-6"
               />
               <div className="bg-gray-50 p-4 rounded-lg">
@@ -63,7 +97,7 @@ const RentalDetails = () => {
                 <p className="text-lg text-gray-700">Location: {rental.location}</p>
               </div>
             </div>
-            
+
             <div className="md:w-1/2 p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Vehicle Specifications</h2>
               <div className="space-y-4">
@@ -102,20 +136,37 @@ const RentalDetails = () => {
                   </div>
                 )}
               </div>
-              
-              <div className="mt-8 flex gap-4">
-                <Link 
-                  to="/seller/view-rentals" 
-                  className="bg-gray-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                >
-                  Back to Rentals
-                </Link>
-                <Link 
-                  to={`/seller/edit-rental/${rental._id}`} 
-                  className="bg-orange-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200"
-                >
-                  Edit Rental
-                </Link>
+
+              <div className="mt-8 space-y-3">
+                {error && (
+                  <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm">{error}</div>
+                )}
+                {success && (
+                  <div className="bg-green-100 text-green-700 p-3 rounded-lg text-sm">{success}</div>
+                )}
+                <div className="flex gap-4">
+                  <Link
+                    to="/seller/view-rentals"
+                    className="bg-gray-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                  >
+                    Back to Rentals
+                  </Link>
+                  <Link
+                    to={`/seller/edit-rental/${rental._id}`}
+                    className="bg-orange-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200"
+                  >
+                    Update Details
+                  </Link>
+                </div>
+                {isRentalCompleted() && rental?.buyerId && rental?.status === 'unavailable' && (
+                  <button
+                    onClick={handleMarkAsReturned}
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-medium hover:from-green-600 hover:to-green-700 disabled:opacity-70 transition-colors duration-200"
+                  >
+                    {loading ? 'Processing...' : '✓ Mark as Returned & Make Available'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

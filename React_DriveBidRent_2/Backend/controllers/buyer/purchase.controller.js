@@ -33,12 +33,18 @@ export const getPurchase = async (req, res) => {
     }));
 
     const validRentals = rentals.filter(rental => rental !== null);
+
+    // Separate rentals into current and past based on dropDate
+    const currentDate = new Date();
+    const currentRentals = validRentals.filter(rental => new Date(rental.dropDate) > currentDate);
+    const pastRentals = validRentals.filter(rental => new Date(rental.dropDate) <= currentDate);
+
     const auctionPurchases = await Purchase.find({ buyerId }).lean();
 
     res.json({
       success: true,
       message: 'Purchase data fetched',
-      data: { rentals: validRentals, auctionPurchases, user }
+      data: { rentals: currentRentals, pastRentals, auctionPurchases, user }
     });
 
     // res.render('buyer_dashboard/purchase', {

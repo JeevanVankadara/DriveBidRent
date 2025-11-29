@@ -11,6 +11,7 @@ import PaymentModal from './components/modals/PaymentModal';
 export default function PurchasesList() {
   const [auctionPurchases, setAuctionPurchases] = useState([]);
   const [rentals, setRentals] = useState([]);
+  const [pastRentals, setPastRentals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPurchase, setSelectedPurchase] = useState(null);
@@ -25,6 +26,7 @@ export default function PurchasesList() {
       const data = await getPurchases();
       setAuctionPurchases(data.auctionPurchases || []);
       setRentals(data.rentals || []);
+      setPastRentals(data.pastRentals || []);
     } catch (error) {
       console.error('Error fetching purchases:', error);
     } finally {
@@ -225,6 +227,70 @@ export default function PurchasesList() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* Past Rentals */}
+      <section className="py-16 max-w-7xl mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Past Rentals</h2>
+
+        {pastRentals.length === 0 ? (
+          <p className="text-center text-xl text-gray-600 py-10">
+            You don't have any past rentals.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {pastRentals.map((rental) => {
+              const rentalId = rental._id || rental.investor_id;
+              return (
+                <div
+                  key={rentalId || rental.vehicleName}
+                  className="bg-white border border-gray-400 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col opacity-90"
+                >
+                  <div className="relative">
+                    <span className="absolute top-6 left-6 z-10 bg-gray-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-md">
+                      Completed
+                    </span>
+                    <img
+                      src={rental.vehicleImage}
+                      alt={rental.vehicleName}
+                      className="w-full h-56 object-contain bg-gray-100"
+                    />
+                  </div>
+
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-2xl font-bold text-gray-700 mb-3">
+                      {rental.vehicleName}
+                    </h3>
+
+                    <p className="text-gray-600 text-sm mb-4">
+                      Period: <strong>
+                        {new Date(rental.pickupDate).toLocaleDateString()} - {new Date(rental.dropDate).toLocaleDateString()}
+                      </strong>
+                    </p>
+
+                    <div className="bg-gray-50 p-5 rounded-lg space-y-3 text-sm flex-grow">
+                      <p><strong>Daily Rate:</strong> ₹{rental.costPerDay}</p>
+                      <p><strong>Total Cost:</strong> ₹{rental.totalCost}</p>
+                      <p><strong>Seller:</strong> {rental.sellerName}</p>
+                      <p><strong>Contact:</strong> {rental.sellerPhone}</p>
+                    </div>
+
+                    {/* More Details Button - Always Visible */}
+                    <div className="mt-6">
+                      <Link
+                        to={`/buyer/rentals/${rentalId}`}
+                        state={{ from: '/buyer/purchases' }}
+                        className="block w-full bg-gray-500 text-white text-center py-3 rounded-lg font-medium hover:bg-gray-600 transition shadow-md"
+                      >
+                        More Details
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Payment Modal */}
