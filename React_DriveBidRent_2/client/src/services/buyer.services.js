@@ -103,35 +103,14 @@ export const processRentalPayment = async (data) => {
   }
 };
 
-// === REVIEWS ===
-export const addReview = async (reviewData) => {
-  try {
-    const response = await axios.post('/buyer/reviews', reviewData);
-    return response.data;
-  } catch (error) {
-    console.error('Error adding review:', error);
-    throw error;
-  }
-};
-
-export const getReviews = async (rentalId) => {
-  try {
-    const response = await axios.get(`/buyer/reviews/${rentalId}`);
-    return response.data.data?.reviews || [];
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
-    return [];
-  }
-};
-
 // === PURCHASES ===
 export const getPurchases = async () => {
   try {
     const response = await axios.get('/buyer/purchases');
-    return response.data.data || { auctionPurchases: [], activeRentals: [], pastRentals: [] };
+    return response.data.data || { auctionPurchases: [], rentals: [] };
   } catch (error) {
     console.error('Error fetching purchases:', error);
-    return { auctionPurchases: [], activeRentals: [], pastRentals: [] };
+    return { auctionPurchases: [], rentals: [] };
   }
 };
 
@@ -141,6 +120,27 @@ export const getPurchaseDetails = async (id) => {
     return response.data.data?.purchase || null;
   } catch (error) {
     console.error('Error fetching purchase details:', error);
+    return null;
+  }
+};
+
+// === CHAT / CONTACT SELLER ===
+export const createOrGetChatForPurchase = async (purchaseId) => {
+  try {
+    const response = await axios.post(`/chat/create/purchase/${purchaseId}`);
+    return response.data.data?.chat || null;
+  } catch (error) {
+    console.error('Error creating/getting chat for purchase:', error);
+    return null;
+  }
+};
+
+export const createOrGetChatForRental = async (rentalId) => {
+  try {
+    const response = await axios.post(`/chat/create/rental/${rentalId}`);
+    return response.data.data?.chat || null;
+  } catch (error) {
+    console.error('Error creating/getting chat for rental:', error);
     return null;
   }
 };
@@ -338,3 +338,5 @@ export const getAboutUs = async () => {
     return {};
   }
 };
+
+// Remove the React hooks from this file and create separate custom hooks
