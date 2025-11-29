@@ -10,15 +10,14 @@ const connectDB = async () => {
   }
 
   try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      // useCreateIndex and useFindAndModify are no longer supported in Mongoose v6+
-    });
+    // Mongoose v6+ no longer requires or uses `useNewUrlParser` / `useUnifiedTopology` options.
+    await mongoose.connect(uri);
     console.log('MongoDB Connected');
   } catch (err) {
     console.error('MongoDB Connection Error:', err.message || err);
-    process.exit(1);
+    // Do not exit the process so nodemon keeps running — caller can decide how to proceed.
+    // This helps during development when DB may be temporarily unreachable.
+    return;
   }
 };
 

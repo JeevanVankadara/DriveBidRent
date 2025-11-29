@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [featuredAuctions, setFeaturedAuctions] = useState([]);
   const [featuredRentals, setFeaturedRentals] = useState([]);
   const [wishlist, setWishlist] = useState({ auctions: [], rentals: [] });
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ const Dashboard = () => {
         const auctionIds = (wl.auctions || []).map(a => a._id || a);
         const rentalIds = (wl.rentals || []).map(r => r._id || r);
         setWishlist({ auctions: auctionIds, rentals: rentalIds });
+        // recent chats removed from dashboard — chats belong on Chat pages
       } catch (err) {
         console.error("Dashboard failed to load:", err);
       } finally {
@@ -155,6 +157,8 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
+
+      {/* Recent Chats removed: chats live on chat pages only */}
     </div>
   );
 };

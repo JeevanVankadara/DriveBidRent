@@ -3,6 +3,8 @@ import AuctionRequest from '../../models/AuctionRequest.js';
 import AuctionBid from '../../models/AuctionBid.js';
 import Purchase from '../../models/Purchase.js';
 import User from '../../models/User.js';
+import chatController from '../../controllers/chat.controller.js';
+const { createChatForAuction } = chatController;
 
 const send = (success, message, data = null) => ({
   success,
@@ -57,6 +59,13 @@ export const stopAuction = async (req, res) => {
       });
 
       await AuctionBid.notifyAuctionWinner(auction._id, currentBid.buyerId._id);
+
+      // create auction chat (5 days duration) between winner and seller
+      try {
+        await createChatForAuction(auction, currentBid.buyerId._id, new Date());
+      } catch (e) {
+        console.error('create auction chat error:', e);
+      }
     }
 
     await auction.save();

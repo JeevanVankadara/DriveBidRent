@@ -1,7 +1,7 @@
 // client/src/pages/buyer/RentalDetails.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getRentalById, bookRental } from '../../services/buyer.services';
+import { getRentalById, bookRental, createOrGetChatForRental } from '../../services/buyer.services';
 import DatePickerModal from './components/modals/DatePickerModal';
 import PaymentModal from './components/modals/PaymentModal';
 import ProcessingModal from './components/modals/ProcessingModal';
@@ -254,12 +254,24 @@ export default function RentalDetails() {
               >
                 {isAvailable ? "Rent This Car" : "Already Rented"}
               </button>
-              <a
-                href={`mailto:${rental.seller.email}?subject=Inquiry about ${rental.vehicleName}`}
+              <button
+                onClick={async () => {
+                  try {
+                    const chat = await createOrGetChatForRental(id);
+                    if (chat && chat._id) {
+                      navigate(`/buyer/chats/${chat._id}`);
+                    } else {
+                      alert('Unable to open chat with seller. Please try again later.');
+                    }
+                  } catch (err) {
+                    console.error('Contact seller (rental) error:', err);
+                    alert('Unable to open chat.');
+                  }
+                }}
                 className="flex-1 text-center bg-gray-700 text-white py-6 rounded-2xl font-bold hover:bg-gray-800 transition text-center"
               >
                 Contact Seller
-              </a>
+              </button>
             </div>
 
             <div className="text-center mt-8">

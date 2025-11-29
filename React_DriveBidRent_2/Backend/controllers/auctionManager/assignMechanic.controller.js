@@ -1,6 +1,7 @@
 // controllers/auctionManager/assignMechanic.controller.js
 import AuctionRequest from '../../models/AuctionRequest.js';
 import User from '../../models/User.js';
+import Chat from '../../models/Chat.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -51,6 +52,31 @@ export const assignMechanic = async (req, res) => {
     } catch (uErr) {
       console.error('Failed to update mechanic assignedRequests:', uErr);
       return res.json(send(true, 'Mechanic assigned successfully, but failed to update mechanic record'));
+    }
+
+    // Auto-create an inspection chat for this assignment (one per mechanic + task)
+    try {
+      const exists = await Chat.findOne({
+        type: 'inspection',
+        mechanic: mechanicId,
+        inspectionTask: updated._id
+      });
+
+      if (!exists) {
+        await Chat.create({
+          type: 'inspection',
+          mechanic: mechanicId,
+          auctionManager: req.user?._id || null,
+          inspectionTask: updated._id,
+          car: updated._id,
+          carModel: 'AuctionRequest',
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days by default
+          title: `Inspection: ${updated.vehicleName}`
+        });
+      }
+    } catch (cErr) {
+      console.error('Failed to create inspection chat:', cErr);
+      // Non-fatal: respond success but inform in logs
     }
 
     res.json(send(true, 'Mechanic assigned successfully'));

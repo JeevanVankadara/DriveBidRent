@@ -2,6 +2,7 @@
 import RentalRequest from '../../models/RentalRequest.js';
 import RentalCost from '../../models/RentalCost.js';
 import User from '../../models/User.js';
+import ChatController from '../../controllers/chat.controller.js';
 
 export const getRentals = async (req, res) => {
   try {
@@ -138,6 +139,16 @@ export const bookRental = async (req, res) => {
     });
 
     const savedRentalCost = await rentalCost.save();
+
+    // Create chat for this rental (chat is unique per rental)
+    try {
+      const rentalRequestDoc = await RentalRequest.findById(rentalCarId);
+      if (rentalRequestDoc) {
+        await ChatController.createChatForRental(rentalRequestDoc);
+      }
+    } catch (err) {
+      console.warn('Failed to create chat for rental:', err.message || err);
+    }
 
     res.json({
       success: true,

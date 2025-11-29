@@ -14,6 +14,8 @@ import connectDB from "./config/db.js";
 import "./models/User.js";
 import "./models/RentalRequest.js";
 import "./models/AuctionRequest.js";
+import "./models/Chat.js";
+import "./models/Message.js";
 
 // === ROUTES ===
 import authRoutes from "./routes/auth.routes.js";
@@ -30,6 +32,7 @@ import mechanicMiddleware from "./middlewares/mechanic.middleware.js";
 import adminMiddleware from "./middlewares/admin.middleware.js";
 import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
 import buyerMiddleware from "./middlewares/buyer.middleware.js";
+import chatRoutes from './routes/chat.routes.js';
 
 // Resolve __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -74,6 +77,8 @@ app.use("/api/buyer", buyerMiddleware, buyerRoutes);
 app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes);   // NEW
 app.use("/api/mechanic", mechanicMiddleware, mechanicRoutes);                     // NEW
 app.use("/api/admin", adminMiddleware, adminRoutes);                              // NEW
+// Chat routes (requires auth cookie or Authorization header)
+app.use('/api/chat', chatRoutes);
 
 // === PRODUCTION: Serve React/Vite Build (SPA Support) ===
 if (process.env.NODE_ENV === "production") {
@@ -124,9 +129,10 @@ const PORT = process.env.PORT || 8000;
 const startServer = async () => {
   try {
     await connectDB();
+
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (err) {
     console.error("Failed to connect to database or start server:", err);

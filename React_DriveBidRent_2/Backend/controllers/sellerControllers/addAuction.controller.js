@@ -1,5 +1,6 @@
 // controllers/sellerControllers/addAuction.controller.js
 import AuctionRequest from '../../models/AuctionRequest.js';
+import { uploadToCloudinary } from '../../utils/fileUpload.js';
 
 export const postAddAuction = async (req, res) => {
   if (!req.file) {
@@ -7,9 +8,15 @@ export const postAddAuction = async (req, res) => {
   }
 
   try {
+    let imageUrl = req.file.path;
+    if (!imageUrl && req.file.buffer) {
+      const uploaded = await uploadToCloudinary(req.file.buffer, 'drivebidrent');
+      imageUrl = uploaded?.secure_url || uploaded?.url || null;
+    }
+
     const auction = new AuctionRequest({
       vehicleName: req.body['vehicle-name'],
-      vehicleImage: req.file.path,
+      vehicleImage: imageUrl,
       year: req.body['vehicle-year'],
       mileage: req.body['vehicle-mileage'],
       fuelType: req.body['fuel-type'],

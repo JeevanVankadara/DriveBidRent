@@ -26,6 +26,12 @@ export default function MechanicNavbar() {
             >
               Past Tasks
             </NavLink>
+            <NavLink
+              to="/mechanic/chats"
+              className={({ isActive }) => `text-lg font-medium transition ${isActive ? 'text-orange-600 border-b-4 border-orange-600 pb-1' : 'text-gray-700 hover:text-orange-600'}`}
+            >
+              Chats
+            </NavLink>
           </div>
 
           <div className="flex items-center space-x-6">

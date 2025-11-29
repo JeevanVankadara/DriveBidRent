@@ -1,5 +1,6 @@
 // controllers/sellerControllers/addRental.controller.js
 import RentalRequest from '../../models/RentalRequest.js';
+import { uploadToCloudinary } from '../../utils/fileUpload.js';
 
 export const postAddRental = async (req, res) => {
   console.log('Request Body:', req.body);
@@ -39,9 +40,15 @@ export const postAddRental = async (req, res) => {
       });
     }
 
+    let imageUrl = req.file.path;
+    if (!imageUrl && req.file.buffer) {
+      const uploaded = await uploadToCloudinary(req.file.buffer, 'drivebidrent');
+      imageUrl = uploaded?.secure_url || uploaded?.url || null;
+    }
+
     const newRental = new RentalRequest({
       vehicleName: req.body['vehicle-name'],
-      vehicleImage: req.file.path,
+      vehicleImage: imageUrl,
       year: parseInt(req.body['vehicle-year']),
       AC: req.body['vehicle-ac'],
       capacity: parseInt(req.body['vehicle-capacity']),

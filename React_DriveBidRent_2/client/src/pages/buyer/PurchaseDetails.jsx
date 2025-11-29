@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getPurchaseDetails } from '../../services/buyer.services';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getPurchaseDetails, createOrGetChatForPurchase } from '../../services/buyer.services';
 
 export default function PurchaseDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [purchase, setPurchase] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -165,12 +166,25 @@ export default function PurchaseDetails() {
 
             <div className="mt-10">
               <p className="text-gray-500 text-sm mb-3">Need help with this purchase?</p>
-              <a
-                href={`mailto:${sellerId?.email || ''}?subject=Regarding ${vehicleName}`}
+              <button
+                onClick={async () => {
+                  try {
+                    const chat = await createOrGetChatForPurchase(purchase._id);
+                    if (chat && chat._id) {
+                      // navigate to buyer chat page
+                      navigate(`/buyer/chats/${chat._id}`);
+                    } else {
+                      alert('Unable to open chat. Please try again later.');
+                    }
+                  } catch (err) {
+                    console.error('Contact seller error:', err);
+                    alert('Unable to open chat.');
+                  }
+                }}
                 className="inline-flex items-center justify-center w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition shadow-lg"
               >
                 Contact Seller
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -81,6 +81,16 @@ export default function Navbar() {
             >
               Approved Cars
             </Link>
+            <Link 
+              to="/auction-manager/chats" 
+              className={`font-medium transition ${
+                isActive('/chats') 
+                  ? 'text-orange-600' 
+                  : 'text-gray-700 hover:text-orange-600'
+              }`}
+            >
+              Chats
+            </Link>
           </div>
           
           <div className="flex items-center space-x-4">

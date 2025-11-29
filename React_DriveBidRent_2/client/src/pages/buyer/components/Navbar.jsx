@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getProfile } from '../../../services/buyer.services';
 import { getUnreadNotificationCount } from '../../../services/buyer.services';
+import axiosInstance from '../../../utils/axiosInstance.util';
 import { useLogout } from '../../../services/auth.services';
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const logout = useLogout();
@@ -21,6 +23,15 @@ export default function Navbar() {
         ]);
         setUser(profileData);
         setUnreadCount(count);
+        // load chat unread count
+        try {
+          const r = await axiosInstance.get('/chat/my-chats');
+          const chats = r.data?.data || [];
+          const sum = chats.reduce((acc, c) => acc + (c.unreadCount || c.unread || 0), 0);
+          setChatUnreadCount(sum);
+        } catch (err) {
+          // ignore chat unread errors
+        }
       } catch (err) {
         console.error("Navbar load failed:", err);
       }
@@ -35,6 +46,12 @@ export default function Navbar() {
         const [profileData, count] = await Promise.all([getProfile(), getUnreadNotificationCount()]);
         setUser(profileData);
         setUnreadCount(count);
+        try {
+          const r = await axiosInstance.get('/chat/my-chats');
+          const chats = r.data?.data || [];
+          const sum = chats.reduce((acc, c) => acc + (c.unreadCount || c.unread || 0), 0);
+          setChatUnreadCount(sum);
+        } catch (err) {}
       } catch (err) {
         console.error('Failed to refresh profile after notificationsSeen', err);
       }
@@ -42,6 +59,18 @@ export default function Navbar() {
 
     window.addEventListener('notificationsSeen', handler);
     return () => window.removeEventListener('notificationsSeen', handler);
+  }, []);
+
+  // update chat unread badge when a chat is marked read
+  useEffect(() => {
+    const onRead = (e) => {
+      try {
+        const { updated } = e.detail || {};
+        setChatUnreadCount(prev => Math.max(0, prev - (updated || 0)));
+      } catch (err) { }
+    };
+    window.addEventListener('chatRead', onRead);
+    return () => window.removeEventListener('chatRead', onRead);
   }, []);
 
   const handleLogout = async () => {
@@ -103,6 +132,15 @@ export default function Navbar() {
             >
               About Us
             </Link>
+            <Link
+              to="/buyer/chats"
+              className={`text-gray-700 hover:text-orange-500 font-medium transition ${isActive('/buyer/chats') ? 'text-orange-500 font-bold' : ''}`}
+            >
+              Chat
+              {chatUnreadCount > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-xs rounded-full h-5 w-5">{chatUnreadCount}</span>
+              )}
+            </Link>
           </div>
 
           {/* Right Side - Profile & Logout */}
@@ -134,6 +172,7 @@ export default function Navbar() {
             Notifications
             {unreadCount > 0 && <span className="absolute -top-1 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{unreadCount}</span>}
           </Link>
+              <Link to="/buyer/chats" className="text-gray-600 hover:text-orange-500">Chat{chatUnreadCount > 0 && <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-xs rounded-full h-5 w-5">{chatUnreadCount}</span>}</Link>
           <Link to="/buyer/about" className="text-gray-600 hover:text-orange-500">About</Link>
         </div>
       </div>

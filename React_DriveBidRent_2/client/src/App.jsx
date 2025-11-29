@@ -30,6 +30,9 @@ import Wishlist from './pages/buyer/Wishlist';
 import BuyerProfile from './pages/buyer/Profile';           // Renamed for clarity
 import Notifications from './pages/buyer/Notifications';
 import AboutUs from './pages/buyer/AboutUs';
+import ChatListBuyer from './pages/buyer/ChatListBuyer';
+import ChatRoomBuyer from './pages/buyer/ChatRoomBuyer';
+import ChatPageBuyer from './pages/buyer/ChatPageBuyer';
 
 // === SELLER ===
 import SellerLayout from './pages/seller/SellerLayout';
@@ -44,6 +47,9 @@ import ViewRentals from './pages/seller/ViewRentals';
 import UpdateRental from './pages/seller/UpdateRental';
 import RentalDetailsAlt from './pages/seller/RentalDetailsAlt';
 import AuctionDetailsSeller from './pages/seller/AuctionDetails';  // Clear distinction
+import ChatListSeller from './pages/seller/ChatListSeller';
+import ChatRoomSeller from './pages/seller/ChatRoomSeller';
+import ChatPageSeller from './pages/seller/ChatPageSeller';
 
 // === AUCTION MANAGER ===
 import AuctionManagerLayout from './pages/auctionManager/AuctionManagerLayout';
@@ -55,6 +61,7 @@ import PendingCarDetails from './pages/auctionManager/PendingCarDetails';
 import PendingCars from './pages/auctionManager/PendingCars';
 import Requests from './pages/auctionManager/Requests';
 import ViewBidsPage from './pages/auctionManager/ViewBids';
+import ChatPageAuctionManager from './pages/auction-manager/ChatPageAuctionManager';
 
 // === MECHANIC ===
 import MechanicLayout from './pages/mechanic/MechanicLayout';
@@ -64,6 +71,7 @@ import PastTasks from './pages/mechanic/past-tasks/PastTasks';
 import PendingTasks from './pages/mechanic/pending-tasks/PendingTasks';
 import CarDetails from './pages/mechanic/car-details/CarDetails';
 import MechanicProfile from './pages/mechanic/profile/Profile';
+import ChatPageMechanic from './pages/mechanic/ChatPageMechanic';
 
 function App() {
   return (
@@ -104,6 +112,8 @@ function App() {
         <Route path="profile" element={<BuyerProfile />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="about" element={<AboutUs />} />
+        <Route path="chats" element={<ChatPageBuyer />} />
+        <Route path="chats/:chatId" element={<ChatPageBuyer />} />
       </Route>
 
       {/* === SELLER SPA === */}
@@ -120,6 +130,8 @@ function App() {
         <Route path="update-rental/:id" element={<UpdateRental />} />
         <Route path="rental-details-alt/:id" element={<RentalDetailsAlt />} />
         <Route path="auction-details/:id" element={<AuctionDetailsSeller />} />
+        <Route path="chats" element={<ChatPageSeller />} />
+        <Route path="chats/:chatId" element={<ChatPageSeller />} />
       </Route>
 
       {/* === AUCTION MANAGER SPA === */}
@@ -133,6 +145,8 @@ function App() {
         <Route path="assign-mechanic/:id" element={<AssignMechanic />} />
         <Route path="view-bids/:id" element={<ViewBidsPage />} />
         <Route path="profile" element={<ManagerProfile />} />
+        <Route path="chats" element={<ChatPageAuctionManager />} />
+        <Route path="chats/:chatId" element={<ChatPageAuctionManager />} />
       </Route>
 
       {/* === MECHANIC SPA === */}
@@ -144,6 +158,8 @@ function App() {
         <Route path="pending-tasks" element={<PendingTasks />} />
         <Route path="car-details/:id" element={<CarDetails />} />
         <Route path="profile" element={<MechanicProfile />} />
+        <Route path="chats" element={<ChatPageMechanic />} />
+        <Route path="chats/:chatId" element={<ChatPageMechanic />} />
       </Route>
 
       {/* === 404 NOT FOUND === */}
