@@ -340,3 +340,35 @@ export const getAboutUs = async () => {
 };
 
 // Remove the React hooks from this file and create separate custom hooks
+
+// === REVIEWS ===
+export const addReview = async (rentalId, reviewData) => {
+  try {
+    const response = await axios.post(`/buyer/rentals/${rentalId}/reviews`, reviewData);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding review:', error);
+    throw error;
+  }
+};
+
+export const getReviews = async (rentalId) => {
+  try {
+    const response = await axios.get(`/buyer/rentals/${rentalId}/reviews`);
+    return response.data.data?.reviews || [];
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
+};
+
+export const checkCanReview = async (rentalId) => {
+  try {
+    const response = await axios.get(`/buyer/rentals/${rentalId}/can-review`);
+    return response.data.data || { canReview: false };
+  } catch (error) {
+    console.error('Error checking review eligibility:', error);
+    return { canReview: false };
+  }
+};
+

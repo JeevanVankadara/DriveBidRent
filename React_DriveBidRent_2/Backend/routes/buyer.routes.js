@@ -27,6 +27,11 @@ import {
   addToWishlistApi,
   removeFromWishlistApi
 } from '../controllers/buyer/wishlist.controller.js';
+import {
+  addReview,
+  getReviews,
+  checkCanReview
+} from '../controllers/buyer/review.controller.js';
 import Notification from '../models/Notification.js';
 
 const router = Router();
@@ -78,6 +83,11 @@ router.get('/rentals', buyerMiddleware, (req, res) => {
   res.redirect('/api/buyer/buyer_dashboard?page=rentals');
 });
 router.post('/rental', buyerMiddleware, bookRental); // Legacy
+
+// === REVIEWS ===
+router.post('/rentals/:id/reviews', buyerMiddleware, addReview);
+router.get('/rentals/:id/reviews', buyerMiddleware, getReviews);
+router.get('/rentals/:id/can-review', buyerMiddleware, checkCanReview);
 
 // === WISHLIST ===
 router.get('/wishlist', buyerMiddleware, getWishlistApi);

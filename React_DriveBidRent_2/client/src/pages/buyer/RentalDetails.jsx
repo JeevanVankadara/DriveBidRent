@@ -1,11 +1,12 @@
 // client/src/pages/buyer/RentalDetails.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getRentalById, bookRental, createOrGetChatForRental } from '../../services/buyer.services';
+import { getRentalById, bookRental, createOrGetChatForRental, addReview, getReviews, checkCanReview } from '../../services/buyer.services';
 import DatePickerModal from './components/modals/DatePickerModal';
 import PaymentModal from './components/modals/PaymentModal';
 import ProcessingModal from './components/modals/ProcessingModal';
 import SuccessModal from './components/modals/SuccessModal';
+import ReviewModal from './components/modals/ReviewModal';
 
 export default function RentalDetails() {
   const { id } = useParams();
@@ -18,6 +19,9 @@ export default function RentalDetails() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showProcessingModal, setShowProcessingModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [canReview, setCanReview] = useState(false);
 
   const [pickupDate, setPickupDate] = useState("");
   const [dropDate, setDropDate] = useState("");
@@ -27,6 +31,8 @@ export default function RentalDetails() {
 
   useEffect(() => {
     fetchRentalDetails();
+    fetchReviews();
+    checkReviewEligibility();
   }, [id]);
 
   useEffect(() => {
@@ -45,6 +51,35 @@ export default function RentalDetails() {
       setError("Failed to load rental details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const reviewsData = await getReviews(id);
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
+
+  const checkReviewEligibility = async () => {
+    try {
+      const eligibility = await checkCanReview(id);
+      setCanReview(eligibility.canReview);
+    } catch (error) {
+      console.error("Error checking review eligibility:", error);
+    }
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    try {
+      await addReview(id, reviewData);
+      await fetchReviews();
+      await checkReviewEligibility();
+      alert("Review submitted successfully!");
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Failed to submit review");
     }
   };
 
@@ -249,11 +284,10 @@ export default function RentalDetails() {
               <button
                 onClick={() => isAvailable && setShowDateModal(true)}
                 disabled={!isAvailable}
-                className={`flex-1 text-white font-bold py-3 rounded-lg transition ${
-                  isAvailable
+                className={`flex-1 text-white font-bold py-3 rounded-lg transition ${isAvailable
                     ? 'bg-orange-500 hover:bg-orange-600'
                     : 'bg-gray-400 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 Rent This Car
               </button>
@@ -288,6 +322,58 @@ export default function RentalDetails() {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200 mt-6">
+          <div className="p-6 md:p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Reviews</h2>
+              {canReview && (
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600 transition"
+                >
+                  Write a Review
+                </button>
+              )}
+            </div>
+
+            {reviews.length === 0 ? (
+              <p className="text-gray-600 text-center py-8">No reviews yet. Be the first to review!</p>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div key={review._id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {review.buyerId?.firstName} {review.buyerId?.lastName}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-700">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
 
       {/* Modals */}
@@ -314,6 +400,13 @@ export default function RentalDetails() {
         isOpen={showSuccessModal}
         onRedirect={redirectToDashboard}
         message="Rental booked successfully!"
+      />
+
+      <ReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onSubmit={handleSubmitReview}
+        rentalName={rental?.vehicleName}
       />
     </div>
   );

@@ -8,6 +8,7 @@ const RentalDetails = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const fetchRental = async () => {
@@ -22,7 +23,20 @@ const RentalDetails = () => {
         setError('Failed to load rental details');
       }
     };
+
+    const fetchReviews = async () => {
+      try {
+        const response = await axiosInstance.get(`/seller/rentals/${id}/reviews`);
+        if (response.data.success) {
+          setReviews(response.data.data.reviews);
+        }
+      } catch (err) {
+        console.error('Error fetching reviews:', err);
+      }
+    };
+
     fetchRental();
+    fetchReviews();
   }, [id]);
 
   const handleMarkAsReturned = async () => {
@@ -171,6 +185,47 @@ const RentalDetails = () => {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Customer Reviews</h2>
+            {reviews.length === 0 ? (
+              <p className="text-gray-600 text-center py-8">No reviews yet</p>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div key={review._id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {review.buyerId?.firstName} {review.buyerId?.lastName}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-700">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   );

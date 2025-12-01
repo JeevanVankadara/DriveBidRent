@@ -14,6 +14,7 @@ import { postUpdateRental } from '../controllers/sellerControllers/updateRental.
 import { getViewAuctions, getViewBids } from '../controllers/sellerControllers/viewAuctions.controller.js';
 import { getViewEarnings } from '../controllers/sellerControllers/viewEarnings.controller.js';
 import { getViewRentals, postToggleRentalStatus } from '../controllers/sellerControllers/viewRentals.controller.js';
+import { getReviews } from '../controllers/buyer/review.controller.js';
 
 const router = express.Router();
 
@@ -58,5 +59,8 @@ router.get('/view-earnings', getViewEarnings);
 // View rentals & toggle status
 router.get('/view-rentals', getViewRentals);
 router.post('/toggle-rental-status/:id', postToggleRentalStatus);
+
+// Reviews
+router.get('/rentals/:id/reviews', getReviews);
 
 export default router;
