@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { getAuctionById, placeBid, getProfile } from '../../services/buyer.services';
+import { getAuctionById, placeBid } from '../../services/buyer.services';
+import useProfile from '../../hooks/useProfile';
 
 export default function BidPage() {
   const { id } = useParams();
@@ -12,10 +13,12 @@ export default function BidPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { profile, loading: profileLoading } = useProfile();
 
   useEffect(() => {
     fetchAuctionData();
-    checkAuth();
+    // profile hook will fetch 'me' automatically; update isLoggedIn when available
+    // checkAuth();
   }, [id]);
 
   const fetchAuctionData = async () => {
@@ -31,14 +34,10 @@ export default function BidPage() {
     }
   };
 
-  const checkAuth = async () => {
-    try {
-      const user = await getProfile();
-      setIsLoggedIn(!!user);
-    } catch (error) {
-      setIsLoggedIn(false);
-    }
-  };
+  useEffect(() => {
+    if (profile === undefined) return; // still loading maybe
+    setIsLoggedIn(!!profile);
+  }, [profile, profileLoading]);
 
   const handleBidSubmit = async (e) => {
     e.preventDefault();

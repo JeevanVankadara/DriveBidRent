@@ -1,21 +1,14 @@
 // client/src/pages/mechanic/profile/Profile.jsx
 import { useEffect, useState } from 'react';
-import { getProfile, changePassword } from '../../../services/mechanic.services';
+import { changePassword } from '../../../services/mechanic.services';
+import useProfile from '../../../hooks/useProfile';
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
+  const { profile: user, loading } = useProfile();
   const [form, setForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState('');
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    getProfile().then(res => {
-      setUser(res.data.data.user);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,14 +53,14 @@ export default function Profile() {
           <div className="bg-white rounded-2xl shadow-xl p-10 border border-gray-200">
             <h3 className="text-2xl font-bold text-gray-800 mb-8 border-b-2 border-orange-600 pb-3">Personal Information</h3>
             <div className="space-y-5 text-lg">
-              <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Phone:</strong> {user.phone || '—'}</p>
-              <p><strong>Shop:</strong> {user.shopName || '—'}</p>
-              <p><strong>Experience:</strong> {user.experienceYears} years</p>
-              <p><strong>Services:</strong> {user.repairCars && user.repairBikes ? 'Cars & Bikes' : user.repairCars ? 'Cars' : 'Bikes'}</p>
-              <p><strong>Status:</strong> <span className={`font-bold ${user.approved_status === 'Yes' ? 'text-green-600' : 'text-amber-600'}`}>
-                {user.approved_status === 'Yes' ? 'Approved' : 'Pending Approval'}
+              <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
+              <p><strong>Email:</strong> {user?.email}</p>
+              <p><strong>Phone:</strong> {user?.phone || '—'}</p>
+              <p><strong>Shop:</strong> {user?.shopName || '—'}</p>
+              <p><strong>Experience:</strong> {user?.experienceYears} years</p>
+              <p><strong>Services:</strong> {user?.repairCars && user?.repairBikes ? 'Cars & Bikes' : user?.repairCars ? 'Cars' : 'Bikes'}</p>
+              <p><strong>Status:</strong> <span className={`font-bold ${user?.approved_status === 'Yes' ? 'text-green-600' : 'text-amber-600'}`}>
+                {user?.approved_status === 'Yes' ? 'Approved' : 'Pending Approval'}
               </span></p>
             </div>
           </div>

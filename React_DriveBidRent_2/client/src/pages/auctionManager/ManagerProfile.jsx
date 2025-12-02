@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from './components/LoadingSpinner';
+import useProfile from '../../hooks/useProfile';
 
 export default function ManagerProfile() {
   const [user, setUser] = useState({});
@@ -13,26 +14,20 @@ export default function ManagerProfile() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
+  const { profile, loading: profileLoading, refresh } = useProfile();
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const res = await auctionManagerServices.getProfile();
-        const responseData = res.data || res;
-        if (responseData.success) {
-          setUser(responseData.data);
-          setPhone(responseData.data.phone || '');
-        } else {
-          showAlert('error', responseData.message || 'Failed to load profile');
-        }
-      } catch (err) {
-        showAlert('error', 'Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+    // when redux profile updates, reflect in local state
+    if (profile) {
+      setUser(profile);
+      setPhone(profile.phone || '');
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    // set initial loading state from profileLoading
+    setLoading(!!profileLoading);
+  }, [profileLoading]);
 
   const showAlert = (type, msg) => {
     setAlert({ show: true, type, msg });
@@ -51,7 +46,9 @@ export default function ManagerProfile() {
       const responseData = res.data || res;
       if (responseData.success) {
         showAlert('success', 'Phone updated successfully');
-        setUser({ ...user, phone });
+        // refresh redux profile
+        try { refresh(); } catch (e) {}
+        setUser(prev => ({ ...prev, phone }));
       } else {
         showAlert('error', responseData.message || 'Failed to update phone');
       }
@@ -85,6 +82,7 @@ export default function ManagerProfile() {
         setOldPassword(''); 
         setNewPassword(''); 
         setConfirmPassword('');
+        try { refresh(); } catch (e) {}
       } else {
         showAlert('error', responseData.message || 'Failed to change password');
       }

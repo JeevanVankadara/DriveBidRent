@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authServices } from '../../services/auth.services';
 
+// Helper to save auth state to localStorage
+const saveAuthState = (user) => {
+  if (user) {
+    localStorage.setItem('authState', JSON.stringify({
+      user,
+      userType: user.userType,
+      approved_status: user.approved_status
+    }));
+  } else {
+    localStorage.removeItem('authState');
+  }
+};
+
 // Async thunks
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
@@ -8,7 +21,8 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await authServices.login(credentials);
       if (response.success) {
-        // Store user data and redirect info in Redux
+        // Save auth state to localStorage
+        saveAuthState(response.user);
         return {
           user: response.user,
           redirect: response.redirect,
@@ -29,8 +43,11 @@ export const signupUser = createAsyncThunk(
     try {
       const response = await authServices.signup(data);
       if (response.success) {
+        const user = response.data?.user || response.user;
+        // Save auth state to localStorage
+        saveAuthState(user);
         return {
-          user: response.data?.user || response.user,
+          user,
           message: response.message
         };
       } else {
@@ -47,6 +64,8 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authServices.logout();
+      // Clear auth state from localStorage
+      localStorage.removeItem('authState');
       return { message: 'Logged out successfully' };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Logout error');
@@ -88,6 +107,8 @@ const authSlice = createSlice({
       if (action.payload) {
         state.userType = action.payload.userType;
         state.approved_status = action.payload.approved_status;
+        // Save to localStorage when setting user
+        saveAuthState(action.payload);
       }
     },
     // Clear auth on logout
@@ -97,6 +118,8 @@ const authSlice = createSlice({
       state.userType = null;
       state.approved_status = null;
       state.redirect = null;
+      // Clear from localStorage
+      localStorage.removeItem('authState');
     }
   },
   extraReducers: (builder) => {

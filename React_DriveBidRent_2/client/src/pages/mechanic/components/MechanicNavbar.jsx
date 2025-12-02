@@ -1,9 +1,21 @@
 // client/src/pages/mechanic/components/MechanicNavbar.jsx
-import { NavLink } from 'react-router-dom';
-import { useLogout } from '../../../services/auth.services';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../../redux/slices/authSlice';
 
 export default function MechanicNavbar() {
-  const logout = useLogout();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap?.();
+    } catch (err) {
+      // ignore errors on logout; still navigate away
+    } finally {
+      navigate('/', { replace: true });
+    }
+  };
 
   return (
     <nav className="sticky top-0 bg-white border-b-4 border-orange-600 shadow-lg z-50">
@@ -39,7 +51,7 @@ export default function MechanicNavbar() {
             <NavLink to="/mechanic/profile" className="text-lg font-medium text-gray-700 hover:text-orange-600">
               Profile
             </NavLink>
-            <button onClick={logout} className="bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition">
+            <button onClick={handleLogout} className="bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition">
               Logout
             </button>
           </div>

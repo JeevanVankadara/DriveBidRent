@@ -1,9 +1,14 @@
 // client/src/pages/seller/Profile.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance.util';
+import { updateMyProfile } from '../../redux/slices/profileSlice';
+import useProfile from '../../hooks/useProfile';
 
 const Profile = () => {
+  const dispatch = useDispatch();
+  const { profile: reduxProfile, loading: profileLoading, refresh } = useProfile();
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -38,13 +43,14 @@ const Profile = () => {
   }, [success, error]);
 
   useEffect(() => {
+    if (reduxProfile) {
+      setUser(reduxProfile);
+    }
+  }, [reduxProfile]);
+
+  useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const profileRes = await axiosInstance.get('/seller/profile');
-        if (profileRes.data.success) {
-          setUser(profileRes.data.data);
-        }
-
         const earningsRes = await axiosInstance.get('/seller/view-earnings');
         if (earningsRes.data.success) {
           const { totalRentalEarnings, totalAuctionEarnings, recentEarnings } = earningsRes.data.data;
@@ -73,30 +79,22 @@ const Profile = () => {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('/seller/update-profile', user);
-      if (res.data.success) {
-        setSuccess('Profile updated successfully!');
-      } else {
-        setError(res.data.message);
-      }
+      const result = await dispatch(updateMyProfile(user)).unwrap();
+      setSuccess('Profile updated successfully!');
+      setUser(result);
     } catch (err) {
-      setError('Failed to update profile');
+      setError(err || 'Failed to update profile');
     }
   };
 
   const handlePreferencesSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('/seller/update-preferences', {
-        notificationPreference: user.notificationPreference,
-      });
-      if (res.data.success) {
-        setSuccess('Preferences updated successfully!');
-      } else {
-        setError(res.data.message);
-      }
+      const result = await dispatch(updateMyProfile({ notificationPreference: user.notificationPreference })).unwrap();
+      setSuccess('Preferences updated successfully!');
+      setUser(result);
     } catch (err) {
-      setError('Failed to update preferences');
+      setError(err || 'Failed to update preferences');
     }
   };
 
@@ -121,6 +119,7 @@ const Profile = () => {
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
+        refresh();
       } else {
         setError(res.data.message);
       }

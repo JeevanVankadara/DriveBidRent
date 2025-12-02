@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { getProfile } from '../../../services/buyer.services';
+import useProfile from '../../../hooks/useProfile';
 import { getUnreadNotificationCount } from '../../../services/buyer.services';
 import axiosInstance from '../../../utils/axiosInstance.util';
 import { logoutUser } from '../../../redux/slices/authSlice';
@@ -15,15 +15,14 @@ export default function Navbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const { profile, loading: profileLoading, error: profileError, refresh } = useProfile();
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [profileData, count] = await Promise.all([
-          getProfile(),
-          getUnreadNotificationCount()
-        ]);
-        setUser(profileData);
+        const count = await getUnreadNotificationCount();
         setUnreadCount(count);
+        setUser(profile || null);
         // load chat unread count
         try {
           const r = await axiosInstance.get('/chat/my-chats');
@@ -44,8 +43,8 @@ export default function Navbar() {
     // Listen for notificationsSeen event to refresh badge/profile
     const handler = async () => {
       try {
-        const [profileData, count] = await Promise.all([getProfile(), getUnreadNotificationCount()]);
-        setUser(profileData);
+        const count = await getUnreadNotificationCount();
+        setUser(profile || null);
         setUnreadCount(count);
         try {
           const r = await axiosInstance.get('/chat/my-chats');
