@@ -80,7 +80,7 @@ const Dashboard = () => {
         className="relative h-96 md:h-[400px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center text-white"
         style={{ backgroundImage: "url('/images/car1001.png')" }}
       >
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/80" />
         <div className="relative z-10 px-6">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
             <span className="text-orange-500">D</span>rive
