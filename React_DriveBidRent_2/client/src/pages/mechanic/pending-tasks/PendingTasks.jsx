@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { getPendingTasks, acceptPendingTask, declinePendingTask } from '../../../services/mechanic.services';
 import { Link } from 'react-router-dom';
-import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function PendingTasks() {
   const [tasks, setTasks] = useState([]);
@@ -23,11 +22,20 @@ export default function PendingTasks() {
 
   const handleDecline = async (id) => {
     if (!confirm('Decline this task?')) return;
-    await declinePendingTask(id);
+    await declinePendingTask(id); 
     setTasks(prev => prev.filter(t => t._id !== id));
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-600"></div>
+          <p className="mt-6 text-xl text-gray-700 font-medium">Loading pending tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-12 px-4">

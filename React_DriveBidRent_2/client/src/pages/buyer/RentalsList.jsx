@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CarCard from './components/CarCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { getRentals, getWishlist, addToWishlist, removeFromWishlist } from '../../services/buyer.services';
 
 export default function RentalsList() {

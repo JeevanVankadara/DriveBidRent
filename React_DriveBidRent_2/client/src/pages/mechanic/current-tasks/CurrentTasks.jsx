@@ -18,16 +18,16 @@ export default function CurrentTasks() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-6 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-bold text-center text-orange-600 mb-12">Current Tasks</h1>
+        <h1 className="text-2xl font-bold text-center text-orange-600 mb-6">Current Tasks</h1>
 
         {tasks.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-2xl text-gray-600">No vehicles assigned at the moment</p>
+          <div className="text-center py-10">
+            <p className="text-base text-gray-600">No vehicles assigned at the moment</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {tasks.map(v => <CurrentTaskCard key={v._id} vehicle={v} />)}
           </div>
         )}
