@@ -148,7 +148,7 @@ export default function ApprovedCars() {
                 {getCarStatus(car) === 'not-started' ? (
                   <button onClick={() => startAuction(car._id)} className="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition">Start Auction</button>
                 ) : (
-                  <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
+                  <Link to={`/auctionmanager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
                 )}
               </div>
             </div>
@@ -192,7 +192,7 @@ export default function ApprovedCars() {
                 <p className="text-gray-600">Location: {car.sellerId?.city || ''}</p>
               </div>
               <div className="flex items-end">
-                <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
+                <Link to={`/auctionmanager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
               </div>
             </div>
           ))}
@@ -209,7 +209,7 @@ export default function ApprovedCars() {
                 <p className="text-gray-600">Location: {car.sellerId?.city || ''}</p>
               </div>
               <div className="flex items-end">
-                <Link to={`/auction-manager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
+                <Link to={`/auctionmanager/view-bids/${car._id}`} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">View Bids</Link>
               </div>
             </div>
           ))}

@@ -20,14 +20,24 @@ export const getMyChats = async (req, res) => {
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('rentalRequest')
       .populate('auctionRequest')
-      .populate('inspectionTask')
+      .populate({ path: 'inspectionTask', select: 'vehicleName vehiclePhotos make model year images' })
       .sort({ lastMessageAt: -1, createdAt: -1 })
       .lean();
 
-    // compute unread counts per chat for this user
+    // compute unread counts per chat for this user and set role-specific unread field
+    const unreadField = 
+      req.user.userType === 'mechanic' ? 'unreadCountMechanic' :
+      req.user.userType === 'auction_manager' ? 'unreadCountAuctionManager' :
+      req.user.userType === 'buyer' ? 'unreadCountBuyer' :
+      'unreadCountSeller';
+
     const chatsWithUnread = await Promise.all(chats.map(async c => {
-      const unread = await Message.countDocuments({ chat: c._id, sender: { $ne: userId }, read: false });
-      return { ...c, unreadCount: unread };
+      const unread = await Message.countDocuments({
+        chat: c._id,
+        sender: { $ne: userId },
+        read: false
+      });
+      return { ...c, unreadCount: unread, [unreadField]: unread };
     }));
 
     res.json({ success: true, data: chatsWithUnread });
@@ -48,7 +58,7 @@ export const getChatById = async (req, res) => {
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('rentalRequest')
       .populate('auctionRequest')
-      .populate('inspectionTask')
+      .populate({ path: 'inspectionTask', select: 'vehicleName vehiclePhotos make model year images' })
       .lean();
 
     if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
@@ -186,8 +196,6 @@ export const createChatForRental = async (rentalRequest) => {
       rentalRequest: rentalRequest._id,
       buyer: rentalRequest.buyerId,
       seller: rentalRequest.sellerId,
-      car: rentalRequest._id,
-      carModel: 'RentalRequest',
       expiresAt,
       title: `Rental: ${rentalRequest.vehicleName}`
     });
@@ -212,8 +220,6 @@ export const createChatForAuction = async (auction, winnerId, soldAt = new Date(
       auctionRequest: auction._id,
       buyer: winnerId,
       seller: auction.sellerId,
-      car: auction._id,
-      carModel: 'AuctionRequest',
       expiresAt,
       finalPrice: auction.finalPurchasePrice || undefined,
       title: `Auction Won: ${auction.vehicleName}`
@@ -273,3 +279,16 @@ export const createChatForRentalHandler = async (req, res) => {
 };
 
 export default { getMyChats, getChatById, getMessages, sendMessage, markMessagesRead, createChatForRental, createChatForAuction, createChatForPurchaseHandler, createChatForRentalHandler };
+
+// Utility to expire an inspection chat immediately (call when inspection/report completes)
+export const expireInspectionChat = async (auctionRequestId) => {
+  try {
+    return await Chat.updateOne(
+      { inspectionTask: auctionRequestId, type: 'inspection' },
+      { expiresAt: new Date() }
+    );
+  } catch (err) {
+    console.error('expireInspectionChat error:', err);
+    return null;
+  }
+};

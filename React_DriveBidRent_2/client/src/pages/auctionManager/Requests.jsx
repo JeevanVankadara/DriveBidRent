@@ -70,7 +70,7 @@ export default function Requests() {
             
             <div className="flex items-end">
               <Link
-                to={`/auction-manager/assign-mechanic/${req._id}`}
+                to={`/auctionmanager/assign-mechanic/${req._id}`}
                 className="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition"
               >
                 Assign Mechanic

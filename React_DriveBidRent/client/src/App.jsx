@@ -69,7 +69,7 @@ function App() {
   return (
     <Routes>
       {/* === LEGACY REDIRECTS === */}
-      <Route path="/auction-manager-dashboard" element={<Navigate to="/auction-manager" replace />} />
+      <Route path="/auctionmanager-dashboard" element={<Navigate to="/auctionmanager" replace />} />
       <Route path="/buyer-dashboard" element={<Navigate to="/buyer" replace />} />
 
       {/* === PUBLIC ROUTES === */}
@@ -123,7 +123,7 @@ function App() {
       </Route>
 
       {/* === AUCTION MANAGER SPA === */}
-      <Route path="/auction-manager" element={<AuctionManagerLayout />}>
+      <Route path="/auctionmanager" element={<AuctionManagerLayout />}>
         <Route index element={<AuctionManagerDashboard />} />
         <Route path="dashboard" element={<AuctionManagerDashboard />} />
         <Route path="requests" element={<Requests />} />

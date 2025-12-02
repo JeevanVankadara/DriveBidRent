@@ -94,7 +94,7 @@ export default function Dashboard() {
                       </div>
 
                       <Link
-                        to={`/auction-manager/assign-mechanic/${req._id}`}
+                        to={`/auctionmanager/assign-mechanic/${req._id}`}
                         className="mt-6 w-full text-center bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl transition transform hover:scale-105 shadow-md"
                       >
                         Assign Mechanic
@@ -105,7 +105,7 @@ export default function Dashboard() {
               </div>
 
               <div className="text-center mt-12">
-                <Link to="/auction-manager/requests" className="text-orange-600 font-bold text-xl hover:text-orange-700 underline">
+                <Link to="/auctionmanager/requests" className="text-orange-600 font-bold text-xl hover:text-orange-700 underline">
                   View All Requests →
                 </Link>
               </div>
@@ -159,7 +159,7 @@ export default function Dashboard() {
                       </div>
 
                       <Link
-                        to={`/auction-manager/pending-car-details/${car._id}`}
+                        to={`/auctionmanager/pending-car-details/${car._id}`}
                         className={`${hasReview ? 'mt-6 w-full text-center bg-green-600 hover:bg-green-700' : 'mt-6 w-full text-center bg-amber-600 hover:bg-amber-700'} text-white font-bold py-3.5 rounded-xl transition transform hover:scale-105 shadow-md`}
                       >
                         View Details
@@ -222,7 +222,7 @@ export default function Dashboard() {
                       </div>
 
                       <Link
-                        to={`/auction-manager/view-bids/${car._id}`}
+                        to={`/auctionmanager/view-bids/${car._id}`}
                         className="w-full block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg"
                       >
                         View Live Bids
@@ -233,7 +233,7 @@ export default function Dashboard() {
               </div>
 
               <div className="text-center mt-12">
-                <Link to="/auction-manager/approved" className="text-green-600 font-bold text-xl hover:text-green-700 underline">
+                <Link to="/auctionmanager/approved" className="text-green-600 font-bold text-xl hover:text-green-700 underline">
                   See All Live Auctions →
                 </Link>
               </div>

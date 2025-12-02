@@ -112,7 +112,7 @@ export default function ViewBids() {
         
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/auction-manager/approved')}
+            onClick={() => navigate('/auctionmanager/approved')}
             className="bg-blue-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-600 transition"
           >
             Back to Cars

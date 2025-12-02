@@ -68,7 +68,7 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600">Location: {req.sellerId.city}</p>
                   <div className="text-center mt-4">
                     <Link
-                      to={`/auction-manager/assign-mechanic/${req._id}`}
+                      to={`/auctionmanager/assign-mechanic/${req._id}`}
                       className="text-orange-600 font-bold hover:opacity-80 transition"
                     >
                       More Details
@@ -82,7 +82,7 @@ export default function Dashboard() {
           )}
         </div>
         <div className="text-center mt-6">
-          <Link to="/auction-manager/requests" className="text-orange-600 font-bold hover:opacity-80 transition">
+          <Link to="/auctionmanager/requests" className="text-orange-600 font-bold hover:opacity-80 transition">
             See More
           </Link>
         </div>
@@ -109,7 +109,7 @@ export default function Dashboard() {
           )}
         </div>
         <div className="text-center mt-6">
-          <Link to="/auction-manager/pending" className="text-orange-600 font-bold hover:opacity-80 transition">
+          <Link to="/auctionmanager/pending" className="text-orange-600 font-bold hover:opacity-80 transition">
             See More
           </Link>
         </div>
@@ -136,7 +136,7 @@ export default function Dashboard() {
           )}
         </div>
         <div className="text-center mt-6">
-          <Link to="/auction-manager/approved" className="text-orange-600 font-bold hover:opacity-80 transition">
+          <Link to="/auctionmanager/approved" className="text-orange-600 font-bold hover:opacity-80 transition">
             See More
           </Link>
         </div>

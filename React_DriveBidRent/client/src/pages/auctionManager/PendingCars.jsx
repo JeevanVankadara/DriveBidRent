@@ -76,14 +76,13 @@ export default function PendingCars() {
             
             <div className="flex items-end">
               <Link
-                to={`/auction-manager/pending-car-details/${car._id}`}
+                to={`/auctionmanager/pending-car-details/${car._id}`}
                 className="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition"
               >
                 View Details
               </Link>
             </div>
           </div>
-        ))
       ) : (
         <div className="text-center py-16 text-gray-600 text-lg">
           No pending cars available

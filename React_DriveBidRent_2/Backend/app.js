@@ -16,6 +16,8 @@ import "./models/RentalRequest.js";
 import "./models/AuctionRequest.js";
 import "./models/Chat.js";
 import "./models/Message.js";
+import "./models/InspectionChat.js";
+import "./models/InspectionMessage.js";
 
 // === ROUTES ===
 import authRoutes from "./routes/auth.routes.js";
@@ -33,6 +35,7 @@ import adminMiddleware from "./middlewares/admin.middleware.js";
 import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
 import buyerMiddleware from "./middlewares/buyer.middleware.js";
 import chatRoutes from './routes/chat.routes.js';
+import inspectionChatRoutes from './routes/inspectionChat.routes.js';
 
 // Resolve __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -74,11 +77,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/seller", sellerMiddleware, sellerRoutes);
 app.use("/api/buyer", buyerMiddleware, buyerRoutes);
-app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes);   // NEW
+app.use("/api/auctionmanager", auctionManagerMiddleware, auctionManagerRoutes);   // NEW
 app.use("/api/mechanic", mechanicMiddleware, mechanicRoutes);                     // NEW
 app.use("/api/admin", adminMiddleware, adminRoutes);                              // NEW
 // Chat routes (requires auth cookie or Authorization header)
 app.use('/api/chat', chatRoutes);
+// Inspection chat routes (auction manager <-> mechanic)
+app.use('/api/inspection-chat', inspectionChatRoutes);
 
 // === PRODUCTION: Serve React/Vite Build (SPA Support) ===
 if (process.env.NODE_ENV === "production") {

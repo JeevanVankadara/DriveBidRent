@@ -47,7 +47,7 @@ export default function PendingCarDetails() {
         alert(`Vehicle ${newStatus} successfully!`);
           if (newStatus === 'approved') {
             // redirect to Approved Cars page after approval
-            navigate('/auction-manager/approved');
+            navigate('/auctionmanager/approved');
           }
       }
     } catch (err) {

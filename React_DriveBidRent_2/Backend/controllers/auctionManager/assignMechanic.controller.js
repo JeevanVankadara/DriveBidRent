@@ -1,7 +1,7 @@
 // controllers/auctionManager/assignMechanic.controller.js
 import AuctionRequest from '../../models/AuctionRequest.js';
 import User from '../../models/User.js';
-import Chat from '../../models/Chat.js';
+import InspectionChat from '../../models/InspectionChat.js';
 
 const send = (success, message, data = null) => ({
   success,
@@ -54,32 +54,36 @@ export const assignMechanic = async (req, res) => {
       return res.json(send(true, 'Mechanic assigned successfully, but failed to update mechanic record'));
     }
 
-    // Auto-create an inspection chat for this assignment (one per mechanic + task)
+    // Auto-create an inspection chat for this assignment (one per task) using InspectionChat model
+    let chatDoc = null;
     try {
-      const exists = await Chat.findOne({
-        type: 'inspection',
-        mechanic: mechanicId,
-        inspectionTask: updated._id
-      });
+      let existingChat = await InspectionChat.findOne({ inspectionTask: updated._id });
 
-      if (!exists) {
-        await Chat.create({
-          type: 'inspection',
+      if (!existingChat) {
+        const created = await InspectionChat.create({
           mechanic: mechanicId,
-          auctionManager: req.user?._id || null,
+          auctionManager: req.user._id,
           inspectionTask: updated._id,
-          car: updated._id,
-          carModel: 'AuctionRequest',
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days by default
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           title: `Inspection: ${updated.vehicleName}`
         });
+        console.log('InspectionChat created for:', updated.vehicleName, 'id=', created._id);
+        chatDoc = created;
+      } else {
+        chatDoc = existingChat;
+      }
+
+      if (chatDoc) {
+        chatDoc = await InspectionChat.findById(chatDoc._id)
+          .populate('mechanic', 'firstName lastName _id')
+          .populate('auctionManager', 'firstName lastName _id')
+          .populate({ path: 'inspectionTask', select: 'vehicleName vehicleImage _id' });
       }
     } catch (cErr) {
-      console.error('Failed to create inspection chat:', cErr);
-      // Non-fatal: respond success but inform in logs
+      console.error('Failed to create or fetch InspectionChat:', cErr);
     }
 
-    res.json(send(true, 'Mechanic assigned successfully'));
+    res.json(send(true, 'Mechanic assigned successfully', { chat: chatDoc }));
   } catch (err) {
     console.error('Assign mechanic save error:', err);
     res.json(send(false, 'Failed to assign mechanic'));

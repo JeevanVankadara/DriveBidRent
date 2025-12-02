@@ -5,7 +5,7 @@ import InspectionChatBubble from '../../components/inspection/InspectionChatBubb
 import InspectionMessageInput from '../../components/inspection/InspectionMessageInput';
 import InspectionChatHeader from '../../components/inspection/InspectionChatHeader';
 
-export default function ChatRoomMechanic({ chatIdProp }) {
+export default function ChatRoomAuctionManager({ chatIdProp }) {
   const { chatId: chatIdFromParam } = useParams();
   const chatId = chatIdProp || chatIdFromParam;
   const [chat, setChat] = useState(null);
@@ -48,31 +48,36 @@ export default function ChatRoomMechanic({ chatIdProp }) {
     (async () => {
       try {
         const res = await axiosInstance.get(`/inspection-chat/${chatId}`);
-        console.log('=== MECHANIC CHAT API RESPONSE DEBUG ===');
+        console.log('=== DETAILED API RESPONSE DEBUG ===');
         console.log('Full API Response:', JSON.stringify(res.data, null, 2));
         
         const data = res.data.data || res.data || {};
         const chatData = data.chat || data || null;
         
-        console.log('=== MECHANIC CHAT DATA STRUCTURE ===');
+        console.log('=== CHAT DATA STRUCTURE ===');
         console.log('chatData:', JSON.stringify(chatData, null, 2));
         
         if (chatData) {
-          console.log('=== MECHANIC IMAGE PATHS DEBUG ===');
+          console.log('=== IMAGE PATHS DEBUG ===');
           console.log('inspectionTask:', chatData.inspectionTask);
           console.log('vehicleImage:', chatData.inspectionTask?.vehicleImage);
           console.log('carImage:', chatData.inspectionTask?.carImage);
+          console.log('image:', chatData.inspectionTask?.image);
+          console.log('Any other image fields:', Object.keys(chatData.inspectionTask || {}).filter(key => key.toLowerCase().includes('image')));
           
-          console.log('=== MECHANIC USER DATA DEBUG ===');
+          console.log('=== USER DATA DEBUG ===');
           console.log('mechanic:', chatData.mechanic);
           console.log('auctionManager:', chatData.auctionManager);
+          console.log('manager:', chatData.manager);
         }
         
         setChat(chatData);
         // prefer API-provided myUserId, but fall back to stored local user
         const storedUser = (() => { try { return JSON.parse(localStorage.getItem('user')); } catch (e) { return null; } })();
         const userId = data.myUserId || storedUser?._id || storedUser?.id || null;
-        console.log('=== MECHANIC USER ID DEBUG ===');
+        console.log('=== USER ID DEBUG ===');
+        console.log('myUserId from API:', data.myUserId);
+        console.log('storedUser:', storedUser);
         console.log('Final userId:', userId);
         setMyUserId(userId);
       } catch (err) {
@@ -144,9 +149,7 @@ export default function ChatRoomMechanic({ chatIdProp }) {
           const latestMs = newMsgs.reduce((acc, m) => Math.max(acc, new Date(m.updatedAt || m.createdAt).getTime()), 0);
           setLastFetchedAt(new Date(latestMs).toISOString());
         }
-      } catch (err) {
-        console.error(err);
-      }
+      } catch (err) { console.error(err); }
     }, 3000);
 
     return () => { mounted = false; clearInterval(id); };
@@ -173,7 +176,7 @@ export default function ChatRoomMechanic({ chatIdProp }) {
   if (!chatId) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50 text-lg">
-        Select an inspection to start chatting
+        Select a mechanic to view messages
       </div>
     );
   }
@@ -188,7 +191,7 @@ export default function ChatRoomMechanic({ chatIdProp }) {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto py-4 bg-gray-50">
         {messages.map(m => {
           const isOwn = myUserId && m.sender && (String(m.sender._id) === String(myUserId) || String(m.sender.id) === String(myUserId));
-          console.log('Mechanic Message alignment - messageId:', m._id, 'senderId:', m.sender?._id, 'myUserId:', myUserId, 'isOwn:', isOwn);
+          console.log('AuctionManager Message alignment - messageId:', m._id, 'senderId:', m.sender?._id, 'myUserId:', myUserId, 'isOwn:', isOwn);
           return (
             <InspectionChatBubble key={m._id} message={m} isOwn={isOwn} />
           );

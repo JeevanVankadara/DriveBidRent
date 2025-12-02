@@ -61,7 +61,7 @@ import PendingCarDetails from './pages/auctionManager/PendingCarDetails';
 import PendingCars from './pages/auctionManager/PendingCars';
 import Requests from './pages/auctionManager/Requests';
 import ViewBidsPage from './pages/auctionManager/ViewBids';
-import ChatPageAuctionManager from './pages/auction-manager/ChatPageAuctionManager';
+import ChatPageAuctionManager from './pages/auctionManager/ChatPageAuctionManager';
 
 // === MECHANIC ===
 import MechanicLayout from './pages/mechanic/MechanicLayout';
@@ -77,7 +77,7 @@ function App() {
   return (
     <Routes>
       {/* === LEGACY REDIRECTS === */}
-      <Route path="/auction-manager-dashboard" element={<Navigate to="/auction-manager" replace />} />
+      <Route path="/auctionmanager-dashboard" element={<Navigate to="/auctionmanager" replace />} />
       <Route path="/buyer-dashboard" element={<Navigate to="/buyer" replace />} />
 
       {/* === PUBLIC ROUTES === */}
@@ -135,7 +135,7 @@ function App() {
       </Route>
 
       {/* === AUCTION MANAGER SPA === */}
-      <Route path="/auction-manager" element={<AuctionManagerLayout />}>
+      <Route path="/auctionmanager" element={<AuctionManagerLayout />}>
         <Route index element={<AuctionManagerDashboard />} />
         <Route path="dashboard" element={<AuctionManagerDashboard />} />
         <Route path="requests" element={<Requests />} />

@@ -1,11 +1,12 @@
 // client/src/pages/auctionManager/AssignMechanic.jsx
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from './components/LoadingSpinner';
 
 export default function AssignMechanic() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [request, setRequest] = useState(null);
   const [mechanics, setMechanics] = useState([]);
   const [selected, setSelected] = useState('');
@@ -59,6 +60,12 @@ export default function AssignMechanic() {
       
       if (responseData.success) {
         setAssigned(true);
+        const chat = responseData.data?.chat;
+        if (chat && chat._id) {
+          // navigate to the auction manager chat view for this inspection
+          navigate(`/auctionmanager/chats/${chat._id}`);
+          return;
+        }
       } else {
         alert(responseData.message || 'Failed to assign mechanic');
       }

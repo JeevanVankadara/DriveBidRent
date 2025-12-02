@@ -98,9 +98,9 @@ export default function ApprovedCars() {
                 >
                   Start Auction
                 </button>
-              ) : (
+                ) : (
                 <Link
-                  to={`/auction-manager/view-bids/${car._id}`}
+                  to={`/auctionmanager/view-bids/${car._id}`}
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition text-center"
                 >
                   View Bids

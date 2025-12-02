@@ -3,7 +3,7 @@ import axiosInstance from '../../utils/axiosInstance.util';
 import { useParams } from 'react-router-dom';
 import ChatBubble from '../../components/chat/ChatBubble';
 import MessageInput from '../../components/chat/MessageInput';
-import ChatHeader from '../../components/chat/ChatHeader';
+import RentalChatHeader from '../../components/chat/RentalChatHeader';
 
 export default function ChatRoomBuyer({ chatIdProp }) {
   const { chatId: chatIdFromParam } = useParams();
@@ -164,11 +164,15 @@ export default function ChatRoomBuyer({ chatIdProp }) {
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader chat={chat} otherUser={chat?.seller} carName={chat?.rentalRequest?.vehicleName} rentalPeriod={`${chat?.rentalRequest ? new Date(chat?.rentalRequest?.pickupDate).toLocaleDateString() + ' - ' + new Date(chat?.rentalRequest?.dropDate).toLocaleDateString() : ''}`} />
-      <div ref={scrollContainerRef} className="p-4 flex-1 overflow-auto flex flex-col">
-        {messages.map(m => (
-          <ChatBubble key={m._id} message={m} isOwn={myUserId && m.sender && m.sender._id === myUserId} />
-        ))}
+      <RentalChatHeader chat={chat} otherUser={chat?.seller} carName={chat?.rentalRequest?.vehicleName} rentalPeriod={`${chat?.rentalRequest ? new Date(chat?.rentalRequest?.pickupDate).toLocaleDateString() + ' - ' + new Date(chat?.rentalRequest?.dropDate).toLocaleDateString() : ''}`} />
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto py-4 bg-gray-50">
+        {messages.map(m => {
+          const isOwn = myUserId && m.sender && (String(m.sender._id) === String(myUserId) || String(m.sender.id) === String(myUserId));
+          console.log('Buyer Message alignment - messageId:', m._id, 'senderId:', m.sender?._id, 'myUserId:', myUserId, 'isOwn:', isOwn);
+          return (
+            <ChatBubble key={m._id} message={m} isOwn={isOwn} />
+          );
+        })}
         <div ref={messagesRef} />
       </div>
       {expired ? <div className="p-2 text-center text-sm text-gray-600">Chat expired and is read-only</div> : <MessageInput onSend={handleSend} disabled={expired} />}

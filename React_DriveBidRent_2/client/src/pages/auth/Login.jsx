@@ -41,7 +41,7 @@ const Login = () => {
           finalRedirect = "/mechanic/dashboard";
 
         if (finalRedirect === "/buyer-dashboard") finalRedirect = "/buyer";
-        if (finalRedirect === "/auction-manager-dashboard") finalRedirect = "/auction-manager";
+        if (finalRedirect === "/auctionmanager-dashboard") finalRedirect = "/auctionmanager";
 
         if ((!redirectUrl || redirectUrl === "/") && loggedUser?.userType) {
           const map = {
@@ -50,7 +50,7 @@ const Login = () => {
             driver: "/driver-dashboard",
             mechanic: "/mechanic/dashboard",
             admin: "/admin/dashboard",
-            auction_manager: "/auction-manager",
+            auction_manager: "/auctionmanager",
           };
           finalRedirect = map[loggedUser.userType] || "/";
         }

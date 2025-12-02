@@ -26,6 +26,46 @@ export default function ChatListItem({ chat, onClick, isSelected, viewerIsBuyer 
   // Compare current user to chat.buyer to determine buyer-vs-seller for badge rules
   const isCurrentUserBuyer = String(currentUserId) === String(chat.buyer?.id || chat.buyer || '');
 
+  // Special rendering for inspection chats (show car image + auctionManager/mechanic info)
+  if (chat?.type === 'inspection') {
+    const isCurrentUserMechanic = String(currentUserId) === String((chat.mechanic && (chat.mechanic._id || chat.mechanic)) || '');
+    return (
+      <div
+        onClick={() => onClick && onClick(chat._id)}
+        className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-all cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-orange-50' : ''}`}
+      >
+        <img 
+          src={chat.inspectionTask?.vehicleImage || '/placeholder-car.jpg'} 
+          alt="car"
+          className="w-14 h-14 rounded-full object-cover border-2 border-orange-500"
+        />
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-gray-900 truncate">
+            {chat.inspectionTask?.vehicleName || 'Vehicle Inspection'}
+          </h3>
+          <p className="text-sm text-gray-600">
+            {isCurrentUserMechanic
+              ? chat.auctionManager && `${chat.auctionManager.firstName} ${chat.auctionManager.lastName || ''}`
+              : chat.mechanic && `${chat.mechanic.firstName} ${chat.mechanic.lastName || ''}`
+            }
+          </p>
+        </div>
+        <div className="text-right">
+          <span className="text-xs text-gray-500">
+            {new Date(chat.lastMessageAt || chat.createdAt).toLocaleDateString('en-GB')}
+          </span>
+          <div className="mt-1">
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+              isCurrentUserMechanic ? 'bg-orange-500 text-white' : 'bg-indigo-600 text-white'
+            }`}>
+              {isCurrentUserMechanic ? 'INSPECTION' : 'MECHANIC'}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       onClick={() => onClick && onClick(chat._id)}
@@ -61,16 +101,7 @@ export default function ChatListItem({ chat, onClick, isSelected, viewerIsBuyer 
         </span>
 
         {/* Role Badge */}
-        {chat?.type === 'inspection' ? (
-          (() => {
-            const isCurrentUserMechanic = String(currentUserId) === String(chat.mechanic || '');
-            return (
-              <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${isCurrentUserMechanic ? 'bg-orange-500 text-white' : 'bg-indigo-600 text-white'}`}>
-                {isCurrentUserMechanic ? 'INSPECTION ASSIGNED' : 'MECHANIC ASSIGNED'}
-              </span>
-            );
-          })()
-        ) : isAuction ? (
+        {isAuction ? (
           <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
             isCurrentUserBuyer
               ? 'bg-yellow-400 text-black'    // Buyer: YOU WON

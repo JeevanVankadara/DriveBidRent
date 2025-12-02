@@ -71,7 +71,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/seller", sellerMiddleware, sellerRoutes);
 app.use("/api/buyer", buyerMiddleware, buyerRoutes);
-app.use("/api/auction-manager", auctionManagerMiddleware, auctionManagerRoutes);   // NEW
+app.use("/api/auctionmanager", auctionManagerMiddleware, auctionManagerRoutes);   // RENAMED
 app.use("/api/mechanic", mechanicMiddleware, mechanicRoutes);                     // NEW
 app.use("/api/admin", adminMiddleware, adminRoutes);                              // NEW
 

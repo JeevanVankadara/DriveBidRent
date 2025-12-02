@@ -3,7 +3,7 @@ import axiosInstance from '../../utils/axiosInstance.util';
 import { Link } from 'react-router-dom';
 import InspectionChatListItem from '../../components/inspection/InspectionChatListItem';
 
-export default function ChatListMechanic({ onSelect, selectedId }) {
+export default function ChatListAuctionManager({ onSelect, selectedId }) {
   const [chats, setChats] = useState([]);
   const currentUserId = JSON.parse(localStorage.getItem('user') || '{}')?._id;
 
@@ -23,7 +23,7 @@ export default function ChatListMechanic({ onSelect, selectedId }) {
   return (
     <div className="w-80 border-r bg-white flex flex-col">
       <div className="p-5 border-b">
-        <h2 className="text-2xl font-bold text-gray-800">Inspections</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Assigned Mechanics</h2>
       </div>
       <div className="flex-1 overflow-y-auto">
         {chats.map(chat => {
@@ -39,7 +39,7 @@ export default function ChatListMechanic({ onSelect, selectedId }) {
               <InspectionChatListItem chat={chat} isSelected={isSelected} viewerIsBuyer={false} currentUserId={currentUserId} />
             </div>
           ) : (
-            <Link key={chat._id} to={`/mechanic/chats/${chat._id}`}>
+            <Link key={chat._id} to={`/auctionmanager/chats/${chat._id}`}>
               <div className={`p-3 border-b transition-all ${isSelected ? 'bg-orange-50 border-orange-300' : 'hover:bg-gray-50'}`}>
                 <InspectionChatListItem chat={chat} isSelected={isSelected} viewerIsBuyer={false} currentUserId={currentUserId} />
               </div>

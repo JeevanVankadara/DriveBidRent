@@ -8,9 +8,14 @@ export default function ChatPageAuctionManager() {
   const navigate = useNavigate();
   const [selectedChatId, setSelectedChatId] = useState(chatIdFromParam || null);
 
-  useEffect(() => { setSelectedChatId(chatIdFromParam || null); }, [chatIdFromParam]);
+  useEffect(() => {
+    setSelectedChatId(chatIdFromParam || null);
+  }, [chatIdFromParam]);
 
-  const handleSelect = (id) => { setSelectedChatId(id); navigate(`/auction-manager/chats/${id}`); };
+  const handleSelect = (id) => {
+    setSelectedChatId(id);
+    navigate(`/auctionmanager/chats/${id}`);
+  };
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-white">

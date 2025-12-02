@@ -34,7 +34,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           <Link 
-            to="/auction-manager/dashboard" 
+            to="/auctionmanager/dashboard" 
             className="text-2xl font-bold text-orange-600"
           >
             DriveBidRent
@@ -42,7 +42,7 @@ export default function Navbar() {
           
           <div className="hidden md:flex items-center space-x-8">
             <Link 
-              to="/auction-manager/dashboard" 
+              to="/auctionmanager/dashboard" 
               className={`font-medium transition ${
                 isActive('/dashboard') 
                   ? 'text-orange-600' 
@@ -52,7 +52,7 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link 
-              to="/auction-manager/requests" 
+              to="/auctionmanager/requests" 
               className={`font-medium transition ${
                 isActive('/requests') 
                   ? 'text-orange-600' 
@@ -62,7 +62,7 @@ export default function Navbar() {
               Requests
             </Link>
             <Link 
-              to="/auction-manager/pending" 
+              to="/auctionmanager/pending" 
               className={`font-medium transition ${
                 isActive('/pending') 
                   ? 'text-orange-600' 
@@ -72,7 +72,7 @@ export default function Navbar() {
               Pending Cars
             </Link>
             <Link 
-              to="/auction-manager/approved" 
+              to="/auctionmanager/approved" 
               className={`font-medium transition ${
                 isActive('/approved') 
                   ? 'text-orange-600' 
@@ -82,7 +82,7 @@ export default function Navbar() {
               Approved Cars
             </Link>
             <Link 
-              to="/auction-manager/chats" 
+              to="/auctionmanager/chats" 
               className={`font-medium transition ${
                 isActive('/chats') 
                   ? 'text-orange-600' 
@@ -95,7 +95,7 @@ export default function Navbar() {
           
           <div className="flex items-center space-x-4">
             <Link
-              to="/auction-manager/profile"
+              to="/auctionmanager/profile"
               className="text-orange-600 font-medium hover:text-orange-700 transition"
             >
               Profile

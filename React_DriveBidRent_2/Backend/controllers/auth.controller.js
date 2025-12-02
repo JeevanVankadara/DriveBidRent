@@ -157,7 +157,7 @@ const authController = {
         driver: "/driver-dashboard",        // Adjust if you have a driver layout
         mechanic: "/mechanic/dashboard",    // Correct
         admin: "/admin",                    // Updated: now uses /admin base
-        auction_manager: "/auction-manager" // Correct
+        auction_manager: "/auctionmanager" // Updated to match frontend
       };
 
       const redirectUrl = redirectMap[user.userType] || "/";
