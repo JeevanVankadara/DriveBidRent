@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { getMyBids } from "../../services/buyer.services";
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { getMyBids } from '../../services/buyer.services';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function MyBids() {
   const [auctionsWithBids, setAuctionsWithBids] = useState([]);
@@ -35,14 +36,7 @@ export default function MyBids() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-3xl font-bold text-orange-500">
-          Loading your bids...
-        </p>
-      </div>
-    );
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">

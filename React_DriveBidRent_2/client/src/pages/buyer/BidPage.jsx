@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { getAuctionById, placeBid } from '../../services/buyer.services';
 import useProfile from '../../hooks/useProfile';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function BidPage() {
   const { id } = useParams();
@@ -68,7 +69,7 @@ export default function BidPage() {
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!auction) return <div className="text-center py-10">Auction not found</div>;
 
   if (!isLoggedIn) {

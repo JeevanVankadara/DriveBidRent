@@ -2,7 +2,7 @@
 import { Outlet } from 'react-router-dom';
 import { Component } from 'react';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Footer from '../components/Footer';
 
 class ErrorBoundary extends Component {
   constructor(props) {

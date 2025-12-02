@@ -5,6 +5,7 @@ import DatePickerModal from './components/modals/DatePickerModal';
 import PaymentModal from './components/modals/PaymentModal';
 import ProcessingModal from './components/modals/ProcessingModal';
 import SuccessModal from './components/modals/SuccessModal';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function BookRental() {
   const { id } = useParams();
@@ -74,7 +75,7 @@ export default function BookRental() {
     navigate('/buyer/purchases');
   };
 
-  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!rental) return <div className="text-center py-10">Rental not found</div>;
 
   return (

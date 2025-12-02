@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Requests() {
   const [requests, setRequests] = useState([]);
@@ -30,7 +30,7 @@ export default function Requests() {
     fetchRequests();
   }, []);
 
-  if (loading) return <LoadingSpinner message="Loading requests..." />;
+  if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (

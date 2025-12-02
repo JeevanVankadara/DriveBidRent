@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import './AuctionDetails.css';
 import { useParams } from 'react-router-dom';
 import { getAuctionById, placeBid } from '../../services/buyer.services';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function AuctionDetails() {
   const { id } = useParams();
@@ -97,13 +98,7 @@ export default function AuctionDetails() {
     setError('');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-3xl font-bold text-orange-600 animate-pulse">Loading auction details...</div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   if (!auction) {
     return (

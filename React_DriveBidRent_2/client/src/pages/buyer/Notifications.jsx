@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -116,13 +117,7 @@ export default function Notifications() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <p className="text-xl text-orange-600">Loading notifications...</p>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 min-h-[calc(100vh-200px)]">

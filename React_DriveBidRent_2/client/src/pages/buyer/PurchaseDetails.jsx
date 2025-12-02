@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getPurchaseDetails, createOrGetChatForPurchase } from '../../services/buyer.services';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function PurchaseDetails() {
   const { id } = useParams();
@@ -23,16 +24,7 @@ export default function PurchaseDetails() {
     fetchPurchaseDetails();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-2xl font-semibold text-gray-700">Loading purchase details...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   if (!purchase) {
     return (

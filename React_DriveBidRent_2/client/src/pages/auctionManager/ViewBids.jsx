@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ViewBids() {
   const { id } = useParams();
@@ -62,7 +62,7 @@ export default function ViewBids() {
     }
   };
 
-  if (loading) return <LoadingSpinner message="Loading bids..." />;
+  if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (

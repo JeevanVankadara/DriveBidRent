@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import Footer from '../components/Footer'
 
 const HomePage = () => {
   const [topRentals, setTopRentals] = useState([]);
@@ -79,7 +80,7 @@ const HomePage = () => {
         }
         .logo {
           font-size: 2rem;
-          font-weight: bold;
+          font-weight: 800; /* Increased from bold to 800 */
           text-transform: uppercase;
           letter-spacing: 1px;
           color: #ff6b00;
@@ -96,7 +97,7 @@ const HomePage = () => {
           text-decoration: none;
           color: #333333;
           font-size: 1.3rem;
-          font-weight: 500;
+          font-weight: 600; /* Increased from 500 to 600 */
           transition: color 0.3s ease, transform 0.3s ease;
           cursor: pointer;
         }
@@ -114,7 +115,7 @@ const HomePage = () => {
           border: 1px solid #ff6b00;
           cursor: pointer;
           font-size: 16px;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           transition: all 0.3s ease;
           border-radius: 5px;
         }
@@ -159,18 +160,19 @@ const HomePage = () => {
         }
         .hero-content h1 {
           font-size: 3rem;
-          font-weight: bold;
+          font-weight: 800; /* Increased from bold to 800 */
           color: #ff6b00;
         }
         .hero-content p {
           font-size: 1.5rem;
           margin-top: 10px;
           color: #333333;
+          font-weight: 500; /* Added font-weight */
         }
         .cta-btn {
           padding: 12px 24px;
           font-size: 1.2rem;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           background: #ff6b00;
           color: white;
           border: none;
@@ -191,12 +193,14 @@ const HomePage = () => {
           font-size: 28px;
           margin-bottom: 15px;
           color: #ff6b00;
+          font-weight: 700; /* Added font-weight */
         }
         .about p {
           font-size: 18px;
           color: #666666;
           max-width: 800px;
           margin: auto;
+          font-weight: 500; /* Added font-weight */
         }
         .join-us {
           text-align: center;
@@ -206,7 +210,7 @@ const HomePage = () => {
         .join-us h2 {
           font-size: 2rem;
           margin-bottom: 20px;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: #ff6b00;
         }
         .join-container {
@@ -235,16 +239,18 @@ const HomePage = () => {
           font-size: 1.4rem;
           margin: 10px 0;
           color: #ff6b00;
+          font-weight: 600; /* Added font-weight */
         }
         .join-box p {
           font-size: 1rem;
           color: #666666;
           margin: 10px 0;
+          font-weight: 500; /* Added font-weight */
         }
         .join-btn {
           padding: 10px 20px;
           font-size: 1rem;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: white;
           background: #ff6b00;
           border: none;
@@ -264,7 +270,7 @@ const HomePage = () => {
         .top-rentals h2 {
           font-size: 2rem;
           margin-bottom: 20px;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: #ff6b00;
         }
         .rental-container {
@@ -296,18 +302,19 @@ const HomePage = () => {
           font-size: 1.4rem;
           margin: 10px 0;
           color: #ff6b00;
+          font-weight: 600; /* Added font-weight */
         }
         .rental-box p {
           font-size: 1.2rem;
           color: #333333;
-          font-weight: bold;
+          font-weight: 600; /* Increased from bold to 600 */
         }
         .rent-btn {
           display: inline-block;
           margin-top: 10px;
           padding: 10px 20px;
           font-size: 1rem;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: white;
           background: #ff6b00;
           border: none;
@@ -326,7 +333,7 @@ const HomePage = () => {
         .top-auctions h2 {
           font-size: 2rem;
           margin-bottom: 20px;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: #ff6b00;
         }
         .auction-container {
@@ -358,18 +365,19 @@ const HomePage = () => {
           font-size: 1.4rem;
           margin: 10px 0;
           color: #ff6b00;
+          font-weight: 600; /* Added font-weight */
         }
         .auction-box p {
           font-size: 1.2rem;
           color: #333333;
-          font-weight: bold;
+          font-weight: 600; /* Increased from bold to 600 */
         }
         .bid-btn {
           display: inline-block;
           margin-top: 10px;
           padding: 10px 20px;
           font-size: 1rem;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: white;
           background: #ff6b00;
           border: none;
@@ -388,7 +396,7 @@ const HomePage = () => {
           display: inline-block;
           padding: 10px 20px;
           font-size: 1rem;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: white;
           background: #ff6b00;
           border: none;
@@ -408,7 +416,7 @@ const HomePage = () => {
         .vehicle-types h2 {
           font-size: 2rem;
           margin-bottom: 20px;
-          font-weight: bold;
+          font-weight: 700; /* Increased from bold to 700 */
           color: #ff6b00;
         }
         .vehicle-container {
@@ -444,6 +452,7 @@ const HomePage = () => {
           font-size: 1.4rem;
           margin: 10px 0;
           color: #ff6b00;
+          font-weight: 600; /* Added font-weight */
         }
         footer {
           margin-top: 80px;
@@ -470,6 +479,7 @@ const HomePage = () => {
           display: inline-block;
           padding-bottom: 5px;
           margin-bottom: 15px;
+          font-weight: 600; /* Added font-weight */
         }
         .footercontainer ul {
           list-style: none;
@@ -477,11 +487,13 @@ const HomePage = () => {
         }
         .footercontainer ul li {
           margin: 8px 0;
+          font-weight: 500; /* Added font-weight */
         }
         .footercontainer ul li a {
           color: white;
           text-decoration: none;
           transition: 0.3s;
+          font-weight: 500; /* Added font-weight */
         }
         .footercontainer ul li a:hover {
           color: #ff6b00;
@@ -489,10 +501,12 @@ const HomePage = () => {
         }
         .footercontainer p {
           margin: 8px 0;
+          font-weight: 500; /* Added font-weight */
         }
         .footercontainer a {
           color: white;
           text-decoration: none;
+          font-weight: 500; /* Added font-weight */
         }
         .footercontainer a:hover {
           color: #ff6b00;
@@ -516,6 +530,7 @@ const HomePage = () => {
           margin-top: 20px;
           font-size: 14px;
           opacity: 0.8;
+          font-weight: 500; /* Added font-weight */
         }
       `}</style>
 
@@ -666,38 +681,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <footer>
-        <div className="footerbox">
-          <div className="footercontainer">
-            <h3>Quick links</h3>
-            <ul>
-              <li><a href="#Mypurchases">My purchases</a></li>
-              <li><a href="#Wishlist">Wishlist</a></li>
-              <li><a href="#Notifications">Notifications</a></li>
-              <li><a href="#Aboutus">About Us</a></li>
-            </ul>
-          </div>
-          <div className="footercontainer">
-            <h3>Contact us</h3>
-            <p>
-              <strong>email :</strong>
-              <a href="mailto:jeevanvankadara@gmail.com">jeevanvankadara@gmail.com</a>
-            </p>
-            <p>
-              <strong>Phone no :</strong><a href="tel:9876543210">9876543210</a>
-            </p>
-            <p><strong>Address :</strong>sb-2,sagar colony,hyderabad</p>
-          </div>
-          <div className="footercontainer">
-            <h3>Follow us</h3>
-            <br /><br />
-            <a href="#instagram"><img src="/css/photos/instagram.png" alt="instagram" className="soc-med-img" /></a>
-            <a href="#facebook"><img src="/css/photos/facebook.png" alt="facebook" className="soc-med-img" /></a>
-            <a href="#X"><img src="/css/photos/X.png" alt="X" className="soc-med-img" /></a>
-          </div>
-        </div>
-        <p className="footer-copy">© 2025 DriveBidRent | All rights reserved.</p>
-      </footer>
+        <Footer />
     </>
   );
 };

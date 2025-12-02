@@ -1,6 +1,8 @@
 // client/src/pages/buyer/PurchasesList.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import LoadingSpinner from '../components/LoadingSpinner';
+
 import {
   getPurchases,
   getAuctionPaymentDetails,
@@ -61,13 +63,7 @@ export default function PurchasesList() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-3xl font-bold text-orange-500">Loading purchases...</p>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function AssignMechanic() {
   const { id } = useParams();
@@ -76,7 +76,7 @@ export default function AssignMechanic() {
     }
   };
 
-  if (loading) return <LoadingSpinner message="Loading vehicle details..." />;
+  if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (

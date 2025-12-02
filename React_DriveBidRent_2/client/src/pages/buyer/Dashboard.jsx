@@ -9,6 +9,7 @@ import {
   getUnreadNotificationCount,
 } from "../../services/buyer.services";
 import CarCard from "./components/CarCard";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Dashboard = () => {
   const [featuredAuctions, setFeaturedAuctions] = useState([]);
@@ -65,13 +66,7 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-2xl font-bold text-orange-500">
-        Loading your dashboard...
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">

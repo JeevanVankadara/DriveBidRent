@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ApprovedCars() {
   const [cars, setCars] = useState([]);
@@ -80,7 +80,7 @@ export default function ApprovedCars() {
       return order[getCarStatus(a)] - order[getCarStatus(b)];
     });
 
-  if (loading) return <LoadingSpinner message="Loading approved cars..." />;
+  if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (

@@ -132,7 +132,7 @@ export default function Profile() {
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading profile...</div>;
+  if (loading) return <LoadingSpinner />;
 
   const css = `
       :root {

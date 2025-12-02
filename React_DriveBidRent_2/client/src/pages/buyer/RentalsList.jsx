@@ -96,13 +96,7 @@ export default function RentalsList() {
     setSearchParams({});
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-3xl font-bold text-orange-500 animate-pulse">Loading rentals...</p>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Dashboard() {
   const [data, setData] = useState({ pending: [], assigned: [], approved: [] });
@@ -29,7 +29,7 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  if (loading) return <LoadingSpinner message="Loading Dashboard..." />;
+  if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (
