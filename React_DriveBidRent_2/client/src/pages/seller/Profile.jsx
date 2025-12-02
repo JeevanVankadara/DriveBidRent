@@ -5,10 +5,12 @@ import { useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance.util';
 import { updateMyProfile } from '../../redux/slices/profileSlice';
 import useProfile from '../../hooks/useProfile';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Profile = () => {
   const dispatch = useDispatch();
   const { profile: reduxProfile, loading: profileLoading, refresh } = useProfile();
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -51,21 +53,25 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const earningsRes = await axiosInstance.get('/seller/view-earnings');
+        // Fetch all data in parallel for faster loading
+        const [earningsRes, auctionsRes, rentalsRes] = await Promise.all([
+          axiosInstance.get('/seller/view-earnings'),
+          axiosInstance.get('/seller/view-auctions'),
+          axiosInstance.get('/seller/view-rentals')
+        ]);
+
         if (earningsRes.data.success) {
           const { totalRentalEarnings, totalAuctionEarnings, recentEarnings } = earningsRes.data.data;
           setTotalEarnings(totalRentalEarnings + totalAuctionEarnings);
           setRecentTransactions(recentEarnings);
         }
 
-        // Optional: fetch counts
-        const auctionsRes = await axiosInstance.get('/seller/view-auctions');
         if (auctionsRes.data.success) setAuctionsCount(auctionsRes.data.data.length);
-
-        const rentalsRes = await axiosInstance.get('/seller/view-rentals');
         if (rentalsRes.data.success) setRentalsCount(rentalsRes.data.data.length);
       } catch (err) {
         setError('Failed to load profile data');
+      } finally {
+        setLoading(false);
       }
     };
     fetchProfileData();
@@ -97,6 +103,8 @@ const Profile = () => {
       setError(err || 'Failed to update preferences');
     }
   };
+
+  if (loading || profileLoading) return <LoadingSpinner />;
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const ViewAuctions = () => {
   const [auctions, setAuctions] = useState([]);
@@ -30,13 +31,7 @@ const ViewAuctions = () => {
     fetchAuctions();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading auctions...</div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const ViewBids = () => {
   const { id } = useParams();
   const [bids, setBids] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBids = async () => {
@@ -19,6 +21,8 @@ const ViewBids = () => {
         }
       } catch (err) {
         setError('Failed to load bids');
+      } finally {
+        setLoading(false);
       }
     };
     fetchBids();
@@ -57,6 +61,8 @@ const ViewBids = () => {
   };
 
   const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';
+
+  if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (

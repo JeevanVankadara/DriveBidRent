@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const ViewRentals = () => {
   const [rentals, setRentals] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRentals = async () => {
@@ -18,10 +20,14 @@ const ViewRentals = () => {
         }
       } catch (err) {
         setError('Failed to load rentals');
+      } finally {
+        setLoading(false);
       }
     };
     fetchRentals();
   }, []);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">

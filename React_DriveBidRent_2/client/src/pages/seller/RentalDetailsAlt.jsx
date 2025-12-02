@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const RentalDetailsAlt = () => {
   const { id } = useParams();
@@ -57,7 +58,7 @@ const RentalDetailsAlt = () => {
     );
   }
 
-  if (!rental) return <div className="text-center py-20">Loading...</div>;
+  if (!rental) return <LoadingSpinner />;
 
   const formattedPickupDate = rental.pickupDate
     ? new Date(rental.pickupDate).toLocaleDateString('en-GB')

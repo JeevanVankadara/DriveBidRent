@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const AuctionDetails = () => {
   const { id } = useParams();
@@ -37,11 +38,7 @@ const AuctionDetails = () => {
     </div>
   );
   
-  if (!auction) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-xl text-gray-600">Loading...</div>
-    </div>
-  );
+  if (!auction) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">

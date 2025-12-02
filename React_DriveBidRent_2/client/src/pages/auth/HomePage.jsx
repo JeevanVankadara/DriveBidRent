@@ -659,7 +659,7 @@ const HomePage = () => {
         <div className="join-container">
           <div className="join-box">
             <h3>Buyers</h3>
-            <p>Find the best deals on vehicles tailored to your needs.</p>
+            <p>Find best deals on vehicles tailored to your needs.</p>
             <button className="join-btn" onClick={() => handleAuth('/signup')}>
               Join as Buyer
             </button>
