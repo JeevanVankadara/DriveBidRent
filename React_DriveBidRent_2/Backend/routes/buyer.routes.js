@@ -7,7 +7,8 @@ import {
   placeBid,
   getAuctionWinnerStatus,
   getAuctionConfirmPayment,
-  completeAuctionPayment
+  completeAuctionPayment,
+  getCompletedAuctionDetails
 } from '../controllers/buyer/auctions.controller.js';
 import { getDashboardHome } from '../controllers/buyer/dashboard.controller.js';
 import { getMyBids } from '../controllers/buyer/my-bids.controller.js';
@@ -61,6 +62,7 @@ router.post('/auction/place-bid', buyerMiddleware, placeBid); // Legacy
 router.get('/auction/winner-status/:id', buyerMiddleware, getAuctionWinnerStatus);
 router.get('/auction/confirm-payment/:id', buyerMiddleware, getAuctionConfirmPayment);
 router.post('/auction/complete-payment/:id', buyerMiddleware, completeAuctionPayment);
+router.get('/auctions/:id/completed', buyerMiddleware, getCompletedAuctionDetails);
 
 // === MY BIDS ===
 router.get('/bids', buyerMiddleware, getMyBids);

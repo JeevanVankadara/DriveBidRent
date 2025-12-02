@@ -132,11 +132,10 @@ export default function Notifications() {
         <button
           onClick={markAllAsRead}
           disabled={notifications.length === 0}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-            notifications.length === 0
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${notifications.length === 0
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-orange-600 text-white hover:bg-orange-700'
-          }`}
+            }`}
         >
           Clear All Notifications
         </button>
@@ -144,11 +143,10 @@ export default function Notifications() {
 
       {/* Message Alert */}
       {message && (
-        <div className={`mb-6 p-4 rounded-lg border transition-all duration-300 ${
-          messageType === 'success'
+        <div className={`mb-6 p-4 rounded-lg border transition-all duration-300 ${messageType === 'success'
             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
             : 'bg-red-50 text-red-800 border-red-200'
-        }`}>
+          }`}>
           {message}
         </div>
       )}
@@ -160,14 +158,13 @@ export default function Notifications() {
             <div
               key={notification._id}
               onClick={() => !notification.isRead && markAsRead(notification._id)}
-              className={`bg-white rounded-xl p-6 shadow-sm border-l-4 border-orange-600 flex gap-4 transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer ${
-                !notification.isRead ? 'bg-orange-50' : ''
-              }`}
+              className={`bg-white rounded-xl p-6 shadow-sm border-l-4 border-orange-600 flex gap-4 transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer ${!notification.isRead ? 'bg-orange-50' : ''
+                }`}
             >
               {/* Icon */}
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getIconStyles(notification.type)}`}>
-                  <Icon type={notification.type} />
-                </div>
+              <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getIconStyles(notification.type)}`}>
+                <Icon type={notification.type} />
+              </div>
 
               {/* Content */}
               <div className="flex-1">
@@ -177,18 +174,19 @@ export default function Notifications() {
 
                 {/* Actions */}
                 {notification.auctionId && notification.type === 'outbid' && (
-                  <div className="flex gap-3 mt-4">
+                  <div className="flex gap-3 mt-4 flex-wrap">
                     <Link
-                      to={`/buyer/auctions/${notification.auctionId._id || notification.auctionId}`}
+                      to={`/buyer/completed-auction/${notification.auctionId._id || notification.auctionId}`}
                       className="px-5 py-2 bg-orange-600 text-white rounded-md font-medium hover:bg-orange-700 transition"
                     >
-                      View Auction
+                      View Bids
                     </Link>
                     <Link
-                      to={`/buyer/auctions/${notification.auctionId._id || notification.auctionId}`}
+                      to={`/buyer/completed-auction/${notification.auctionId._id || notification.auctionId}`}
                       className="px-5 py-2 bg-gray-600 text-white rounded-md font-medium hover:bg-gray-700 transition"
+                      title="View auction if it's still active"
                     >
-                      Place New Bid
+                      View Auction
                     </Link>
                   </div>
                 )}

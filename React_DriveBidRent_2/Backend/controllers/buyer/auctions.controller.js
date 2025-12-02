@@ -299,3 +299,109 @@ export const completeAuctionPayment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// Controller to fetch completed auction details with winner information
+export const getCompletedAuctionDetails = async (req, res) => {
+  try {
+    const auctionId = req.params.id;
+
+    const auction = await AuctionRequest.findById(auctionId)
+      .populate('sellerId', 'firstName lastName email phone city state doorNo street')
+      .lean();
+
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Auction not found',
+        data: null
+      });
+    }
+
+    // Check if auction is completed
+    if (auction.started_auction !== 'ended') {
+      return res.status(400).json({
+        success: false,
+        message: 'This auction has not been completed yet',
+        data: null
+      });
+    }
+
+    // Get the winner information from the Purchase record
+    const purchase = await Purchase.findOne({ auctionId })
+      .populate('buyerId', 'firstName lastName email phone city state doorNo street')
+      .lean();
+
+    if (!purchase) {
+      return res.status(404).json({
+        success: false,
+        message: 'Purchase details not found',
+        data: null
+      });
+    }
+
+    // Get all bids for this auction to show bid history
+    const bidHistory = await AuctionBid.find({ auctionId })
+      .populate('buyerId', 'firstName lastName')
+      .sort({ bidTime: -1 })
+      .limit(10)
+      .lean();
+
+    // Filter out any bids where buyerId is null and ensure we have valid data
+    const validBidHistory = bidHistory.filter(bid => bid.buyerId && bid.buyerId.firstName && bid.buyerId.lastName);
+
+    res.json({
+      success: true,
+      message: 'Completed auction details fetched',
+      data: {
+        auction: {
+          _id: auction._id,
+          vehicleName: auction.vehicleName,
+          vehicleImage: auction.vehicleImage,
+          year: auction.year,
+          mileage: auction.mileage,
+          condition: auction.condition,
+          fuelType: auction.fuelType,
+          transmission: auction.transmission,
+          startingBid: auction.startingBid,
+          auctionDate: auction.auctionDate,
+          mechanicReview: auction.mechanicReview
+        },
+        seller: {
+          _id: auction.sellerId._id,
+          firstName: auction.sellerId.firstName,
+          lastName: auction.sellerId.lastName,
+          email: auction.sellerId.email,
+          phone: auction.sellerId.phone,
+          city: auction.sellerId.city,
+          state: auction.sellerId.state,
+          address: auction.sellerId.doorNo && auction.sellerId.street
+            ? `${auction.sellerId.doorNo}, ${auction.sellerId.street}, ${auction.sellerId.city}, ${auction.sellerId.state}`
+            : 'Address not available'
+        },
+        winner: {
+          _id: purchase.buyerId._id,
+          firstName: purchase.buyerId.firstName,
+          lastName: purchase.buyerId.lastName,
+          email: purchase.buyerId.email,
+          phone: purchase.buyerId.phone,
+          city: purchase.buyerId.city,
+          state: purchase.buyerId.state,
+          address: purchase.buyerId.doorNo && purchase.buyerId.street
+            ? `${purchase.buyerId.doorNo}, ${purchase.buyerId.street}, ${purchase.buyerId.city}, ${purchase.buyerId.state}`
+            : 'Address not available'
+        },
+        finalPrice: purchase.purchasePrice,
+        purchaseDate: purchase.purchaseDate,
+        paymentStatus: purchase.paymentStatus,
+        bidHistory: validBidHistory
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching completed auction details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      data: null
+    });
+  }
+};
