@@ -8,18 +8,29 @@ export default function ChatPageMechanic() {
   const navigate = useNavigate();
   const [selectedChatId, setSelectedChatId] = useState(chatIdFromParam || null);
 
-  useEffect(() => { setSelectedChatId(chatIdFromParam || null); }, [chatIdFromParam]);
+  useEffect(() => { 
+    setSelectedChatId(chatIdFromParam || null); 
+  }, [chatIdFromParam]);
 
-  const handleSelect = (id) => { setSelectedChatId(id); navigate(`/mechanic/chats/${id}`); };
+  const handleSelect = (id) => { 
+    setSelectedChatId(id); 
+    navigate(`/mechanic/chats/${id}`); 
+  };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-white">
-      <aside className="w-80 border-r">
-        <ChatListMechanic onSelect={handleSelect} selectedId={selectedChatId} />
-      </aside>
-      <main className="flex-1">
-        <ChatRoomMechanic chatIdProp={selectedChatId} />
-      </main>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+          <div className="flex h-[calc(100vh-100px)] min-h-[700px]">
+            <aside className="w-96 border-r border-gray-200">
+              <ChatListMechanic onSelect={handleSelect} selectedId={selectedChatId} />
+            </aside>
+            <main className="flex-1">
+              <ChatRoomMechanic chatIdProp={selectedChatId} />
+            </main>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

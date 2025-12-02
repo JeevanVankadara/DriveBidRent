@@ -9,8 +9,8 @@ export default function BuyerLayout() {
       <Navbar />
 
       {/* 90% Scale - Makes everything feel light & premium */}
-      <div className="scale-[0.93] origin-top-left w-[107.52688172%]">
-        <main>
+      <div className="scale-[0.93] origin-top-left w-[107.52688172%] flex-grow flex flex-col">
+        <main className="flex-grow">
           <Outlet />
         </main>
       </div>
