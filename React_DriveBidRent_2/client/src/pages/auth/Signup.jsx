@@ -1,10 +1,14 @@
 // client/src/pages/auth/Signup.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authServices } from '../../services/auth.services';
+import { useDispatch, useSelector } from 'react-redux';
+import { signupUser } from '../../redux/slices/authSlice';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error, success, message } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     userType: '',
     firstName: '',
@@ -29,7 +33,13 @@ const Signup = () => {
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (success) {
+      alert(message || 'Account created! Redirecting to login...');
+      navigate('/login');
+    }
+  }, [success, message, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -89,29 +99,23 @@ const Signup = () => {
       const err = validateField(key, formData[key]);
       if (err) newErrors[key] = err;
     });
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({});
-    if (!validateAll()) return;
-
-    setLoading(true);
-    try {
-      const response = await authServices.signup(formData);
-      if (response.success) {
-        alert(response.message || 'Account created! Redirecting...');
-        navigate('/login');
-      } else {
-        setErrors({ submit: response.message || 'Signup failed' });
-      }
-    } catch (err) {
-      setErrors({ submit: 'Network error. Please try again.' });
-    } finally {
-      setLoading(false);
+    const newErrors = validateAll();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      Object.keys(newErrors).forEach((key) => {
+        setTouched((prev) => ({ ...prev, [key]: true }));
+      });
+      return;
     }
+
+    // Remove confirmPassword before sending to backend
+    const { confirmPassword, ...signupData } = formData;
+    dispatch(signupUser(signupData));
   };
 
   const getBorderColor = (field) => {
@@ -132,9 +136,9 @@ const Signup = () => {
             Create an Account
           </h1>
 
-          {errors.submit && (
+          {error && (
             <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center">
-              {errors.submit}
+              {error}
             </div>
           )}
 

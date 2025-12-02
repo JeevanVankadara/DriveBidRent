@@ -1,10 +1,11 @@
 // client/src/pages/buyer/components/Navbar.jsx
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { getProfile } from '../../../services/buyer.services';
 import { getUnreadNotificationCount } from '../../../services/buyer.services';
 import axiosInstance from '../../../utils/axiosInstance.util';
-import { useLogout } from '../../../services/auth.services';
+import { logoutUser } from '../../../redux/slices/authSlice';
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
@@ -12,7 +13,7 @@ export default function Navbar() {
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
-  const logout = useLogout();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,7 +76,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      dispatch(logoutUser());
+      navigate('/', { replace: true });
     } catch (err) {
       navigate('/', { replace: true });
     }

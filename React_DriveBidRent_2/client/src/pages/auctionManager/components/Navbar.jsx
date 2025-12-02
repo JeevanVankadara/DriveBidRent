@@ -1,28 +1,20 @@
 // client/src/pages/auctionManager/components/Navbar.jsx
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { authServices } from '../../../services/auth.services';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../../redux/slices/authSlice';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const currentPath = location.pathname;
 
   const handleLogout = async () => {
     try {
-      // Call logout API to clear JWT cookie
-      await authServices.logout();
-      
-      // Clear local storage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userType');
-      
-      // Redirect to home
+      dispatch(logoutUser());
       navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if API fails, clear local storage and redirect
-      localStorage.removeItem('token');
-      localStorage.removeItem('userType');
       navigate('/');
     }
   };

@@ -1,13 +1,15 @@
 // client/src/pages/seller/components/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { authServices } from '../../../services/auth.services';
+import { useDispatch } from 'react-redux';
 import axiosInstance from '../../../utils/axiosInstance.util';
+import { logoutUser } from '../../../redux/slices/authSlice';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
 
   // Get current user from cookie or fallback
@@ -15,10 +17,8 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      const result = await authServices.logout();
-      if (result.success) {
-        navigate('/', { replace: true });
-      }
+      dispatch(logoutUser());
+      navigate('/', { replace: true });
     } catch (err) {
       console.error('Logout failed:', err);
       navigate('/', { replace: true });
