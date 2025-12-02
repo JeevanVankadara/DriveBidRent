@@ -44,11 +44,11 @@ export const getInspectionChatById = async (req, res) => {
 
     if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
 
-    const uid = String(getUserId(req));
-    const allowed = [String(chat.mechanic || ''), String(chat.auctionManager || '')].some(id => id === uid);
+    const uid = getUserId(req);
+    const allowed = [String(chat.mechanic?._id || ''), String(chat.auctionManager?._id || '')].some(id => id === String(uid));
     if (!allowed) return res.status(403).json({ success: false, message: 'Access denied' });
 
-    res.json({ success: true, data: { chat, myUserId: req.user._id } });
+    res.json({ success: true, data: { chat, myUserId: uid } });
   } catch (err) {
     console.error('getInspectionChatById error:', err);
     res.status(500).json({ success: false, message: 'Server error' });

@@ -15,7 +15,19 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
   }, []);
 
   useEffect(() => {
-    const handler = () => setChats(prev => [...prev]);
+    const handler = (e) => {
+      try {
+        const { chatId, updated } = e.detail || {};
+        if (!chatId) return;
+        setChats(prev => prev.map(c => {
+          if (String(c._id) === String(chatId)) {
+            const newCount = (c.unreadCount && c.unreadCount > 0) ? Math.max(0, c.unreadCount - (updated || c.unreadCount)) : 0;
+            return { ...c, unreadCount: newCount };
+          }
+          return c;
+        }));
+      } catch (err) { console.error(err); }
+    };
     window.addEventListener('chatRead', handler);
     return () => window.removeEventListener('chatRead', handler);
   }, []);

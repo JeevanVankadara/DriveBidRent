@@ -116,10 +116,15 @@ const InspectionChatListItem = ({ chat, onClick, isSelected, viewerIsBuyer, curr
         
         <p className="text-sm text-gray-600 truncate mt-1">{getCarName()}</p>
         
-        <div className="flex items-center mt-2">
+        <div className="flex items-center justify-between mt-2">
           <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold text-white ${getStatusColor()}`}>
             {getInspectionStatus()}
           </span>
+          {chat.unreadCount > 0 && (
+            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full">
+              {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+            </span>
+          )}
         </div>
       </div>
     </div>

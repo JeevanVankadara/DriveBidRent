@@ -28,7 +28,7 @@ import PurchasesList from './pages/buyer/PurchasesList';
 import PurchaseDetails from './pages/buyer/PurchaseDetails';
 import MyBids from './pages/buyer/MyBids';
 import Wishlist from './pages/buyer/Wishlist';
-import BuyerProfile from './pages/buyer/Profile';           // Renamed for clarity
+import BuyerProfile from './pages/buyer/Profile';          
 import Notifications from './pages/buyer/Notifications';
 import AboutUs from './pages/buyer/AboutUs';
 import ChatListBuyer from './pages/buyer/ChatListBuyer';
