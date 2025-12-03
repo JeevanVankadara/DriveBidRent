@@ -48,7 +48,7 @@ const RentalChatHeader = ({ chat, otherUser, carName, rentalPeriod, onDeleteChat
     const image = imagePaths.find(img => img && img !== null && img !== 'null' && img !== '');
     console.log('Selected rental image:', image);
     
-    return image || 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=Rental+Vehicle';
+    return image || 'https://placehold.co/400x300/3b82f6/ffffff?text=Rental+Vehicle';
   };
 
   const getCarName = () => {

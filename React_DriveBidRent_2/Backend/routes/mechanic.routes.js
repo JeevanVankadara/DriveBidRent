@@ -104,7 +104,8 @@ router.get('/current-tasks', mechanicMiddleware, async (req, res) => {
   try {
     const assignedVehicles = await AuctionRequest.find({
       assignedMechanic: req.user._id,
-      status: 'assignedMechanic'
+      status: 'assignedMechanic',
+      reviewStatus: 'pending'
     }).sort({ createdAt: -1 });
     res.json({ success: true, message: 'Current tasks', data: { assignedVehicles } });
   } catch (err) {

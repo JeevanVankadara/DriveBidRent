@@ -144,7 +144,7 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat, onDelet
     console.log('Selected image:', image);
     
     // Return the image or a default placeholder
-    return image || 'https://via.placeholder.com/400x300/cccccc/666666?text=No+Image';
+    return image || 'https://placehold.co/400x300/cccccc/666666?text=No+Image';
   };
 
   const getCarName = () => {

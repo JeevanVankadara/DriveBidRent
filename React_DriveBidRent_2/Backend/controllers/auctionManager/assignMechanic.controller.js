@@ -14,11 +14,34 @@ export const getAssignMechanic = async (req, res) => {
     const request = await AuctionRequest.findById(req.params.id).populate('sellerId');
     if (!request) return res.json(send(false, 'Request not found'));
 
+    // Get seller's city
+    const sellerCity = request.sellerId?.city;
+    
+    console.log('=== ASSIGN MECHANIC DEBUG ===');
+    console.log('Request ID:', req.params.id);
+    console.log('Seller ID:', request.sellerId?._id);
+    console.log('Seller City:', sellerCity);
+    
+    if (!sellerCity) {
+      console.log('⚠️ Seller has no city defined');
+      return res.json(send(false, 'Seller location not available. Please update seller address.'));
+    }
+
+    // Find mechanics in the same city who are approved
     const mechanics = await User.find({
       userType: 'mechanic',
-      city: request.sellerId.city,
+      city: sellerCity,
       approved_status: 'Yes'
-    }).select('firstName lastName shopName experienceYears _id');
+    }).select('firstName lastName shopName experienceYears city repairBikes repairCars _id');
+
+    console.log('Found mechanics:', mechanics.length);
+    if (mechanics.length > 0) {
+      console.log('Mechanics:', mechanics.map(m => ({
+        name: `${m.firstName} ${m.lastName}`,
+        city: m.city,
+        shop: m.shopName
+      })));
+    }
 
     res.json(send(true, 'Mechanics loaded', { request, mechanics }));
   } catch (err) {

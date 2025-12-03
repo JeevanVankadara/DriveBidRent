@@ -97,7 +97,7 @@ export default function MyBids() {
                     className="w-full h-full object-cover"
                     onError={(e) =>
                       (e.target.src =
-                        "https://via.placeholder.com/400x300?text=No+Image")
+                        "https://placehold.co/400x300/f3f4f6/6b7280?text=No+Image")
                     }
                   />
                 </div>

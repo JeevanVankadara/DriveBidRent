@@ -10,7 +10,13 @@ export default function CurrentTasks() {
 
   useEffect(() => {
     getCurrentTasks()
-      .then(res => setTasks(res.data.data.assignedVehicles || []))
+      .then(res => {
+        // Filter to only show pending review status (not completed)
+        const activeTasks = (res.data.data.assignedVehicles || []).filter(
+          task => task.reviewStatus === 'pending'
+        );
+        setTasks(activeTasks);
+      })
       .catch(() => setTasks([]))
       .finally(() => setLoading(false));
   }, []);

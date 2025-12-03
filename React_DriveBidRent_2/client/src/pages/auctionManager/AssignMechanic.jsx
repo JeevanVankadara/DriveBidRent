@@ -22,13 +22,20 @@ export default function AssignMechanic() {
         const res = await auctionManagerServices.getAssignMechanic(id);
         const responseData = res.data || res;
         
+        console.log('=== FRONTEND: Assign Mechanic Response ===', responseData);
+        
         if (responseData.success) {
           setRequest(responseData.data.request);
           setMechanics(responseData.data.mechanics || []);
+          console.log('Loaded mechanics:', responseData.data.mechanics?.length || 0);
+          if (responseData.data.mechanics?.length === 0) {
+            console.log('No mechanics found for seller city:', responseData.data.request?.sellerId?.city);
+          }
         } else {
           setError(responseData.message || 'Failed to load data');
         }
       } catch (err) {
+        console.error('Error fetching assign mechanic data:', err);
         setError(err.response?.data?.message || 'Failed to load data');
       } finally {
         setLoading(false);
@@ -170,7 +177,7 @@ export default function AssignMechanic() {
                   <option value="">Select a Mechanic</option>
                   {mechanics.map(m => (
                     <option key={m._id} value={m._id}>
-                      {m.firstName} {m.lastName} {m.shopName && `- ${m.shopName}`} {m.experienceYears && `(${m.experienceYears} yrs exp)`}
+                      {m.firstName} {m.lastName} {m.shopName && `- ${m.shopName}`} {m.city && `(${m.city})`} {m.experienceYears && `- ${m.experienceYears} yrs exp`}
                     </option>
                   ))}
                 </select>
@@ -186,7 +193,8 @@ export default function AssignMechanic() {
                 
                 {mechanics.length === 0 && (
                   <div className="mt-4 bg-yellow-100 text-yellow-800 p-4 rounded-lg text-center">
-                    No mechanics available. Please add mechanics first.
+                    No mechanics available in <strong>{request?.sellerId?.city || 'this area'}</strong>. 
+                    {request?.sellerId?.city ? ' Please add mechanics in this city or assign from a different location.' : ' Seller location is not set.'}
                   </div>
                 )}
               </>
