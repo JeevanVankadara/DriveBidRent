@@ -128,7 +128,7 @@ export const bookRental = async (req, res) => {
         status: 'unavailable'
       },
       { new: true }
-    ).lean();
+    );
 
     const rentalCost = new RentalCost({
       rentalCarId,
@@ -142,18 +142,20 @@ export const bookRental = async (req, res) => {
 
     // Create chat for this rental (chat is unique per rental)
     try {
-      const rentalRequestDoc = await RentalRequest.findById(rentalCarId);
-      if (rentalRequestDoc) {
-        await ChatController.createChatForRental(rentalRequestDoc);
+      if (updatedRentalRequest) {
+        await ChatController.createChatForRental(updatedRentalRequest);
       }
     } catch (err) {
       console.warn('Failed to create chat for rental:', err.message || err);
     }
+    
+    // Convert to lean object for response
+    const rentalData = updatedRentalRequest.toObject ? updatedRentalRequest.toObject() : updatedRentalRequest;
 
     res.json({
       success: true,
       message: 'Rental booked successfully',
-      data: { rentalRequest: updatedRentalRequest, totalCost }
+      data: { rentalRequest: rentalData, totalCost }
     });
   } catch (err) {
     console.error('Error in POST /rental:', err);

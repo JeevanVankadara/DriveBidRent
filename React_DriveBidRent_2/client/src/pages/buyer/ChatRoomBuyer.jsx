@@ -222,7 +222,7 @@ export default function ChatRoomBuyer({ chatIdProp }) {
     );
   }
 
-  const otherUser = chat?.participants?.find(p => String(p._id) !== String(myUserId));
+  const otherUser = chat?.seller || null;
 
   return (
     <div className="flex flex-col h-full bg-white">

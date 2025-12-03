@@ -55,19 +55,22 @@ export default function ChatListSeller({ onSelect, selectedId }) {
 
   // Helper function to get user initials
   const getUserInitials = (user) => {
-    if (!user) return 'B';
-    const name = user.name || user.username || '';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return (names[0][0] + names[1][0]).toUpperCase();
+    if (!user) return 'R';
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
+    if (firstName && lastName) {
+      return (firstName[0] + lastName[0]).toUpperCase();
     }
-    return name[0] ? name[0].toUpperCase() : 'B';
+    if (firstName) return firstName[0].toUpperCase();
+    if (lastName) return lastName[0].toUpperCase();
+    return 'R';
   };
 
   // Helper function to get other user (buyer)
   const getOtherUser = (chat) => {
-    if (!chat || !chat.participants) return null;
-    return chat.participants.find(p => String(p._id) !== String(currentUserId));
+    if (!chat) return null;
+    // For seller, the other user is the buyer
+    return chat.buyer || null;
   };
 
   // Helper function to format date
@@ -100,7 +103,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
   // Helper function to get last message preview
   const getLastMessagePreview = (chat) => {
     if (!chat.lastMessage) return 'No messages yet';
-    const content = chat.lastMessage.content || '';
+    const content = typeof chat.lastMessage === 'string' ? chat.lastMessage : (chat.lastMessage.content || '');
     return content.length > 30 ? content.substring(0, 30) + '...' : content;
   };
 
@@ -110,7 +113,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
     
     const searchLower = searchTerm.toLowerCase();
     const otherUser = getOtherUser(chat);
-    const userName = otherUser?.name?.toLowerCase() || '';
+    const userName = otherUser ? `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.toLowerCase() : '';
     const vehicleName = chat.rentalRequest?.vehicleName?.toLowerCase() || '';
     
     return userName.includes(searchLower) || 
@@ -123,8 +126,8 @@ export default function ChatListSeller({ onSelect, selectedId }) {
     if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
     if (b.unreadCount > 0 && a.unreadCount === 0) return 1;
     
-    const timeA = new Date(a.updatedAt || a.createdAt || 0);
-    const timeB = new Date(b.updatedAt || b.createdAt || 0);
+    const timeA = new Date(a.lastMessageAt || a.updatedAt || a.createdAt || 0);
+    const timeB = new Date(b.lastMessageAt || b.updatedAt || b.createdAt || 0);
     return timeB - timeA;
   });
 
@@ -201,7 +204,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
               const isSelected = String(selectedId) === String(chat._id);
               const isUnread = chat.unreadCount > 0;
               const otherUser = getOtherUser(chat);
-              const userName = otherUser?.name || 'Renter';
+              const userName = otherUser ? `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.trim() || 'Renter' : 'Renter';
               const vehicleName = chat.rentalRequest?.vehicleName || 'Vehicle';
               const status = chat.status || 'ACTIVE';
               const lastUpdated = chat.updatedAt || chat.createdAt;

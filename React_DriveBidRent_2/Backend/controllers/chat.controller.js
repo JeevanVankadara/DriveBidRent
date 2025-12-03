@@ -153,6 +153,12 @@ export const sendMessage = async (req, res) => {
     const message = await Message.create({ chat: chatId, sender: req.user._id, content, delivered: true, read: false });
     await message.populate('sender', 'firstName lastName profileImage');
 
+    // Update chat's lastMessage and lastMessageAt for proper sorting in chat list
+    await Chat.findByIdAndUpdate(chatId, {
+      lastMessage: content,
+      lastMessageAt: message.createdAt
+    });
+
     // No realtime emit (using DB-backed polling/REST)
 
     res.json({ success: true, data: message });
