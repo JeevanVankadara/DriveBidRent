@@ -42,20 +42,6 @@ export const getViewBids = async (req, res) => {
       });
     }
 
-    // Check if auction is approved and has started
-    if (!['approved', 'assignedMechanic'].includes(auction.status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'This auction has not been approved yet.'
-      });
-    }
-
-    if (!['yes', 'ended'].includes(auction.started_auction)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Auction has not yet started.'
-      });
-    }
 
     // Fetch all bids for this auction
     const bids = await AuctionBid.find({ auctionId })
@@ -63,13 +49,9 @@ export const getViewBids = async (req, res) => {
       .sort({ bidTime: -1 })
       .lean();
 
-    // Separate current highest bid and recent bid history
-    const currentBid = bids.find(bid => bid.isCurrentBid) || null;
-    const bidHistory = bids.filter(bid => !bid.isCurrentBid).slice(0, 3);
-
     res.json({
       success: true,
-      data: { auction, currentBid, bidHistory }
+      data: bids
     });
   } catch (err) {
     console.error('Error accessing auction bids:', err);
@@ -77,5 +59,45 @@ export const getViewBids = async (req, res) => {
       success: false,
       message: 'Failed to access auction bids.'
     });
+  }
+};
+
+export const acceptBid = async (req, res) => {
+  try {
+    const bidId = req.params.id;
+    const bid = await AuctionBid.findByIdAndUpdate(
+      bidId,
+      { status: 'accepted' },
+      { new: true }
+    );
+
+    if (!bid) {
+      return res.status(404).json({ success: false, message: 'Bid not found' });
+    }
+
+    res.json({ success: true, message: 'Bid accepted', data: bid });
+  } catch (err) {
+    console.error('Error accepting bid:', err);
+    res.status(500).json({ success: false, message: 'Failed to accept bid' });
+  }
+};
+
+export const rejectBid = async (req, res) => {
+  try {
+    const bidId = req.params.id;
+    const bid = await AuctionBid.findByIdAndUpdate(
+      bidId,
+      { status: 'rejected' },
+      { new: true }
+    );
+
+    if (!bid) {
+      return res.status(404).json({ success: false, message: 'Bid not found' });
+    }
+
+    res.json({ success: true, message: 'Bid rejected', data: bid });
+  } catch (err) {
+    console.error('Error rejecting bid:', err);
+    res.status(500).json({ success: false, message: 'Failed to reject bid' });
   }
 };

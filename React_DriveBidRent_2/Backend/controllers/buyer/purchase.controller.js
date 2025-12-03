@@ -36,15 +36,61 @@ export const getPurchase = async (req, res) => {
 
     // Separate rentals into current and past based on dropDate
     const currentDate = new Date();
-    const currentRentals = validRentals.filter(rental => new Date(rental.dropDate) > currentDate);
-    const pastRentals = validRentals.filter(rental => new Date(rental.dropDate) <= currentDate);
+    currentDate.setHours(0, 0, 0, 0); // Set to start of today
+    
+    const currentRentals = validRentals.filter(rental => {
+      const dropDate = new Date(rental.dropDate);
+      dropDate.setHours(0, 0, 0, 0);
+      return dropDate > currentDate; // Only future dates
+    });
+    
+    const pastRentals = validRentals.filter(rental => {
+      const dropDate = new Date(rental.dropDate);
+      dropDate.setHours(0, 0, 0, 0);
+      return dropDate <= currentDate; // Today and past dates
+    });
+
+    // DEBUG: Log duplicate check
+    console.log('=== DEBUG: Rental IDs ===');
+    console.log('Current rentals count:', currentRentals.length);
+    console.log('Past rentals count:', pastRentals.length);
+    console.log('Total rentals:', validRentals.length);
+    
+    const allRentalIds = [...currentRentals, ...pastRentals].map(r => r._id);
+    const uniqueIds = new Set(allRentalIds);
+    if (allRentalIds.length !== uniqueIds.size) {
+      console.warn('DUPLICATE IDS FOUND:', allRentalIds.filter((id, idx) => allRentalIds.indexOf(id) !== idx));
+    }
+    
+    // Remove duplicates if they exist (shouldn't happen with above logic, but safety measure)
+    const seenIds = new Set();
+    const currentRentalsUnique = currentRentals.filter(rental => {
+      const id = rental._id.toString();
+      if (seenIds.has(id)) {
+        console.warn('Removing duplicate rental from current:', id);
+        return false;
+      }
+      seenIds.add(id);
+      return true;
+    });
+    
+    const seenIdsPast = new Set();
+    const pastRentalsUnique = pastRentals.filter(rental => {
+      const id = rental._id.toString();
+      if (seenIdsPast.has(id)) {
+        console.warn('Removing duplicate rental from past:', id);
+        return false;
+      }
+      seenIdsPast.add(id);
+      return true;
+    });
 
     const auctionPurchases = await Purchase.find({ buyerId }).lean();
 
     res.json({
       success: true,
       message: 'Purchase data fetched',
-      data: { rentals: currentRentals, pastRentals, auctionPurchases, user }
+      data: { rentals: currentRentalsUnique, pastRentals: pastRentalsUnique, auctionPurchases, user }
     });
 
     // res.render('buyer_dashboard/purchase', {

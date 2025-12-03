@@ -11,7 +11,7 @@ import { getProfile, updateProfile, updatePreferences, changePassword } from '..
 import { getRentalDetail, postMarkRentalReturned } from '../controllers/sellerControllers/rentalDetail.controller.js';
 import { getSellerDashboard } from '../controllers/sellerControllers/sellerDashboard.controller.js';
 import { postUpdateRental } from '../controllers/sellerControllers/updateRental.controller.js';
-import { getViewAuctions, getViewBids } from '../controllers/sellerControllers/viewAuctions.controller.js';
+import { getViewAuctions, getViewBids, acceptBid, rejectBid } from '../controllers/sellerControllers/viewAuctions.controller.js';
 import { getViewEarnings } from '../controllers/sellerControllers/viewEarnings.controller.js';
 import { getViewRentals, postToggleRentalStatus } from '../controllers/sellerControllers/viewRentals.controller.js';
 import { getReviews } from '../controllers/buyer/review.controller.js';
@@ -52,6 +52,8 @@ router.put('/update-rental/:id', upload.single('vehicleImage'), postUpdateRental
 // View auctions & bids
 router.get('/view-auctions', getViewAuctions);
 router.get('/view-bids/:id', getViewBids);
+router.put('/accept-bid/:id', acceptBid);
+router.put('/reject-bid/:id', rejectBid);
 
 // View earnings
 router.get('/view-earnings', getViewEarnings);

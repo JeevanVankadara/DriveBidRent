@@ -1,21 +1,42 @@
+
 // controllers/sellerControllers/auctionDetail.controller.js
 import AuctionRequest from '../../models/AuctionRequest.js';
+import AuctionBid from '../../models/AuctionBid.js';
 
 export const getAuctionDetail = async (req, res) => {
   try {
     const auction = await AuctionRequest.findOne({
       _id: req.params.id,
       sellerId: req.user._id
-    }).lean();
-    
+    })
+      .populate('winnerId', 'firstName lastName email phone')
+      .lean();
+
     if (!auction) {
       return res.status(404).json({
         success: false,
         message: 'Auction not found'
       });
     }
-    
-    res.json({ success: true, data: auction });
+
+    // Fetch current highest bid if auction has started
+    let currentBid = null;
+    if (auction.started_auction === 'yes' || auction.started_auction === 'ended') {
+      currentBid = await AuctionBid.findOne({
+        auctionId: auction._id,
+        isCurrentBid: true
+      })
+        .populate('buyerId', 'firstName lastName email phone')
+        .lean();
+    }
+
+    res.json({
+      success: true,
+      data: {
+        ...auction,
+        currentBid: currentBid
+      }
+    });
   } catch (err) {
     console.error('Error fetching auction details:', err);
     res.status(500).json({ success: false, message: 'Failed to fetch auction details' });

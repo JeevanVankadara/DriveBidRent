@@ -22,7 +22,7 @@ export default function PaymentModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-24">
             <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 text-white">
@@ -45,8 +45,8 @@ export default function PaymentModal({
                             {/* UPI Option */}
                             <div
                                 className={`cursor-pointer p-4 rounded-lg border transition-all ${paymentMethod === 'upi'
-                                        ? 'border-orange-500 bg-orange-50 shadow-sm'
-                                        : 'border-gray-200 bg-white hover:border-orange-300'
+                                    ? 'border-orange-500 bg-orange-50 shadow-sm'
+                                    : 'border-gray-200 bg-white hover:border-orange-300'
                                     }`}
                                 onClick={() => handlePaymentMethodSelect('upi')}
                             >
@@ -65,8 +65,8 @@ export default function PaymentModal({
                             {/* Card Option */}
                             <div
                                 className={`cursor-pointer p-4 rounded-lg border transition-all ${paymentMethod === 'card'
-                                        ? 'border-orange-500 bg-orange-50 shadow-sm'
-                                        : 'border-gray-200 bg-white hover:border-orange-300'
+                                    ? 'border-orange-500 bg-orange-50 shadow-sm'
+                                    : 'border-gray-200 bg-white hover:border-orange-300'
                                     }`}
                                 onClick={() => handlePaymentMethodSelect('card')}
                             >
@@ -85,8 +85,8 @@ export default function PaymentModal({
                             {/* Net Banking Option */}
                             <div
                                 className={`cursor-pointer p-4 rounded-lg border transition-all ${paymentMethod === 'netbanking'
-                                        ? 'border-orange-500 bg-orange-50 shadow-sm'
-                                        : 'border-gray-200 bg-white hover:border-orange-300'
+                                    ? 'border-orange-500 bg-orange-50 shadow-sm'
+                                    : 'border-gray-200 bg-white hover:border-orange-300'
                                     }`}
                                 onClick={() => handlePaymentMethodSelect('netbanking')}
                             >

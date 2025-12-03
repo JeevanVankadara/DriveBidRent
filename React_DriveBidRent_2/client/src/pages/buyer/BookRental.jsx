@@ -56,7 +56,7 @@ export default function BookRental() {
       };
 
       const result = await bookRental(bookingData);
-      
+
       if (result.success) {
         setShowProcessingModal(false);
         setShowSuccessModal(true);
@@ -120,25 +120,27 @@ export default function BookRental() {
       </div>
 
       {/* Modals */}
-      <DatePickerModal 
+      <DatePickerModal
         isOpen={showDateModal}
         onClose={() => navigate('/buyer/rentals')}
         onProceed={handleDateSelection}
         rental={rental}
       />
 
-      <PaymentModal 
+      <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        onPayment={handlePayment}
-        amount={totalCost}
+        onProcessPayment={handlePayment}
+        totalCost={totalCost}
+        selectedPaymentMethod="upi"
+        onPaymentMethodSelect={() => { }}
       />
 
-      <ProcessingModal 
+      <ProcessingModal
         isOpen={showProcessingModal}
       />
 
-      <SuccessModal 
+      <SuccessModal
         isOpen={showSuccessModal}
         onClose={handleSuccessClose}
         seller={rental.seller}

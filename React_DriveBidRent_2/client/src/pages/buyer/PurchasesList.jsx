@@ -26,6 +26,35 @@ export default function PurchasesList() {
   const fetchPurchases = async () => {
     try {
       const data = await getPurchases();
+      
+      // DEBUG: Log fetched data
+      console.log('=== DEBUG: Full purchases data ===', data);
+      console.log('=== Past Rentals ===', data.pastRentals);
+      
+      // Detailed rental inspection
+      if (data.pastRentals && data.pastRentals.length > 0) {
+        console.log('=== DETAILED PAST RENTALS INFO ===');
+        data.pastRentals.forEach((rental, idx) => {
+          console.log(`Rental ${idx}:`, {
+            _id: rental._id,
+            investor_id: rental.investor_id,
+            vehicleName: rental.vehicleName,
+            pickupDate: rental.pickupDate,
+            dropDate: rental.dropDate
+          });
+        });
+      }
+      
+      // Check for duplicates
+      const pastRentalIds = data.pastRentals?.map(r => r._id || r.investor_id) || [];
+      const uniqueIds = new Set(pastRentalIds);
+      if (pastRentalIds.length !== uniqueIds.size) {
+        console.warn('⚠️ DUPLICATE IDS DETECTED IN FRONTEND:');
+        const duplicates = pastRentalIds.filter((id, idx) => pastRentalIds.indexOf(id) !== idx);
+        console.warn('Duplicate IDs:', duplicates);
+        console.warn('All IDs:', pastRentalIds);
+      }
+      
       setAuctionPurchases(data.auctionPurchases || []);
       setRentals(data.rentals || []);
       setPastRentals(data.pastRentals || []);
@@ -170,11 +199,13 @@ export default function PurchasesList() {
             </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {rentals.map((rental) => {
+              {rentals.map((rental, index) => {
                 const rentalId = rental._id || rental.investor_id;
+                // Create a unique key combining ID, dates, and index to prevent duplicates
+                const uniqueKey = `active-${rentalId}-${rental.pickupDate}-${rental.dropDate}-${index}`;
                 return (
                   <div
-                    key={rentalId || rental.vehicleName}
+                    key={uniqueKey}
                     className="bg-white border border-orange-500 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col"
                   >
                     <div className="relative">
@@ -235,11 +266,13 @@ export default function PurchasesList() {
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {pastRentals.map((rental) => {
+            {pastRentals.map((rental, index) => {
               const rentalId = rental._id || rental.investor_id;
+              // Create a unique key combining ID, dates, and index to prevent duplicates
+              const uniqueKey = `completed-${rentalId}-${rental.pickupDate}-${rental.dropDate}-${index}`;
               return (
                 <div
-                  key={rentalId || rental.vehicleName}
+                  key={uniqueKey}
                   className="bg-white border border-gray-400 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col opacity-90"
                 >
                   <div className="relative">
@@ -293,9 +326,11 @@ export default function PurchasesList() {
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        onPayment={handlePayment}
-        paymentDetails={paymentDetails}
-        type="auction"
+        onProcessPayment={handlePayment}
+        totalCost={paymentDetails?.totalAmount || 0}
+        selectedPaymentMethod="upi"
+        onPaymentMethodSelect={() => { }}
+
       />
     </div>
   );
