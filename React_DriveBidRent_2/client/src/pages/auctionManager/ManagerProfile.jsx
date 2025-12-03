@@ -13,6 +13,8 @@ export default function ManagerProfile() {
   const [alert, setAlert] = useState({ show: false, type: '', msg: '' });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState('');
+  const [passwordMatch, setPasswordMatch] = useState('');
 
   const { profile, loading: profileLoading, refresh } = useProfile();
 
@@ -29,6 +31,33 @@ export default function ManagerProfile() {
     setLoading(!!profileLoading);
   }, [profileLoading]);
 
+  const handleNewPasswordChange = (value) => {
+    setNewPassword(value);
+    const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!value) {
+      setPasswordStrength('');
+    } else if (!strongRegex.test(value)) {
+      setPasswordStrength('❌ Weak: needs uppercase, number, special char');
+    } else {
+      setPasswordStrength('✅ Strong password');
+    }
+  };
+
+  const handleConfirmPasswordChange = (value) => {
+    setConfirmPassword(value);
+    if (!value) {
+      setPasswordMatch('');
+    } else if (newPassword !== value) {
+      setPasswordMatch('❌ Passwords do not match');
+    } else {
+      setPasswordMatch('✅ Passwords match');
+    }
+  };
+
+  const handleOldPasswordChange = (value) => {
+    setOldPassword(value);
+  };
+
   const showAlert = (type, msg) => {
     setAlert({ show: true, type, msg });
     setTimeout(() => setAlert({ show: false, type: '', msg: '' }), 3000);
@@ -40,6 +69,10 @@ export default function ManagerProfile() {
       showAlert('error', 'Phone number must be 10 digits');
       return;
     }
+    if (phone === user.phone) {
+      showAlert('error', 'New phone number cannot be the same as current phone number');
+      return;
+    }
     try {
       setUpdating(true);
       const res = await auctionManagerServices.updatePhone(phone);
@@ -47,7 +80,7 @@ export default function ManagerProfile() {
       if (responseData.success) {
         showAlert('success', 'Phone updated successfully');
         // refresh redux profile
-        try { refresh(); } catch (e) {}
+        try { refresh(); } catch (e) { }
         setUser(prev => ({ ...prev, phone }));
       } else {
         showAlert('error', responseData.message || 'Failed to update phone');
@@ -61,6 +94,14 @@ export default function ManagerProfile() {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+    if (!oldPassword) {
+      showAlert('error', 'Please enter your current password');
+      return;
+    }
+    if (oldPassword === newPassword) {
+      showAlert('error', 'New password cannot be the same as current password');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       showAlert('error', 'Passwords do not match');
       return;
@@ -69,20 +110,18 @@ export default function ManagerProfile() {
       showAlert('error', 'Password must be at least 8 characters');
       return;
     }
-    if (!oldPassword) {
-      showAlert('error', 'Please enter your current password');
-      return;
-    }
     try {
       setUpdating(true);
       const res = await auctionManagerServices.changePassword({ oldPassword, newPassword });
       const responseData = res.data || res;
       if (responseData.success) {
         showAlert('success', 'Password changed successfully');
-        setOldPassword(''); 
-        setNewPassword(''); 
+        setOldPassword('');
+        setNewPassword('');
         setConfirmPassword('');
-        try { refresh(); } catch (e) {}
+        setPasswordStrength('');
+        setPasswordMatch('');
+        try { refresh(); } catch (e) { }
       } else {
         showAlert('error', responseData.message || 'Failed to change password');
       }
@@ -138,8 +177,8 @@ export default function ManagerProfile() {
               />
               <small className="text-gray-600 block mt-1">10 digits only</small>
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={updating}
               className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-lg font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -153,40 +192,50 @@ export default function ManagerProfile() {
           <form onSubmit={handlePasswordChange} className="space-y-6">
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Current Password:</label>
-              <input 
-                type="password" 
-                value={oldPassword} 
-                onChange={(e) => setOldPassword(e.target.value)} 
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition" 
+              <input
+                type="password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
                 placeholder="Enter your current password"
-                required 
+                required
               />
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-2">New Password:</label>
-              <input 
-                type="password" 
-                value={newPassword} 
-                onChange={(e) => setNewPassword(e.target.value)} 
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition" 
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => handleNewPasswordChange(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
                 minLength="8"
-                required 
+                required
               />
-              <small className="text-gray-600 block mt-1">Must be at least 8 characters</small>
+              <small className="text-gray-600 block mt-1">Must be at least 8 characters, include uppercase, number, special character</small>
+              {passwordStrength && (
+                <div className={`text-sm mt-2 ${passwordStrength.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                  {passwordStrength}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Confirm New Password:</label>
-              <input 
-                type="password" 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition" 
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => handleConfirmPasswordChange(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
                 placeholder="Re-enter new password"
-                required 
+                required
               />
+              {passwordMatch && (
+                <div className={`text-sm mt-2 ${passwordMatch.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                  {passwordMatch}
+                </div>
+              )}
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={updating}
               className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-lg font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >

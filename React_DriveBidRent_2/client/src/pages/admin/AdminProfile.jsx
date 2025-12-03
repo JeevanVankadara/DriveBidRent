@@ -51,6 +51,10 @@ const AdminProfile = () => {
     e.preventDefault();
     const { currentPassword, newPassword, confirmPassword } = formData;
 
+    if (currentPassword === newPassword) {
+      showAlert("New password cannot be the same as current password", "error");
+      return;
+    }
     if (newPassword !== confirmPassword) {
       showAlert("New passwords do not match", "error");
       return;

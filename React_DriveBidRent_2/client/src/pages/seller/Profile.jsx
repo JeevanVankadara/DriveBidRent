@@ -31,6 +31,9 @@ const Profile = () => {
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [passwordStrength, setPasswordStrength] = useState('');
+  const [passwordMatch, setPasswordMatch] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
 
   // Auto-hide messages after 4 seconds
   useEffect(() => {
@@ -79,11 +82,59 @@ const Profile = () => {
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'lastName') {
+      const numbersOnlyRegex = /^\d+$/;
+      if (value && numbersOnlyRegex.test(value)) {
+        setLastNameError('Last name cannot contain only numbers');
+      } else {
+        setLastNameError('');
+      }
+    }
     setUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNewPasswordChange = (value) => {
+    setNewPassword(value);
+    const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!value) {
+      setPasswordStrength('');
+    } else if (!strongRegex.test(value)) {
+      setPasswordStrength('❌ Weak: needs uppercase, number, special char');
+    } else {
+      setPasswordStrength('✅ Strong password');
+    }
+  };
+
+  const handleConfirmPasswordChange = (value) => {
+    setConfirmPassword(value);
+    if (!value) {
+      setPasswordMatch('');
+    } else if (newPassword !== value) {
+      setPasswordMatch('❌ Passwords do not match');
+    } else {
+      setPasswordMatch('✅ Passwords match');
+    }
   };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+    if (lastNameError) {
+      setError('Last name cannot contain only numbers');
+      return;
+    }
+    if (!user.firstName || user.firstName.trim() === '') {
+      setError('First name is required');
+      return;
+    }
+    const phoneRegex = /^\d{10}$/;
+    if (user.phone && !phoneRegex.test(user.phone)) {
+      setError('Phone number must be exactly 10 digits');
+      return;
+    }
+    if (user.phone && user.phone === reduxProfile.phone) {
+      setError('New phone number cannot be the same as current phone number');
+      return;
+    }
     try {
       const result = await dispatch(updateMyProfile(user)).unwrap();
       setSuccess('Profile updated successfully!');
@@ -108,12 +159,30 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!oldPassword) {
+      setError('Please enter your current password');
+      return;
+    }
+    
+    if (oldPassword === newPassword) {
+      setError('New password cannot be the same as current password');
+      return;
+    }
+    
     if (newPassword !== confirmPassword) {
       setError('New passwords do not match');
       return;
     }
+    
     if (newPassword.length < 8) {
       setError('Password must be at least 8 characters');
+      return;
+    }
+    
+    const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!strongRegex.test(newPassword)) {
+      setError('Password must include uppercase letter, number, and special character');
       return;
     }
 
@@ -127,6 +196,8 @@ const Profile = () => {
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
+        setPasswordStrength('');
+        setPasswordMatch('');
         refresh();
       } else {
         setError(res.data.message);
@@ -164,7 +235,6 @@ const Profile = () => {
                       value={user.firstName}
                       onChange={handleProfileChange}
                       className="w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                      required
                     />
                   </div>
                   <div>
@@ -175,8 +245,8 @@ const Profile = () => {
                       value={user.lastName}
                       onChange={handleProfileChange}
                       className="w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                      required
                     />
+                    {lastNameError && <div style={{ color: '#dc3545', fontSize: '0.85rem', marginTop: '0.25rem' }}>❌ {lastNameError}</div>}
                   </div>
                 </div>
 
@@ -199,7 +269,6 @@ const Profile = () => {
                     onChange={handleProfileChange}
                     pattern="[0-9]{10}"
                     className="w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                    required
                   />
                 </div>
 
@@ -354,22 +423,36 @@ const Profile = () => {
                   className="w-full px-3 py-2 border rounded-lg"
                   required
                 />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm New Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
+                <div>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => handleNewPasswordChange(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    required
+                  />
+                  {passwordStrength && (
+                    <div style={{ color: passwordStrength.includes('✅') ? 'green' : 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                      {passwordStrength}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    placeholder="Confirm New Password"
+                    value={confirmPassword}
+                    onChange={(e) => handleConfirmPasswordChange(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    required
+                  />
+                  {passwordMatch && (
+                    <div style={{ color: passwordMatch.includes('✅') ? 'green' : 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                      {passwordMatch}
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
                   className="w-full bg-orange-600 text-white py-2 rounded-lg font-medium hover:bg-orange-700"
