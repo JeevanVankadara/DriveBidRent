@@ -74,7 +74,8 @@ export const updateStatus = async (req, res) => {
 export const getPendingCarDetails = async (req, res) => {
   try {
     const car = await AuctionRequest.findById(req.params.id)
-      .populate('assignedMechanic', 'firstName lastName');
+      .populate('assignedMechanic', 'firstName lastName')
+      .populate('sellerId', 'firstName lastName email phone city');
 
     if (!car) return res.json(send(false, 'Car not found'));
 

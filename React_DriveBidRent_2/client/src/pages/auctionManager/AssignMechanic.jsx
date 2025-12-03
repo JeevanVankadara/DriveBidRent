@@ -137,21 +137,25 @@ export default function AssignMechanic() {
             </div>
           </div>
 
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-orange-600 pb-2">Seller Details</h2>
+          <div className="bg-blue-50 border border-blue-300 rounded-lg p-4">
+            <h3 className="text-base font-bold text-blue-900 mb-2">Seller Contact</h3>
             {request.sellerId ? (
-              <div className="space-y-2 mt-4 text-lg">
-                <p><strong>Name:</strong> {request.sellerId.firstName} {request.sellerId.lastName}</p>
-                <p><strong>Contact:</strong> {request.sellerId.phone || 'Not provided'}</p>
-                <p><strong>Location:</strong> {[
-                  request.sellerId.doorNo,
-                  request.sellerId.street,
-                  request.sellerId.city,
-                  request.sellerId.state
-                ].filter(Boolean).join(', ')}</p>
+              <div className="space-y-1 text-sm">
+                <p mt-2px><strong>Name:</strong> {request.sellerId.firstName} {request.sellerId.lastName}</p>
+                <p mt-2px><strong>Email:</strong> {request.sellerId.email || 'N/A'}</p>
+                <p mt-2px><strong>Phone:</strong> {request.sellerId.phone || 'N/A'}</p>
+                <p mt-2px><strong>City:</strong> {request.sellerId.city || 'N/A'}</p>
+                {request.sellerId.phone && (
+                  <a
+                    href={`tel:${request.sellerId.phone}`}
+                    className="inline-block mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-semibold transition text-sm"
+                  >
+                     Call Seller
+                  </a>
+                )}
               </div>
             ) : (
-              <p className="mt-4">Seller information not available</p>
+              <p className="text-sm">Seller information not available</p>
             )}
           </div>
 

@@ -135,21 +135,22 @@ export default function PendingCarDetails() {
             ))}
           </div>
 
-          {/* Assigned Mechanic */}
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-10">
-            <h3 className="text-2xl font-bold text-blue-900 mb-4">Assigned Mechanic</h3>
-            <p className="text-lg">
-              <span className="font-semibold">Name:</span>{' '}
-              {car.assignedMechanic?.firstName} {car.assignedMechanic?.lastName || 'Not assigned yet'}
-            </p>
-            {car.mechanicReview?.submittedAt && (
-              <p className="text-lg mt-2">
-                <span className="font-semibold">Report Submitted:</span>{' '}
-                {new Date(car.mechanicReview.submittedAt).toLocaleDateString('en-IN', {
-                  day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                })}
-              </p>
-            )}
+          {/* Seller Details - Compact */}
+          <div className="bg-blue-50 border border-blue-300 rounded-lg p-4 mb-8">
+            <h3 className="text-lg font-bold text-blue-900 mb-3">Seller Contact</h3>
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <span><strong>Name:</strong> {car.sellerId?.firstName} {car.sellerId?.lastName}</span>
+              <span><strong>Email:</strong> {car.sellerId?.email || 'N/A'}</span>
+              <span><strong>Phone:</strong> {car.sellerId?.phone || 'N/A'}</span>
+              {car.sellerId?.phone && (
+                <a
+                  href={`tel:${car.sellerId.phone}`}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-semibold transition"
+                >
+                   Call
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Mechanic Inspection Report - Only Amber Border */}
