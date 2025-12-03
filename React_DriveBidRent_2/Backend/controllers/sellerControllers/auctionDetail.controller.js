@@ -10,6 +10,7 @@ export const getAuctionDetail = async (req, res) => {
       sellerId: req.user._id
     })
       .populate('winnerId', 'firstName lastName email phone')
+      .populate('assignedMechanic', 'firstName lastName email phone shopName experienceYears repairBikes repairCars')
       .lean();
 
     if (!auction) {
