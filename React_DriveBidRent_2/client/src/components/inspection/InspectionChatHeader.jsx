@@ -19,6 +19,11 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat, onDelet
     // Get current user ID from props or localStorage
     const storedUser = (() => { 
       try { 
+        // Try authState first (Redux persisted state)
+        const authState = JSON.parse(localStorage.getItem('authState'));
+        if (authState?.user) return authState.user;
+        
+        // Fallback to user key
         return JSON.parse(localStorage.getItem('user')); 
       } catch (e) { 
         return null; 
@@ -192,14 +197,30 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat, onDelet
   const isAuctionManager = () => {
     const storedUser = (() => { 
       try { 
+        // Try authState first (Redux persisted state)
+        const authState = JSON.parse(localStorage.getItem('authState'));
+        if (authState?.user) return authState.user;
+        
+        // Fallback to user key
         return JSON.parse(localStorage.getItem('user')); 
       } catch (e) { 
         return null; 
       } 
     })();
     
-    const userRole = storedUser?.role;
-    return userRole === 'auctionManager' || userRole === 'auction_manager';
+    console.log('=== DELETE BUTTON DEBUG ===');
+    console.log('storedUser:', storedUser);
+    console.log('role:', storedUser?.role);
+    console.log('userType:', storedUser?.userType);
+    console.log('onDeleteChat prop:', onDeleteChat);
+    
+    const userRole = storedUser?.role || storedUser?.userType;
+    const isManager = userRole === 'auctionManager' || 
+                      userRole === 'auction_manager' || 
+                      userRole === 'auctionmanager';
+    
+    console.log('isManager result:', isManager);
+    return isManager;
   };
 
   return (

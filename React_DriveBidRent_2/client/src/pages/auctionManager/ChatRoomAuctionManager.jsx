@@ -142,7 +142,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
             pollingIntervalRef.current = null;
           }
           // Navigate away from deleted chat
-          navigate('/auction-manager/chats');
+          navigate('/auctionmanager/dashboard');
         } else {
           console.error('Polling error:', err);
         }
@@ -223,15 +223,15 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
       // Trigger chat list refresh and navbar update
       window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
       
-      // Navigate back to chat list
-      navigate('/auction-manager/chats');
+      // Navigate back to dashboard
+      navigate('/auctionmanager/dashboard');
     } catch (err) {
       console.error('Delete chat error:', err);
       // Handle race condition - if already deleted by other user
       if (err.response?.status === 404) {
         // Chat already deleted, just navigate away
         window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
-        navigate('/auction-manager/chats');
+        navigate('/auctionmanager/dashboard');
       } else {
         alert('Failed to delete chat. Please try again.');
       }

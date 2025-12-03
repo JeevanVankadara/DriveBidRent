@@ -146,4 +146,30 @@ export const markInspectionMessagesRead = async (req, res) => {
   }
 };
 
-export default { getMyInspectionChats, getInspectionChatById, getInspectionMessages, sendInspectionMessage, markInspectionMessagesRead };
+export const deleteInspectionChat = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const chat = await InspectionChat.findById(chatId).lean();
+    
+    if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
+
+    const uid = String(getUserId(req));
+    // Only auction manager can delete the chat
+    if (String(chat.auctionManager || '') !== uid) {
+      return res.status(403).json({ success: false, message: 'Only auction manager can delete this chat' });
+    }
+
+    // Delete all messages in this chat
+    await InspectionMessage.deleteMany({ chat: chatId });
+    
+    // Delete the chat itself
+    await InspectionChat.findByIdAndDelete(chatId);
+
+    res.json({ success: true, message: 'Inspection chat deleted successfully' });
+  } catch (err) {
+    console.error('deleteInspectionChat error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export default { getMyInspectionChats, getInspectionChatById, getInspectionMessages, sendInspectionMessage, markInspectionMessagesRead, deleteInspectionChat };

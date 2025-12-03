@@ -28,5 +28,6 @@ router.get('/:chatId', InspectionController.getInspectionChatById);
 router.get('/:chatId/messages', InspectionController.getInspectionMessages);
 router.post('/:chatId/message', InspectionController.sendInspectionMessage);
 router.post('/:chatId/mark-read', InspectionController.markInspectionMessagesRead);
+router.delete('/:chatId', InspectionController.deleteInspectionChat);
 
 export default router;
