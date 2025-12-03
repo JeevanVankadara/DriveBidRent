@@ -9,17 +9,27 @@ export default function MyBids() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchMyBids();
+    // Initial fetch with loading state
+    fetchMyBids(true);
+    
+    // Set up polling for real-time bid updates every 1 second (without loading state)
+    const intervalId = setInterval(() => {
+      if (!error) {
+        fetchMyBids(false);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
-  const fetchMyBids = async () => {
+  const fetchMyBids = async (isInitial = false) => {
     try {
       const data = await getMyBids();
       setAuctionsWithBids(data);
     } catch (error) {
       setError("Failed to load your bids.");
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 

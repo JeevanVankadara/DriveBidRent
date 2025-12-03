@@ -171,17 +171,17 @@ export default function Notifications() {
                 {notification.auctionId && notification.type === 'outbid' && (
                   <div className="flex gap-3 mt-4 flex-wrap">
                     <Link
-                      to={`/buyer/completed-auction/${notification.auctionId._id || notification.auctionId}`}
+                      to={`/buyer/auctions/${notification.auctionId._id || notification.auctionId}`}
                       className="px-5 py-2 bg-orange-600 text-white rounded-md font-medium hover:bg-orange-700 transition"
                     >
-                      View Bids
+                      View Auction & Place Bid
                     </Link>
                     <Link
-                      to={`/buyer/completed-auction/${notification.auctionId._id || notification.auctionId}`}
+                      to="/buyer/my-bids"
                       className="px-5 py-2 bg-gray-600 text-white rounded-md font-medium hover:bg-gray-700 transition"
-                      title="View auction if it's still active"
+                      title="View all your bids"
                     >
-                      View Auction
+                      View My Bids
                     </Link>
                   </div>
                 )}

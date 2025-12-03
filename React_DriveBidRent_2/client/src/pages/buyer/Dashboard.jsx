@@ -19,8 +19,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = async (isInitial = false) => {
       try {
+        if (isInitial) setLoading(true);
         const [dash, wl, count] = await Promise.all([
           getDashboardData(),
           getWishlist(),
@@ -37,10 +38,19 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Dashboard failed to load:", err);
       } finally {
-        setLoading(false);
+        if (isInitial) setLoading(false);
       }
     };
-    loadData();
+    
+    // Initial load with loading state
+    loadData(true);
+    
+    // Set up polling for real-time auction/rental updates every 2 seconds
+    const intervalId = setInterval(() => {
+      loadData(false);
+    }, 2000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleWishlistToggle = async (id, type) => {

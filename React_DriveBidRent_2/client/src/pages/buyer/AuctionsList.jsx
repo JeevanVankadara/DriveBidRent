@@ -33,6 +33,13 @@ export default function AuctionsList() {
   useEffect(() => {
     fetchAuctions();
     fetchWishlist();
+    
+    // Set up polling for real-time auction updates every 2 seconds
+    const intervalId = setInterval(() => {
+      fetchAuctions();
+    }, 2000);
+    
+    return () => clearInterval(intervalId);
   }, [debouncedSearch, condition, fuelType, transmission, minPrice, maxPrice]);
 
   const fetchAuctions = async () => {

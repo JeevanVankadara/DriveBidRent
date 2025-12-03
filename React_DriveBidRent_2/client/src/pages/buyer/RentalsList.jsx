@@ -32,6 +32,13 @@ export default function RentalsList() {
   useEffect(() => {
     fetchRentals();
     fetchWishlist();
+    
+    // Set up polling for real-time rental updates every 2 seconds
+    const intervalId = setInterval(() => {
+      fetchRentals();
+    }, 2000);
+    
+    return () => clearInterval(intervalId);
   }, [debouncedSearch, fuelType, transmission, capacity, city]);
 
   const fetchRentals = async () => {

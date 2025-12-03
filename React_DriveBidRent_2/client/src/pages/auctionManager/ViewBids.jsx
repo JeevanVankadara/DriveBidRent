@@ -15,10 +15,10 @@ export default function ViewBids() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBids = async () => {
+    const fetchBids = async (isInitial = false) => {
       try {
-        setLoading(true);
-  const res = await auctionManagerServices.viewBids(id);
+        if (isInitial) setLoading(true);
+        const res = await auctionManagerServices.viewBids(id);
         const responseData = res.data || res;
         
         if (responseData.success) {
@@ -35,10 +35,21 @@ export default function ViewBids() {
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load bids');
       } finally {
-        setLoading(false);
+        if (isInitial) setLoading(false);
       }
     };
-    fetchBids();
+    
+    // Initial fetch with loading state
+    fetchBids(true);
+    
+    // Set up polling for real-time bid updates every 1 second (without loading state)
+    const intervalId = setInterval(() => {
+      if (!error) {
+        fetchBids(false);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
   }, [id]);
 
   const endAuction = async () => {

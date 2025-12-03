@@ -17,12 +17,37 @@ export default function AuctionDetails() {
   const [isCurrentBidder, setIsCurrentBidder] = useState(false);
 
   useEffect(() => {
-    fetchAuctionDetails();
+    const fetchAuctionDetails = async (isInitial = false) => {
+      try {
+        if (isInitial) setLoading(true);
+        const data = await getAuctionById(id);
+        setAuction(data.auction);
+        setCurrentBid(data.currentBid);
+        setIsCurrentBidder(data.isCurrentBidder || false);
+      } catch (error) {
+        console.error('Error fetching auction details:', error);
+        setError('Failed to load auction details');
+      } finally {
+        if (isInitial) setLoading(false);
+      }
+    };
+    
+    // Initial fetch with loading state
+    fetchAuctionDetails(true);
+    
+    // Set up polling for real-time bid updates every 1 second (without loading state)
+    const intervalId = setInterval(() => {
+      if (!error) {
+        fetchAuctionDetails(false);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
   }, [id]);
 
-  const fetchAuctionDetails = async () => {
+  const fetchAuctionDetails = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const data = await getAuctionById(id);
       setAuction(data.auction);
       setCurrentBid(data.currentBid);
@@ -31,7 +56,7 @@ export default function AuctionDetails() {
       console.error('Error fetching auction details:', error);
       setError('Failed to load auction details');
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 

@@ -36,8 +36,27 @@ export default function Navbar() {
         console.error("Navbar load failed:", err);
       }
     };
+    
+    // Initial load
     loadData();
-  }, []);
+    
+    // Set up polling for real-time notification updates every 1 second
+    const intervalId = setInterval(async () => {
+      try {
+        const count = await getUnreadNotificationCount();
+        setUnreadCount(count);
+        
+        // Also refresh profile data
+        if (profile) {
+          setUser(profile);
+        }
+      } catch (err) {
+        // Silently fail during polling
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [profile]);
 
   useEffect(() => {
     // Listen for notificationsSeen event to refresh badge/profile
@@ -139,8 +158,10 @@ export default function Navbar() {
               >
                 Notifications
               </Link>
-              {user?.notificationFlag && (
-                <span className="absolute -top-3 -right-6 bg-orange-500 rounded-full h-3 w-3 shadow-md" aria-hidden="true" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-3 -right-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-md" aria-hidden="true">
+                  {unreadCount}
+                </span>
               )}
             </div>
             <Link

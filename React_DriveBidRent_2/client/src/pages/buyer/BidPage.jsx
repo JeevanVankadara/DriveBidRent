@@ -17,12 +17,20 @@ export default function BidPage() {
   const { profile, loading: profileLoading } = useProfile();
 
   useEffect(() => {
-    fetchAuctionData();
+    // Initial fetch with loading state
+    fetchAuctionData(true);
+    
+    // Set up polling for real-time bid updates every 1 second (without loading state)
+    const intervalId = setInterval(() => {
+      fetchAuctionData(false);
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
     // profile hook will fetch 'me' automatically; update isLoggedIn when available
     // checkAuth();
   }, [id]);
 
-  const fetchAuctionData = async () => {
+  const fetchAuctionData = async (isInitial = false) => {
     try {
       const data = await getAuctionById(id);
       setAuction(data.auction);
@@ -31,7 +39,7 @@ export default function BidPage() {
     } catch (error) {
       console.error('Error fetching auction data:', error);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 

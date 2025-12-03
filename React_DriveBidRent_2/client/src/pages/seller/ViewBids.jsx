@@ -20,7 +20,19 @@ const ViewBids = () => {
         setError('Failed to load bids');
       }
     };
+    
+    // Initial fetch
     fetchBids();
+    
+    // Set up polling for real-time bid updates every 1 second
+    const intervalId = setInterval(() => {
+      // Only poll if there's no error
+      if (!error) {
+        fetchBids();
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
   }, [id]);
 
 
