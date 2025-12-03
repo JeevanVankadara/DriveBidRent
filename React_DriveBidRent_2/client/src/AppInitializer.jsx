@@ -3,10 +3,7 @@ import { useDispatch } from 'react-redux';
 import { setUser } from './redux/slices/authSlice';
 import App from './App';
 
-/**
- * AppInitializer: Restores auth state from localStorage on app mount
- * This ensures that if user refreshes the page, their auth state is preserved
- */
+
 function AppInitializer() {
   const dispatch = useDispatch();
 
