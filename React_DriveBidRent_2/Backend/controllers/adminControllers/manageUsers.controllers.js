@@ -111,7 +111,7 @@ const blockUser = async (req, res) => {
     user.blockedAt = user.isBlocked ? new Date() : null;
     await user.save();
 
-    // If user is being blocked, remove their current bids from ongoing auctions
+    // If user is being blocked, remove their bids from all auctions (ongoing and ended)
     if (user.isBlocked) {
       const AuctionBid = (await import('../../models/AuctionBid.js')).default;
       const AuctionRequest = (await import('../../models/AuctionRequest.js')).default;
@@ -127,8 +127,13 @@ const blockUser = async (req, res) => {
       for (const auctionId of auctionIds) {
         const auction = await AuctionRequest.findById(auctionId);
         
+        if (!auction) continue;
+
         // Only process ongoing auctions (not ended/stopped)
-        if (auction && auction.started_auction === 'yes' && !auction.auction_stopped) {
+        // For ended auctions, bids remain as historical records
+        if (auction.started_auction === 'yes' && !auction.auction_stopped) {
+          console.log(`Processing ongoing auction ${auctionId} - removing blocked user's bids`);
+
           // First, set all bids for this auction to not current
           await AuctionBid.updateMany(
             { auctionId: auctionId },
@@ -136,10 +141,12 @@ const blockUser = async (req, res) => {
           );
 
           // Delete ALL bids from the blocked user for this auction
-          await AuctionBid.deleteMany({
+          const deletedResult = await AuctionBid.deleteMany({
             auctionId: auctionId,
             buyerId: userId
           });
+
+          console.log(`Deleted ${deletedResult.deletedCount} bid(s) from blocked user for auction ${auctionId}`);
 
           // Find the new highest bid from remaining bidders
           const highestBid = await AuctionBid.findOne({
@@ -148,10 +155,14 @@ const blockUser = async (req, res) => {
           .sort({ bidAmount: -1, bidTime: -1 })
           .exec();
 
-          // Set the new highest bid as current
           if (highestBid) {
+            // Set the new highest bid as current
             highestBid.isCurrentBid = true;
             await highestBid.save();
+            console.log(`New highest bidder for auction ${auctionId}: ₹${highestBid.bidAmount}`);
+          } else {
+            // No remaining bids - auction continues with no current bid
+            console.log(`No remaining bids for auction ${auctionId} - auction continues without bids`);
           }
         }
       }

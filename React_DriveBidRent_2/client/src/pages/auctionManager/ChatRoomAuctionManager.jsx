@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance.util';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import InspectionChatBubble from '../../components/inspection/InspectionChatBubble';
 import InspectionMessageInput from '../../components/inspection/InspectionMessageInput';
 import InspectionChatHeader from '../../components/inspection/InspectionChatHeader';
 
 export default function ChatRoomAuctionManager({ chatIdProp }) {
   const { chatId: chatIdFromParam } = useParams();
+  const navigate = useNavigate();
   const chatId = chatIdProp || chatIdFromParam;
   const [chat, setChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -17,6 +18,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const initialLoadRef = useRef(true);
+  const pollingIntervalRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -132,15 +134,32 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
+        // Handle chat deletion (404) or other errors
+        if (err.response?.status === 404) {
+          console.log('Chat was deleted, stopping polling');
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          // Navigate away from deleted chat
+          navigate('/auction-manager/chats');
+        } else {
+          console.error('Polling error:', err);
+        }
       }
     };
 
     // Set up polling
     const intervalId = setInterval(fetchMessages, 3000);
+    pollingIntervalRef.current = intervalId;
     
-    return () => clearInterval(intervalId);
-  }, [chatId, lastFetchedAt]);
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [chatId, lastFetchedAt, navigate]);
 
   // Mark messages as read
   useEffect(() => {
@@ -191,6 +210,34 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
     }
   };
 
+  const handleDeleteChat = async (chatId) => {
+    try {
+      // Stop polling immediately
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      
+      await axiosInstance.delete(`/inspection-chat/${chatId}`);
+      
+      // Trigger chat list refresh and navbar update
+      window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
+      
+      // Navigate back to chat list
+      navigate('/auction-manager/chats');
+    } catch (err) {
+      console.error('Delete chat error:', err);
+      // Handle race condition - if already deleted by other user
+      if (err.response?.status === 404) {
+        // Chat already deleted, just navigate away
+        window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
+        navigate('/auction-manager/chats');
+      } else {
+        alert('Failed to delete chat. Please try again.');
+      }
+    }
+  };
+
   const expired = chat && new Date() > new Date(chat.expiresAt);
 
   if (!chatId) {
@@ -238,6 +285,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
         carName={chat?.inspectionTask?.vehicleName || "Vehicle Inspection"}
         currentUserId={myUserId}
         chat={chat}
+        onDeleteChat={handleDeleteChat}
       />
       
       <div 

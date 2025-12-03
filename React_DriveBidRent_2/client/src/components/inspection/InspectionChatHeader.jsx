@@ -1,6 +1,6 @@
 import React from 'react';
 
-const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat }) => {
+const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat, onDeleteChat }) => {
   const getOtherUser = () => {
     console.log('=== GET OTHER USER DEBUG ===');
     console.log('otherUser prop:', otherUser);
@@ -189,6 +189,19 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat }) => {
     );
   };
 
+  const isAuctionManager = () => {
+    const storedUser = (() => { 
+      try { 
+        return JSON.parse(localStorage.getItem('user')); 
+      } catch (e) { 
+        return null; 
+      } 
+    })();
+    
+    const userRole = storedUser?.role;
+    return userRole === 'auctionManager' || userRole === 'auction_manager';
+  };
+
   return (
     <div className="bg-orange-600 text-white px-6 py-4 border-b">
       <div className="flex items-center justify-between">
@@ -205,8 +218,26 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat }) => {
             <p className="text-sm text-white/90">{getCarName()}</p>
           </div>
         </div>
-        <div className="text-right">
-          {getInspectionStatus()}
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            {getInspectionStatus()}
+          </div>
+          {isAuctionManager() && onDeleteChat && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this inspection chat?')) {
+                  onDeleteChat(chat?._id);
+                }
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+              title="Delete Chat"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              Delete Chat
+            </button>
+          )}
         </div>
       </div>
     </div>
