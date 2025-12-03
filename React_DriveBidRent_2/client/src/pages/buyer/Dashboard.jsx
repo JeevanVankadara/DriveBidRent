@@ -82,17 +82,17 @@ const Dashboard = () => {
     <div className="min-h-screen bg-white">
       {/* Hero Banner */}
       <section
-        className="relative h-96 md:h-[400px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center text-white"
+        className="relative h-64 sm:h-80 md:h-96 lg:h-[400px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center text-white"
         style={{ backgroundImage: "url('/images/car1001.png')" }}
       >
         <div className="absolute inset-0 bg-black/80" />
-        <div className="relative z-10 px-6">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+        <div className="relative z-10 px-4 sm:px-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight">
             <span className="text-orange-500">D</span>rive
             <span className="text-orange-500">B</span>id
             <span className="text-orange-500">R</span>ent
           </h1>
-          <p className="mt-4 text-xl md:text-2xl font-medium text-gray-100">
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-gray-100">
             Buy or Rent — Drive Your Dream with{" "}
             <span className="text-orange-500 font-bold">Ease!</span>
           </p>
@@ -101,8 +101,8 @@ const Dashboard = () => {
       </section>
 
       {/* Featured Auctions */}
-      <section className="py-16 max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Featured Auctions</h2>
+      <section className="py-8 sm:py-12 lg:py-16 max-w-7xl mx-auto px-4 sm:px-6">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-orange-500 mb-8 sm:mb-10 lg:mb-12">Featured Auctions</h2>
 
         {featuredAuctions.length === 0 ? (
           <p className="text-center text-xl text-gray-600">No auctions available right now.</p>
@@ -131,9 +131,9 @@ const Dashboard = () => {
       </section>
 
       {/* Featured Rentals */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Featured Rentals</h2>
+      <section className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-orange-500 mb-8 sm:mb-10 lg:mb-12">Featured Rentals</h2>
 
           {featuredRentals.length === 0 ? (
             <p className="text-center text-xl text-gray-600">No rentals available right now.</p>

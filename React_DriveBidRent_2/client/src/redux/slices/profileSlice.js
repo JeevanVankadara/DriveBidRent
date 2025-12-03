@@ -32,6 +32,18 @@ const profileUpdateEndpointFor = (userType) => {
 export const fetchMyProfile = createAsyncThunk('profile/fetchMyProfile', async (_, { getState, rejectWithValue }) => {
   try {
     const userType = getState().auth?.userType;
+    const user = getState().auth?.user;
+    
+    // If no userType but we have user object, use it directly
+    if (!userType && user) {
+      return user;
+    }
+    
+    // If no userType at all, reject
+    if (!userType) {
+      return rejectWithValue('User type not found. Please log in again.');
+    }
+    
     const endpoint = profileEndpointFor(userType);
     const res = await axiosInstance.get(endpoint);
     // Handle both formats: { data: { user: {...} } } and { data: {...} }

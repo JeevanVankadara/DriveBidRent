@@ -121,18 +121,18 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-md border-b border-orange-100 sticky top-0 z-50" style={{ marginBottom: '-8px' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/buyer" className="text-3xl font-black text-orange-500 hover:text-orange-600 transition">
+            <Link to="/buyer" className="text-xl sm:text-2xl lg:text-3xl font-black text-orange-500 hover:text-orange-600 transition">
               Drive<span className="text-gray-800">BidRent</span>
             </Link>
           </div>
 
           {/* Center Links */}
-          <div className="hidden md:flex flex-1 justify-center space-x-10">
+          <div className="hidden lg:flex flex-1 justify-center space-x-6 xl:space-x-10">
             <Link
               to="/buyer/purchases"
               className={`text-gray-700 hover:text-orange-500 font-medium transition ${isActive('/buyer/purchases') ? 'text-orange-500 font-bold' : ''}`}
@@ -182,17 +182,17 @@ export default function Navbar() {
           </div>
 
           {/* Right Side - Profile & Logout */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Link
               to="/buyer/profile"
-              className="text-gray-700 hover:text-orange-500 font-medium border border-orange-500 px-4 py-2 rounded-lg hover:bg-orange-50 transition"
+              className="text-gray-700 hover:text-orange-500 text-sm sm:text-base font-medium border border-orange-500 px-2 sm:px-4 py-1 sm:py-2 rounded-lg hover:bg-orange-50 transition"
             >
               Profile
             </Link>
 
             <button
               onClick={handleLogout}
-              className="bg-red-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-red-700 transition shadow-md"
+              className="bg-red-600 text-white text-sm sm:text-base px-3 sm:px-5 py-1 sm:py-2 rounded-lg font-medium hover:bg-red-700 transition shadow-md"
             >
               Logout
             </button>
@@ -200,18 +200,20 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu (Optional - hidden for now) */}
-      <div className="md:hidden border-t border-gray-200 bg-gray-50 py-3 px-4">
-        <div className="flex flex-wrap justify-center gap-4 text-sm">
-          <Link to="/buyer/purchases" className="text-gray-600 hover:text-orange-500">Purchases</Link>
-          <Link to="/buyer/wishlist" className="text-gray-600 hover:text-orange-500">Wishlist</Link>
-          <Link to="/buyer/my-bids" className="text-gray-600 hover:text-orange-500">My Bids</Link>
-          <Link to="/buyer/notifications" className="text-gray-600 hover:text-orange-500 relative">
+      {/* Mobile Menu */}
+      <div className="lg:hidden border-t border-gray-200 bg-gray-50 py-2 px-2">
+        <div className="flex flex-wrap justify-center gap-3 text-xs sm:text-sm">
+          <Link to="/buyer/purchases" className="text-gray-600 hover:text-orange-500 font-medium">Purchases</Link>
+          <Link to="/buyer/wishlist" className="text-gray-600 hover:text-orange-500 font-medium">Wishlist</Link>
+          <Link to="/buyer/my-bids" className="text-gray-600 hover:text-orange-500 font-medium">My Bids</Link>
+          <Link to="/buyer/notifications" className="text-gray-600 hover:text-orange-500 relative font-medium">
             Notifications
-            {unreadCount > 0 && <span className="absolute -top-1 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{unreadCount}</span>}
+            {unreadCount > 0 && <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">{unreadCount}</span>}
           </Link>
-              <Link to="/buyer/chats" className="text-gray-600 hover:text-orange-500">Chat{chatUnreadCount > 0 && <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-xs rounded-full h-5 w-5">{chatUnreadCount}</span>}</Link>
-          <Link to="/buyer/about" className="text-gray-600 hover:text-orange-500">About</Link>
+          <Link to="/buyer/chats" className="text-gray-600 hover:text-orange-500 font-medium">
+            Chat{chatUnreadCount > 0 && <span className="ml-1 inline-flex items-center justify-center bg-red-500 text-white text-xs rounded-full h-4 w-4">{chatUnreadCount}</span>}
+          </Link>
+          <Link to="/buyer/about" className="text-gray-600 hover:text-orange-500 font-medium">About</Link>
         </div>
       </div>
     </nav>

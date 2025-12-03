@@ -85,11 +85,11 @@ export default function BidPage() {
   }
 
   return (
-    <div className="container">
+    <div className="container max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Auction Details Section */}
-      <div className="auction-details">
-        <img src={auction.vehicleImage} alt={auction.vehicleName} />
-        <h1>{auction.vehicleName}</h1>
+      <div className="auction-details bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 shadow-md mb-6 sm:mb-8">
+        <img src={auction.vehicleImage} alt={auction.vehicleName} className="w-full h-48 sm:h-64 object-cover rounded-lg mb-4" />
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-4">{auction.vehicleName}</h1>
         <p><strong>Seller:</strong> {auction.sellerId?.firstName} {auction.sellerId?.lastName}</p>
         <p><strong>Year:</strong> {auction.year}</p>
         <p><strong>Condition:</strong> {auction.condition?.charAt(0)?.toUpperCase() + auction.condition?.slice(1)}</p>
