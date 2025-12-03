@@ -1,39 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance.util';
+import useSellerAuctions from '../../hooks/useSellerAuctions';
 
 const ViewBids = () => {
   const { id } = useParams();
-  const [bids, setBids] = useState([]);
-  const [error, setError] = useState(null);
+  const { bids, bidsError: error, loadBids } = useSellerAuctions();
+  const pollingIntervalRef = useRef(null);
 
   useEffect(() => {
-    const fetchBids = async () => {
-      try {
-        const response = await axiosInstance.get(`/seller/view-bids/${id}`);
-        if (response.data.success) {
-          setBids(response.data.data);
-        } else {
-          setError(response.data.message);
-        }
-      } catch (err) {
-        setError('Failed to load bids');
-      }
-    };
-    
     // Initial fetch
-    fetchBids();
+    loadBids(id);
     
     // Set up polling for real-time bid updates every 1 second
-    const intervalId = setInterval(() => {
-      // Only poll if there's no error
+    pollingIntervalRef.current = setInterval(() => {
       if (!error) {
-        fetchBids();
+        loadBids(id);
       }
     }, 1000);
     
-    return () => clearInterval(intervalId);
-  }, [id]);
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [id, loadBids, error]);
 
 
   const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';

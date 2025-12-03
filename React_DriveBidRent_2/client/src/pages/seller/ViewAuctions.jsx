@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance.util';
 import LoadingSpinner from '../components/LoadingSpinner';
+import useSellerAuctions from '../../hooks/useSellerAuctions';
 
 const ViewAuctions = () => {
-  const [auctions, setAuctions] = useState([]);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const { auctions, loading, error, loadAuctions } = useSellerAuctions();
   const navigate = useNavigate();
 
   const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -46,22 +44,8 @@ const ViewAuctions = () => {
   };
 
   useEffect(() => {
-    const fetchAuctions = async () => {
-      try {
-        const response = await axiosInstance.get('/seller/view-auctions');
-        if (response.data.success) {
-          setAuctions(response.data.data);
-        } else {
-          setError(response.data.message);
-        }
-      } catch (err) {
-        setError('Failed to load auctions');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAuctions();
-  }, []);
+    loadAuctions();
+  }, [loadAuctions]);
 
   if (loading) return <LoadingSpinner />;
 

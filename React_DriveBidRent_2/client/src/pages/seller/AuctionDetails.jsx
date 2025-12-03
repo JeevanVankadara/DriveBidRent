@@ -1,31 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance.util';
+import useSellerAuctions from '../../hooks/useSellerAuctions';
 
 const AuctionDetails = () => {
   const { id } = useParams();
-  const [auction, setAuction] = useState(null);
-  const [error, setError] = useState(null);
+  const { currentAuction: auction, loading, error, loadAuctionById } = useSellerAuctions();
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
   const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';
   const formatDateTime = (date) => date ? new Date(date).toLocaleString() : 'Not specified';
 
   useEffect(() => {
-    const fetchAuction = async () => {
-      try {
-        const response = await axiosInstance.get(`/seller/auction-details/${id}`);
-        if (response.data.success) {
-          setAuction(response.data.data);
-        } else {
-          setError(response.data.message);
-        }
-      } catch (err) {
-        setError('Failed to load auction details');
-      }
-    };
-    fetchAuction();
-  }, [id]);
+    loadAuctionById(id);
+  }, [id, loadAuctionById]);
 
   if (error) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -38,7 +25,7 @@ const AuctionDetails = () => {
     </div>
   );
 
-  if (!auction) return (
+  if (loading || !auction) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-xl text-gray-600">Loading...</div>
     </div>

@@ -1,63 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance.util';
 import LoadingSpinner from '../components/LoadingSpinner';
+import useSellerRentals from '../../hooks/useSellerRentals';
 
 const RentalDetails = () => {
   const { id } = useParams();
-  const [rental, setRental] = useState(null);
+  const { currentRental: rental, reviews, loading: rentalLoading, loadRentalById, loadReviews, markRentalAsReturned } = useSellerRentals();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
-  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    const fetchRental = async () => {
-      try {
-        const response = await axiosInstance.get(`/seller/rental-details/${id}`);
-        if (response.data.success) {
-          setRental(response.data.data.rental);
-        } else {
-          setError(response.data.message);
-        }
-      } catch (err) {
-        setError('Failed to load rental details');
-      }
-    };
-
-    const fetchReviews = async () => {
-      try {
-        const response = await axiosInstance.get(`/seller/rentals/${id}/reviews`);
-        if (response.data.success) {
-          setReviews(response.data.data.reviews);
-        }
-      } catch (err) {
-        console.error('Error fetching reviews:', err);
-      }
-    };
-
-    fetchRental();
-    fetchReviews();
-  }, [id]);
+    loadRentalById(id);
+    loadReviews(id);
+  }, [id, loadRentalById, loadReviews]);
 
   const handleMarkAsReturned = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.post(`/seller/rental/mark-returned/${id}`);
-      if (response.data.success) {
-        setSuccess('Vehicle marked as returned and is now available for rent!');
-        setRental(prev => ({
-          ...prev,
-          status: 'available',
-          buyerId: null,
-          pickupDate: null,
-          dropDate: null
-        }));
-        setTimeout(() => setSuccess(null), 3000);
-      } else {
-        setError(response.data.message);
-      }
+      await markRentalAsReturned(id);
+      setSuccess('Vehicle marked as returned and is now available for rent!');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError('Failed to mark rental as returned. Please try again.');
     } finally {

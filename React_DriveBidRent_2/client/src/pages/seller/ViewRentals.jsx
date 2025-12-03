@@ -1,31 +1,15 @@
 // client/src/pages/seller/ViewRentals.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance.util';
 import LoadingSpinner from '../components/LoadingSpinner';
+import useSellerRentals from '../../hooks/useSellerRentals';
 
 const ViewRentals = () => {
-  const [rentals, setRentals] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { rentals, loading, error, loadRentals } = useSellerRentals();
 
   useEffect(() => {
-    const fetchRentals = async () => {
-      try {
-        const response = await axiosInstance.get('/seller/view-rentals');
-        if (response.data.success) {
-          setRentals(response.data.data);
-        } else {
-          setError(response.data.message);
-        }
-      } catch (err) {
-        setError('Failed to load rentals');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRentals();
-  }, []);
+    loadRentals();
+  }, [loadRentals]);
 
   if (loading) return <LoadingSpinner />;
 
