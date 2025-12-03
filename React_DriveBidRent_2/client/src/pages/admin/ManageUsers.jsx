@@ -31,7 +31,6 @@ const ManageUsers = () => {
     reportedUsers: false,
     blockedUsers: false
   });
-  const [alerts, setAlerts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,14 +60,6 @@ const ManageUsers = () => {
     setShowAll(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const showAlert = (message, type = 'success') => {
-    const id = Date.now();
-    setAlerts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setAlerts(prev => prev.filter(a => a.id !== id));
-    }, 5000);
-  };
-
   const handleAction = async (action, id, type) => {
     try {
       let res;
@@ -85,9 +76,6 @@ const ManageUsers = () => {
       }
 
       if (res.success) {
-        if (action !== 'block') {
-          showAlert(res.message);
-        }
         // Refresh data
         const refreshed = await adminServices.getManageUsers();
         if (refreshed.success) setData(refreshed.data);
@@ -96,11 +84,9 @@ const ManageUsers = () => {
         if (action === 'block' && selectedUser && selectedUser._id === id) {
           setSelectedUser(prev => ({ ...prev, isBlocked: res.data.isBlocked }));
         }
-      } else {
-        showAlert(res.message, 'danger');
       }
     } catch (err) {
-      showAlert('Error performing action', 'danger');
+      console.error('Error performing action:', err);
     }
   };
 
@@ -186,14 +172,6 @@ const ManageUsers = () => {
 
   return (
     <>
-      <div id="alertContainer" className="fixed top-5 right-5 z-[1001]">
-        {alerts.map(alert => (
-          <div key={alert.id} className={`alert alert-${alert.type} p-4 mb-5 border border-transparent rounded opacity-100 transition-opacity duration-500 ease-in-out`}>
-            <span onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))} className="float-right text-xl font-bold leading-none cursor-pointer" style={{ color: 'inherit' }}>×</span>
-            {alert.message}
-          </div>
-        ))}
-      </div>
       <div className="container p-8 max-w-6xl mx-auto">
         <h1 className="text-center text-4xl font-bold text-orange-500 mb-8">Manage Users</h1>
 

@@ -208,8 +208,11 @@ export default function ChatRoomSeller({ chatIdProp }) {
           </div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">Select a Conversation</h3>
           <p className="text-gray-500 mb-4">Choose a chat from the sidebar to begin</p>
-          <div className="flex items-center justify-center text-gray-400">
-            <span className="text-sm">Click on a renter to start</span>
+          <div className="inline-flex items-center justify-center space-x-2 text-orange-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="font-medium">Click on a renter to start</span>
           </div>
         </div>
       </div>

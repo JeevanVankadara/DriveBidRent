@@ -207,7 +207,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
             Choose a chat from the sidebar to start communicating with mechanics about vehicle inspections
           </p>
           <div className="inline-flex items-center justify-center space-x-2 text-orange-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
             <span className="font-medium">Click on a mechanic to begin</span>
