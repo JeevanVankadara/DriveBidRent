@@ -82,7 +82,7 @@ const ViewBids = () => {
                     bid.status === 'accepted' ? 'bg-green-100 text-green-800' :
                       bid.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
                     }`}>
-                    {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                    {bid.status ? bid.status.charAt(0).toUpperCase() + bid.status.slice(1) : 'Pending'}
                   </span>
                 </div>
 
@@ -92,10 +92,6 @@ const ViewBids = () => {
                     <span className="font-bold text-orange-600 text-lg">
                       ₹{bid.bidAmount?.toLocaleString('en-IN')}
                     </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Bid Date:</span>
-                    <span className="font-medium">{formatDate(bid.bidTime)}</span>
                   </div>
                 </div>
 

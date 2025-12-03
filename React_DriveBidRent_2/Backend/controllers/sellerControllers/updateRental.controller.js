@@ -26,8 +26,15 @@ export const postUpdateRental = async (req, res) => {
       if (currentDate <= dropDate) {
         return res.status(400).json({
           success: false,
-          message: 'Cannot update rental details while a booking is active or upcoming. Please mark the rental as returned after the rental period ends.'
+          message: 'Cannot update rental details while a booking is active or upcoming. The rental period must end first.'
         });
+      }
+      
+      // If rental period has ended but not marked as returned, automatically clear the booking
+      if (currentDate > dropDate) {
+        rental.buyerId = null;
+        rental.pickupDate = null;
+        rental.dropDate = null;
       }
     }
 

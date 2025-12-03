@@ -16,48 +16,22 @@ export default function ChatRoomSeller({ chatIdProp }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const messagesEndRef = useRef(null);
-  const scrollContainerRef = useRef(null);
-  const initialLoadRef = useRef(true);
   const pollingIntervalRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom
   const scrollToBottom = () => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'end'
-      });
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
   useEffect(() => {
-    if (initialLoadRef.current && messages.length > 0) {
+    if (messages.length > 0) {
       scrollToBottom();
-      initialLoadRef.current = false;
     }
   }, [messages.length]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Keep scroll at bottom when user is at bottom
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const isNearBottom = 
-        container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-      if (isNearBottom) {
-        scrollToBottom();
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
-
+  // Load chat info
   useEffect(() => {
     if (!chatId) {
       setIsLoading(false);
@@ -76,11 +50,11 @@ export default function ChatRoomSeller({ chatIdProp }) {
         console.error('Error loading chat:', err);
       } finally {
         setIsLoading(false);
-        initialLoadRef.current = true;
       }
     })();
   }, [chatId]);
 
+  // Load messages
   useEffect(() => {
     if (!chatId) return;
     
@@ -101,7 +75,7 @@ export default function ChatRoomSeller({ chatIdProp }) {
     })();
   }, [chatId]);
 
-  // Poll for messages every 3 seconds
+  // Poll for new messages
   useEffect(() => {
     if (!chatId) return;
     
@@ -113,7 +87,6 @@ export default function ChatRoomSeller({ chatIdProp }) {
         const newMsgs = res.data.data || [];
         if (newMsgs.length > 0) {
           setMessages(prev => {
-            // Deduplicate by message ID to prevent repeating messages
             const existingIds = new Set(prev.map(m => m._id));
             const uniqueNewMsgs = newMsgs.filter(m => !existingIds.has(m._id));
             return uniqueNewMsgs.length > 0 ? [...prev, ...uniqueNewMsgs] : prev;
@@ -124,14 +97,12 @@ export default function ChatRoomSeller({ chatIdProp }) {
           }
         }
       } catch (err) {
-        // Handle chat deletion (404) or other errors
         if (err.response?.status === 404) {
-          console.log('Chat was deleted, stopping polling');
+          // Chat was deleted
           if (pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
           }
-          // Navigate away from deleted chat
           navigate('/seller/chats');
         } else {
           console.error('Polling error:', err);
@@ -139,7 +110,6 @@ export default function ChatRoomSeller({ chatIdProp }) {
       }
     };
 
-    // Set up polling
     const intervalId = setInterval(fetchMessages, 3000);
     pollingIntervalRef.current = intervalId;
     
@@ -173,20 +143,21 @@ export default function ChatRoomSeller({ chatIdProp }) {
     })();
   }, [messages, chatId, myUserId]);
 
+  // Send message
   const handleSend = async (content) => {
     if (!chatId || !content.trim()) return;
     
+    const tempMessage = {
+      _id: `temp-${Date.now()}`,
+      content,
+      sender: { _id: myUserId },
+      createdAt: new Date().toISOString(),
+      isSending: true
+    };
+    
+    setMessages(prev => [...prev, tempMessage]);
+    
     try {
-      const tempMessage = {
-        _id: `temp-${Date.now()}`,
-        content,
-        sender: { _id: myUserId },
-        createdAt: new Date().toISOString(),
-        isSending: true
-      };
-      
-      setMessages(prev => [...prev, tempMessage]);
-      
       const res = await axiosInstance.post(`/chat/${chatId}/message`, { content });
       if (res.data?.data) {
         setMessages(prev => prev.map(m => 
@@ -200,26 +171,20 @@ export default function ChatRoomSeller({ chatIdProp }) {
     }
   };
 
+  // Delete chat
   const handleDeleteChat = async (chatId) => {
     try {
-      // Stop polling immediately
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
         pollingIntervalRef.current = null;
       }
       
       await axiosInstance.delete(`/chat/${chatId}`);
-      
-      // Trigger chat list refresh and navbar update
       window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
-      
-      // Navigate back to chat list
       navigate('/seller/chats');
     } catch (err) {
       console.error('Delete chat error:', err);
-      // Handle race condition - if already deleted by other user
       if (err.response?.status === 404) {
-        // Chat already deleted, just navigate away
         window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
         navigate('/seller/chats');
       } else {
@@ -229,47 +194,39 @@ export default function ChatRoomSeller({ chatIdProp }) {
   };
 
   const expired = chat && new Date() > new Date(chat.expiresAt);
+  const otherUser = chat?.buyer || null;
 
+  // No chat selected
   if (!chatId) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-white p-8">
-        <div className="text-center max-w-md">
-          <div className="w-32 h-32 mx-auto mb-8 text-gray-200">
+      <div className="h-full flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-6 text-gray-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-full h-full">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
-          <h3 className="text-3xl font-bold text-gray-800 mb-3">Select a Conversation</h3>
-          <p className="text-gray-600 text-lg mb-8">
-            Choose a chat from the sidebar to start communicating with renters
-          </p>
-          <div className="inline-flex items-center justify-center space-x-2 text-orange-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <span className="font-medium">Click on a renter to begin</span>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Select a Conversation</h3>
+          <p className="text-gray-500 mb-4">Choose a chat from the sidebar to begin</p>
+          <div className="flex items-center justify-center text-gray-400">
+            <span className="text-sm">Click on a renter to start</span>
           </div>
         </div>
       </div>
     );
   }
 
+  // Loading
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-white">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-gray-200 rounded-full"></div>
-            <div className="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
-          </div>
-          <p className="mt-6 text-gray-600 font-medium">Loading conversation...</p>
-          <p className="text-sm text-gray-500 mt-2">Preparing your chat interface</p>
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading conversation...</p>
         </div>
       </div>
     );
   }
-
-  const otherUser = chat?.buyer || null;
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -281,35 +238,33 @@ export default function ChatRoomSeller({ chatIdProp }) {
         onDeleteChat={handleDeleteChat}
       />
       
-      <div 
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-8 bg-gradient-to-b from-white to-gray-50/50"
-      >
-        <div className="max-w-4xl mx-auto space-y-6">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+        <div className="max-w-3xl mx-auto">
           {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center min-h-[400px]">
+            <div className="h-full flex items-center justify-center min-h-[300px]">
               <div className="text-center">
-                <div className="w-24 h-24 mx-auto mb-6 text-gray-300">
+                <div className="w-16 h-16 mx-auto mb-4 text-gray-300">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-full h-full">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-2">Start the Conversation</h3>
-                <p className="text-gray-500 max-w-md mx-auto">
-                  Send your first message to discuss the rental details with the renter
-                </p>
+                <h3 className="text-lg font-medium text-gray-700 mb-1">No messages yet</h3>
+                <p className="text-gray-500 text-sm">Send your first message to start the conversation</p>
               </div>
             </div>
           ) : (
             <>
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-green-50 to-green-100 border border-green-200">
-                  <span className="text-sm font-medium text-green-700">
-                    Rental Chat Started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
+              {/* Chat started indicator */}
+              <div className="text-center mb-4">
+                <div className="inline-block px-3 py-1 bg-gray-100 rounded-full">
+                  <span className="text-xs text-gray-600">
+                    Chat started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
               </div>
               
+              {/* Messages */}
               {messages.map(m => {
                 const isOwn = myUserId && m.sender && 
                   (String(m.sender._id) === String(myUserId) || String(m.sender.id) === String(myUserId));
@@ -328,32 +283,28 @@ export default function ChatRoomSeller({ chatIdProp }) {
         </div>
       </div>
       
-      {expired ? (
-        <div className="px-8 py-4 bg-gradient-to-r from-amber-50 to-amber-100 border-t border-amber-200">
-          <div className="max-w-4xl mx-auto flex items-center justify-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-amber-800">This rental chat has expired</p>
-              <p className="text-xs text-amber-600">The conversation is now read-only</p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="border-t border-gray-200 bg-white">
-          <div className="max-w-4xl mx-auto px-8">
-            <MessageInput 
-              onSend={handleSend} 
-              disabled={expired} 
-              placeholder="Type your message here..." 
-              className="border-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
+      {/* Expired chat notice */}
+      {expired && (
+        <div className="px-4 py-3 bg-amber-50 border-t border-amber-200">
+          <div className="max-w-3xl mx-auto flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-amber-700">This chat has expired and is read-only</p>
           </div>
         </div>
       )}
+      
+      {/* Message input */}
+      <div className="border-t border-gray-200 bg-white">
+        <div className="max-w-3xl mx-auto p-4">
+          <MessageInput 
+            onSend={handleSend} 
+            disabled={expired} 
+            placeholder="Type your message..." 
+          />
+        </div>
+      </div>
     </div>
   );
 }
