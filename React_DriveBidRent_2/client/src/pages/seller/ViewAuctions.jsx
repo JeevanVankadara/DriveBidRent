@@ -13,6 +13,38 @@ const ViewAuctions = () => {
   const formatDate = (d) =>
     d ? new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
+  // Helper to determine display tag for an auction
+  const getAuctionTag = (auction) => {
+    // If auction has been re-auctioned and auction ended, show "Auction completed"
+    if (auction.isReauctioned && auction.auction_stopped) {
+      return { text: 'Auction completed', color: 'bg-gray-100 text-gray-800' };
+    }
+    // If auction is currently being re-auctioned (ongoing or waiting), show "Re-auction"
+    if (auction.isReauctioned) {
+      return { text: 'Re-auction', color: 'bg-purple-100 text-purple-800' };
+    }
+    // Regular auction ended
+    if (auction.auction_stopped || auction.started_auction === 'ended') {
+      return { text: 'Auction completed', color: 'bg-gray-100 text-gray-800' };
+    }
+    // Regular auction ongoing (first time)
+    if (auction.started_auction === 'yes') {
+      return { text: 'Approved', color: 'bg-green-100 text-green-800' };
+    }
+    // Not started yet (approved but not started)
+    if (auction.status === 'approved' || auction.status === 'assignedMechanic') {
+      return { text: 'Pending Start', color: 'bg-yellow-100 text-yellow-800' };
+    }
+    // Default status based tags
+    if (auction.status === 'pending') {
+      return { text: 'Pending', color: 'bg-yellow-100 text-yellow-800' };
+    }
+    if (auction.status === 'rejected') {
+      return { text: 'Rejected', color: 'bg-red-100 text-red-800' };
+    }
+    return { text: capitalize(auction.status), color: 'bg-gray-100 text-gray-800' };
+  };
+
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
@@ -70,14 +102,8 @@ const ViewAuctions = () => {
                     <h3 className="text-xl font-bold text-gray-800">
                       {capitalize(auction.vehicleName)}
                     </h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      auction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      auction.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      auction.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                      auction.status === 'assignedMechanic' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {capitalize(auction.status)}
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getAuctionTag(auction).color}`}>
+                      {getAuctionTag(auction).text}
                     </span>
                   </div>
                   

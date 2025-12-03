@@ -1,6 +1,7 @@
 // routes/buyer.routes.js
 import { Router } from 'express';
 import buyerMiddleware from '../middlewares/buyer.middleware.js';
+import checkBlocked from '../middlewares/checkBlocked.middleware.js';
 import {
   getAuctions,
   getSingleAuction,
@@ -57,11 +58,11 @@ router.get('/buyer_dashboard', buyerMiddleware, async (req, res) => {
 });
 
 // === AUCTIONS ===
-router.post('/auctions/:id/bid', buyerMiddleware, placeBid);
-router.post('/auction/place-bid', buyerMiddleware, placeBid); // Legacy
+router.post('/auctions/:id/bid', buyerMiddleware, checkBlocked, placeBid);
+router.post('/auction/place-bid', buyerMiddleware, checkBlocked, placeBid); // Legacy
 router.get('/auction/winner-status/:id', buyerMiddleware, getAuctionWinnerStatus);
 router.get('/auction/confirm-payment/:id', buyerMiddleware, getAuctionConfirmPayment);
-router.post('/auction/complete-payment/:id', buyerMiddleware, completeAuctionPayment);
+router.post('/auction/complete-payment/:id', buyerMiddleware, checkBlocked, completeAuctionPayment);
 router.get('/auctions/:id/completed', buyerMiddleware, getCompletedAuctionDetails);
 
 // === MY BIDS ===
@@ -76,7 +77,7 @@ router.get('/purchase_details', buyerMiddleware, getAuctionPurchaseDetails); // 
 router.get('/rental_details/:id', buyerMiddleware, getRentalDetails);
 
 // === RENTALS ===
-router.post('/rentals/book', buyerMiddleware, bookRental);
+router.post('/rentals/book', buyerMiddleware, checkBlocked, bookRental);
 router.get('/rental', buyerMiddleware, (req, res) => {
   const id = req.query.id;
   res.redirect(`/api/buyer/buyer_dashboard?page=rental&id=${id}`);
@@ -84,7 +85,7 @@ router.get('/rental', buyerMiddleware, (req, res) => {
 router.get('/rentals', buyerMiddleware, (req, res) => {
   res.redirect('/api/buyer/buyer_dashboard?page=rentals');
 });
-router.post('/rental', buyerMiddleware, bookRental); // Legacy
+router.post('/rental', buyerMiddleware, checkBlocked, bookRental); // Legacy
 
 // === REVIEWS ===
 router.post('/rentals/:id/reviews', buyerMiddleware, addReview);
@@ -94,10 +95,10 @@ router.get('/rentals/:id/can-review', buyerMiddleware, checkCanReview);
 // === WISHLIST ===
 router.get('/wishlist', buyerMiddleware, getWishlistApi);
 router.get('/api/wishlist', buyerMiddleware, getWishlistApi);
-router.post('/wishlist', buyerMiddleware, addToWishlistApi);
-router.post('/api/wishlist', buyerMiddleware, addToWishlistApi);
-router.delete('/wishlist', buyerMiddleware, removeFromWishlistApi);
-router.delete('/api/wishlist', buyerMiddleware, removeFromWishlistApi);
+router.post('/wishlist', buyerMiddleware, checkBlocked, addToWishlistApi);
+router.post('/api/wishlist', buyerMiddleware, checkBlocked, addToWishlistApi);
+router.delete('/wishlist', buyerMiddleware, checkBlocked, removeFromWishlistApi);
+router.delete('/api/wishlist', buyerMiddleware, checkBlocked, removeFromWishlistApi);
 
 // === PROFILE ===
 router.get('/profile', buyerMiddleware, async (req, res) => {
@@ -108,7 +109,7 @@ router.get('/profile', buyerMiddleware, async (req, res) => {
   });
 });
 
-router.put('/profile', buyerMiddleware, async (req, res) => {
+router.put('/profile', buyerMiddleware, checkBlocked, async (req, res) => {
   const { firstName, lastName, email, phone, doorNo, street, city, state } = req.body;
   const userId = req.user._id;
   if (!firstName || !lastName || !email || !phone) {

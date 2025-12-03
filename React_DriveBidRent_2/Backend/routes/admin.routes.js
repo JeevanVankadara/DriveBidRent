@@ -17,6 +17,7 @@ router.post("/approve-user/:id", isAdminLoggedin, manageUsersControllers.approve
 router.post("/decline-user/:id", isAdminLoggedin, manageUsersControllers.declineUser);
 router.post("/delete-buyer/:id", isAdminLoggedin, manageUsersControllers.deleteBuyer);
 router.post("/delete-seller/:id", isAdminLoggedin, manageUsersControllers.deleteSeller);
+router.post("/block-user/:id", isAdminLoggedin, manageUsersControllers.blockUser);
 
 // Analytics
 router.get("/analytics", isAdminLoggedin, analyticsControllers.getAnalytics);

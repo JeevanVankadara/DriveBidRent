@@ -28,6 +28,10 @@ const adminServices = {
     const response = await axiosInstance.post(`admin/delete-seller/${id}`);
     return response.data;
   },
+  blockUser: async (id) => {
+    const response = await axiosInstance.post(`admin/block-user/${id}`);
+    return response.data;
+  },
 
   // Analytics
   getAnalytics: async () => {

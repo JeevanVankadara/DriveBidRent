@@ -10,7 +10,8 @@ export const getAuctions = async (req, res) => {
     const { search, condition, fuelType, transmission, minPrice, maxPrice } = req.query;
     const query = {
       status: 'approved',
-      started_auction: 'yes'
+      started_auction: 'yes',
+      auction_stopped: false  // Only show ongoing auctions
     };
 
     if (search) {
@@ -86,7 +87,8 @@ export const getSingleAuction = async (req, res) => {
 
     const auction = await AuctionRequest.findOne({
       _id: auctionId,
-      started_auction: 'yes'
+      started_auction: 'yes',
+      auction_stopped: false  // Only show ongoing auctions
     })
       .populate('sellerId', 'firstName lastName email phone city state')
       .lean();

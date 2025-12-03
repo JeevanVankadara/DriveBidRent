@@ -25,6 +25,7 @@ export const auctionManagerServices = {
   // Auction Actions
   startAuction: (id) => axiosInstance.post(`/auctionmanager/start-auction/${id}`),
   stopAuction: (id) => axiosInstance.post(`/auctionmanager/stop-auction/${id}`),
+  reAuction: (id) => axiosInstance.post(`/auctionmanager/re-auction/${id}`),
 
   // View Bids
   viewBids: (id) => axiosInstance.get(`/auctionmanager/view-bids/${id}`),

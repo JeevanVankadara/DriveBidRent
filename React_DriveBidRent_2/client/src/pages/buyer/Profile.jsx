@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useProfile } from '../../hooks/useBuyerHooks';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Profile() {
   const { profile, loading, updateProfile, changePassword } = useProfile();
@@ -177,6 +178,35 @@ export default function Profile() {
       <style>{css}</style>
       <section className="profile-settings">
         <h2>Profile Settings</h2>
+
+        {/* Blocked User Warning */}
+        {profile?.isBlocked && (
+          <div style={{
+            backgroundColor: '#fee',
+            border: '2px solid #dc3545',
+            borderRadius: '0.5rem',
+            padding: '1rem',
+            marginBottom: '1.5rem',
+            textAlign: 'center'
+          }}>
+            <p style={{
+              color: '#dc3545',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+              margin: 0
+            }}>
+              Your account has been blocked
+            </p>
+            <p style={{
+              color: '#721c24',
+              fontSize: '0.95rem',
+              marginTop: '0.5rem',
+              marginBottom: 0
+            }}>
+              You can view your data but cannot place bids, book rentals, or update your profile. Please contact admin for assistance.
+            </p>
+          </div>
+        )}
 
         <div className="alert alert-success" style={{ display: successAlert ? 'block' : 'none' }}>{successAlert}</div>
         <div className="alert alert-danger" style={{ display: errorAlert ? 'block' : 'none' }}>{errorAlert}</div>
