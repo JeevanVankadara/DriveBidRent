@@ -11,7 +11,6 @@ const authController = {
         lastName,
         email,
         password,
-        confirmPassword,
         userType,
         phone,
         dateOfBirth,
@@ -59,10 +58,6 @@ const authController = {
       const age = new Date().getFullYear() - dob.getFullYear();
       if (age < 18) {
         return res.status(400).json({ success: false, message: "You must be at least 18 years old" });
-      }
-
-      if (password !== confirmPassword) {
-        return res.status(400).json({ success: false, message: "Passwords do not match" });
       }
 
       if (password.length < 8) {
