@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance.util';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ChatBubble from '../../components/chat/ChatBubble';
 import MessageInput from '../../components/chat/MessageInput';
 import RentalChatHeader from '../../components/chat/RentalChatHeader';
 
 export default function ChatRoomSeller({ chatIdProp }) {
   const { chatId: chatIdFromParam } = useParams();
+  const navigate = useNavigate();
   const chatId = chatIdProp || chatIdFromParam;
   const [chat, setChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -17,6 +18,7 @@ export default function ChatRoomSeller({ chatIdProp }) {
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const initialLoadRef = useRef(true);
+  const pollingIntervalRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -122,15 +124,32 @@ export default function ChatRoomSeller({ chatIdProp }) {
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
+        // Handle chat deletion (404) or other errors
+        if (err.response?.status === 404) {
+          console.log('Chat was deleted, stopping polling');
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          // Navigate away from deleted chat
+          navigate('/seller/chats');
+        } else {
+          console.error('Polling error:', err);
+        }
       }
     };
 
     // Set up polling
     const intervalId = setInterval(fetchMessages, 3000);
+    pollingIntervalRef.current = intervalId;
     
-    return () => clearInterval(intervalId);
-  }, [chatId, lastFetchedAt]);
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [chatId, lastFetchedAt, navigate]);
 
   // Mark messages as read
   useEffect(() => {
@@ -178,6 +197,34 @@ export default function ChatRoomSeller({ chatIdProp }) {
     } catch (err) {
       console.error('Send message error:', err);
       setMessages(prev => prev.filter(m => m._id !== tempMessage?._id));
+    }
+  };
+
+  const handleDeleteChat = async (chatId) => {
+    try {
+      // Stop polling immediately
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      
+      await axiosInstance.delete(`/chat/${chatId}`);
+      
+      // Trigger chat list refresh and navbar update
+      window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
+      
+      // Navigate back to chat list
+      navigate('/seller/chats');
+    } catch (err) {
+      console.error('Delete chat error:', err);
+      // Handle race condition - if already deleted by other user
+      if (err.response?.status === 404) {
+        // Chat already deleted, just navigate away
+        window.dispatchEvent(new CustomEvent('chatDeleted', { detail: { chatId } }));
+        navigate('/seller/chats');
+      } else {
+        alert('Failed to delete chat. Please try again.');
+      }
     }
   };
 
@@ -230,7 +277,8 @@ export default function ChatRoomSeller({ chatIdProp }) {
         chat={chat} 
         otherUser={otherUser} 
         carName={chat?.rentalRequest?.vehicleName} 
-        rentalPeriod={`${chat?.rentalRequest ? new Date(chat?.rentalRequest?.pickupDate).toLocaleDateString() + ' - ' + new Date(chat?.rentalRequest?.dropDate).toLocaleDateString() : ''}`} 
+        rentalPeriod={`${chat?.rentalRequest ? new Date(chat?.rentalRequest?.pickupDate).toLocaleDateString() + ' - ' + new Date(chat?.rentalRequest?.dropDate).toLocaleDateString() : ''}`}
+        onDeleteChat={handleDeleteChat}
       />
       
       <div 

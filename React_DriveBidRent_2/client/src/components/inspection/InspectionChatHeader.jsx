@@ -189,15 +189,6 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat }) => {
     );
   };
 
-  const getStatusIndicator = () => {
-    return (
-      <div className="flex items-center space-x-2 mb-2">
-        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-        <span className="text-sm text-white/90">Online</span>
-      </div>
-    );
-  };
-
   return (
     <div className="bg-orange-600 text-white px-6 py-4 border-b">
       <div className="flex items-center justify-between">
@@ -215,7 +206,6 @@ const InspectionChatHeader = ({ otherUser, carName, currentUserId, chat }) => {
           </div>
         </div>
         <div className="text-right">
-          {getStatusIndicator()}
           {getInspectionStatus()}
         </div>
       </div>

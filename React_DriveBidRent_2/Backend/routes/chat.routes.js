@@ -28,9 +28,9 @@ router.get('/:chatId', ChatController.getChatById);
 router.get('/:chatId/messages', ChatController.getMessages);
 router.post('/:chatId/message', ChatController.sendMessage);
 router.post('/:chatId/mark-read', ChatController.markMessagesRead);
+router.delete('/:chatId', ChatController.deleteChat);
 
 // Create-or-get chat endpoints (used by frontend Contact Seller)
-router.post('/create/purchase/:purchaseId', ChatController.createChatForPurchaseHandler);
 router.post('/create/rental/:rentalId', ChatController.createChatForRentalHandler);
 
 export default router;

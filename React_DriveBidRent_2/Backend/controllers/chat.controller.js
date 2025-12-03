@@ -7,19 +7,15 @@ import AuctionRequest from '../models/AuctionRequest.js';
 export const getMyChats = async (req, res) => {
   try {
     const userId = req.user._id;
-    const now = new Date();
+    // Include expired chats so users can still delete them
     const chats = await Chat.find({
-      $and: [
-        { expiresAt: { $gt: now } },
-        { $or: [{ buyer: userId }, { seller: userId }, { mechanic: userId }, { auctionManager: userId }] }
-      ]
+      $or: [{ buyer: userId }, { seller: userId }, { mechanic: userId }, { auctionManager: userId }]
     })
       .populate('buyer', 'firstName lastName profileImage _id')
       .populate('seller', 'firstName lastName profileImage _id')
       .populate('mechanic', 'firstName lastName profileImage _id')
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('rentalRequest')
-      .populate('auctionRequest')
       .populate({ path: 'inspectionTask', select: 'vehicleName vehiclePhotos make model year images' })
       .sort({ lastMessageAt: -1, createdAt: -1 })
       .lean();
@@ -57,7 +53,6 @@ export const getChatById = async (req, res) => {
       .populate('mechanic', 'firstName lastName profileImage _id')
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('rentalRequest')
-      .populate('auctionRequest')
       .populate({ path: 'inspectionTask', select: 'vehicleName vehiclePhotos make model year images' })
       .lean();
 
@@ -187,6 +182,35 @@ export const markMessagesRead = async (req, res) => {
   }
 };
 
+// DELETE /api/chat/:chatId
+export const deleteChat = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const chat = await Chat.findById(chatId).lean();
+    
+    // Handle race condition: if chat already deleted, return success
+    if (!chat) {
+      console.log('Chat already deleted (race condition), returning success');
+      return res.json({ success: true, message: 'Chat deleted successfully' });
+    }
+
+    const uid = req.user._id.toString();
+    const allowed = [chat?.buyer?.toString?.(), chat?.seller?.toString?.(), chat?.mechanic?.toString?.(), chat?.auctionManager?.toString?.()].some(id => id === uid);
+    if (!allowed) return res.status(403).json({ success: false, message: 'Access denied' });
+
+    // Delete all messages associated with this chat
+    await Message.deleteMany({ chat: chatId });
+    
+    // Delete the chat
+    await Chat.findByIdAndDelete(chatId);
+
+    res.json({ success: true, message: 'Chat deleted successfully' });
+  } catch (err) {
+    console.error('deleteChat error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // Utility: create chat for rental
 export const createChatForRental = async (rentalRequest) => {
   try {
@@ -284,7 +308,7 @@ export const createChatForRentalHandler = async (req, res) => {
   }
 };
 
-export default { getMyChats, getChatById, getMessages, sendMessage, markMessagesRead, createChatForRental, createChatForAuction, createChatForPurchaseHandler, createChatForRentalHandler };
+export default { getMyChats, getChatById, getMessages, sendMessage, markMessagesRead, deleteChat, createChatForRental, createChatForRentalHandler };
 
 // Utility to expire an inspection chat immediately (call when inspection/report completes)
 export const expireInspectionChat = async (auctionRequestId) => {

@@ -6,7 +6,7 @@ const { Schema } = mongoose;
 const chatSchema = new Schema({
   type: { 
     type: String, 
-    enum: ['rental', 'auction', 'inspection'], 
+    enum: ['rental', 'inspection'], 
     required: true 
   },
 
@@ -18,7 +18,6 @@ const chatSchema = new Schema({
 
   // References
   rentalRequest: { type: Schema.Types.ObjectId, ref: 'RentalRequest' },
-  auctionRequest: { type: Schema.Types.ObjectId, ref: 'AuctionRequest' },
   inspectionTask: { type: Schema.Types.ObjectId, ref: 'AuctionRequest' }, // This is the car being inspected
 
   // Duration

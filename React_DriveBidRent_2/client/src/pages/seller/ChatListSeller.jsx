@@ -18,7 +18,10 @@ export default function ChatListSeller({ onSelect, selectedId }) {
       setIsLoading(true);
       try {
         const res = await axiosInstance.get('/chat/my-chats');
-        setChats(res.data.data || []);
+        // Filter to show only rental chats for buyer-seller communication
+        const allChats = res.data.data || [];
+        const rentalChats = allChats.filter(chat => chat.type === 'rental');
+        setChats(rentalChats);
       } catch (err) {
         console.error('Error fetching chats:', err);
       } finally {
@@ -51,6 +54,23 @@ export default function ChatListSeller({ onSelect, selectedId }) {
     
     window.addEventListener('chatRead', handler);
     return () => window.removeEventListener('chatRead', handler);
+  }, []);
+
+  // Listen for chatDeleted events and remove chat from list
+  useEffect(() => {
+    const handler = (e) => {
+      try {
+        const { chatId } = e.detail || {};
+        if (!chatId) return;
+        // Remove deleted chat from list immediately
+        setChats(prev => prev.filter(c => String(c._id) !== String(chatId)));
+      } catch (err) {
+        console.error('Chat deleted handler error:', err);
+      }
+    };
+
+    window.addEventListener('chatDeleted', handler);
+    return () => window.removeEventListener('chatDeleted', handler);
   }, []);
 
   // Helper function to get user initials

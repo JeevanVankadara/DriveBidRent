@@ -73,6 +73,22 @@ export default function Navbar() {
     return () => window.removeEventListener('chatRead', onRead);
   }, []);
 
+  // update chat unread badge when a chat is deleted
+  useEffect(() => {
+    const onDeleted = async () => {
+      try {
+        const r = await axiosInstance.get('/chat/my-chats');
+        const chats = r.data?.data || [];
+        const sum = chats.reduce((acc, c) => acc + (c.unreadCount || c.unread || 0), 0);
+        setChatUnreadCount(sum);
+      } catch (err) {
+        console.error('Failed to refresh chat count after deletion:', err);
+      }
+    };
+    window.addEventListener('chatDeleted', onDeleted);
+    return () => window.removeEventListener('chatDeleted', onDeleted);
+  }, []);
+
   const handleLogout = async () => {
     try {
       dispatch(logoutUser());
