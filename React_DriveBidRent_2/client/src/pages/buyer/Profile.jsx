@@ -23,6 +23,7 @@ export default function Profile() {
   const [errorAlert, setErrorAlert] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('Password must be at least 8 characters, include uppercase, number, and special character');
   const [confirmMessage, setConfirmMessage] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
 
   useEffect(() => {
     if (profile) {
@@ -47,7 +48,7 @@ export default function Profile() {
       setErrorAlert(message);
       setSuccessAlert('');
     }
-    
+
     setTimeout(() => {
       setSuccessAlert('');
       setErrorAlert('');
@@ -55,6 +56,14 @@ export default function Profile() {
   };
 
   const handleProfileChange = (field, value) => {
+    if (field === 'lastName') {
+      const numbersOnlyRegex = /^\d+$/;
+      if (value && numbersOnlyRegex.test(value)) {
+        setLastNameError('Last name cannot contain only numbers');
+      } else {
+        setLastNameError('');
+      }
+    }
     setProfileForm(prev => ({ ...prev, [field]: value }));
   };
 
@@ -64,14 +73,14 @@ export default function Profile() {
     if (field === 'newPassword') {
       const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
       if (!value) setPasswordStrength('Password must be at least 8 characters, include uppercase, number, and special character');
-      else if (!strongRegex.test(value)) setPasswordStrength('Weak password: must include uppercase letter, number, and special character');
-      else setPasswordStrength('Strong password');
+      else if (!strongRegex.test(value)) setPasswordStrength('❌ Weak password: must include uppercase letter, number, and special character');
+      else setPasswordStrength('✅ Strong password');
     }
 
     if (field === 'confirmPassword') {
       if (!value) setConfirmMessage('');
-      else if (passwordForm.newPassword !== value) setConfirmMessage('Passwords do not match');
-      else setConfirmMessage('Passwords match');
+      else if (passwordForm.newPassword !== value) setConfirmMessage('❌ Passwords do not match');
+      else setConfirmMessage('✅ Passwords match');
     }
   };
 
@@ -83,6 +92,16 @@ export default function Profile() {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+
+    if (!passwordForm.oldPassword) {
+      showAlert('Please enter your current password', 'error');
+      return;
+    }
+
+    if (passwordForm.oldPassword === passwordForm.newPassword) {
+      showAlert('New password cannot be the same as current password', 'error');
+      return;
+    }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       showAlert('New passwords do not match', 'error');
@@ -114,9 +133,19 @@ export default function Profile() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
 
+    if (lastNameError) {
+      showAlert('Last name cannot contain only numbers', 'error');
+      return;
+    }
+
     const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(profileForm.phone)) {
+    if (profileForm.phone && !phoneRegex.test(profileForm.phone)) {
       showAlert('Phone number must be exactly 10 digits', 'error');
+      return;
+    }
+
+    if (profileForm.phone && profileForm.phone === profile.phone) {
+      showAlert('New phone number cannot be the same as current phone number', 'error');
       return;
     }
 
@@ -224,7 +253,6 @@ export default function Profile() {
                   className="form-control"
                   value={profileForm.firstName}
                   onChange={(e) => handleProfileChange('firstName', e.target.value)}
-                  required
                 />
               </div>
 
@@ -236,8 +264,8 @@ export default function Profile() {
                   className="form-control"
                   value={profileForm.lastName}
                   onChange={(e) => handleProfileChange('lastName', e.target.value)}
-                  required
                 />
+                {lastNameError && <div style={{ color: '#dc3545', fontSize: '0.85rem', marginTop: '0.25rem' }}>❌ {lastNameError}</div>}
               </div>
 
               <div className="form-group">
@@ -248,7 +276,6 @@ export default function Profile() {
                   className="form-control"
                   value={profileForm.phone}
                   onChange={(e) => handlePhoneInput(e.target.value)}
-                  required
                 />
                 <div className="field-info">Must be 10 digits</div>
               </div>
@@ -339,7 +366,7 @@ export default function Profile() {
                   onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
                   required
                 />
-                <div className={`password-strength ${passwordStrength.includes('Weak') ? 'strength-weak' : passwordStrength.includes('Strong') ? 'strength-strong' : ''}`}>
+                <div className={`password-strength ${passwordStrength.includes('✅') ? 'strength-strong' : passwordStrength.includes('❌') ? 'strength-weak' : ''}`}>
                   {passwordStrength}
                 </div>
               </div>
@@ -354,7 +381,7 @@ export default function Profile() {
                   onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
                   required
                 />
-                <div className={`password-strength ${confirmMessage.toLowerCase().includes('not') || confirmMessage.toLowerCase().includes('do not') ? 'strength-weak' : confirmMessage.toLowerCase().includes('match') ? 'strength-strong' : ''}`}>
+                <div className={`password-strength ${confirmMessage.includes('✅') ? 'strength-strong' : confirmMessage.includes('❌') ? 'strength-weak' : ''}`}>
                   {confirmMessage}
                 </div>
               </div>

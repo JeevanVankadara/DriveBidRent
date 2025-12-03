@@ -10,23 +10,84 @@ export default function Profile() {
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState('');
+  const [passwordMatch, setPasswordMatch] = useState('');
+
+  const handleNewPasswordChange = (value) => {
+    setForm({ ...form, newPassword: value });
+    const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!value) {
+      setPasswordStrength('');
+    } else if (!strongRegex.test(value)) {
+      setPasswordStrength('❌ Weak: needs uppercase, number, special char');
+    } else {
+      setPasswordStrength('✅ Strong password');
+    }
+  };
+
+  const handleConfirmPasswordChange = (value) => {
+    setForm({ ...form, confirmPassword: value });
+    if (!value) {
+      setPasswordMatch('');
+    } else if (form.newPassword !== value) {
+      setPasswordMatch('❌ Passwords do not match');
+    } else {
+      setPasswordMatch('✅ Passwords match');
+    }
+  };
+
+  const handleOldPasswordChange = (value) => {
+    setForm({ ...form, oldPassword: value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.newPassword !== form.confirmPassword) return alert("Passwords don't match");
-    if (form.newPassword.length < 8) return alert("New password must be 8+ chars");
+
+    if (!form.oldPassword) {
+      setMsg('Please enter your current password');
+      setMsgType('error');
+      return;
+    }
+
+    if (form.oldPassword === form.newPassword) {
+      setMsg('New password cannot be the same as current password');
+      setMsgType('error');
+      return;
+    }
+
+    if (form.newPassword !== form.confirmPassword) {
+      setMsg("Passwords don't match");
+      setMsgType('error');
+      return;
+    }
+
+    if (form.newPassword.length < 8) {
+      setMsg('New password must be 8+ characters');
+      setMsgType('error');
+      return;
+    }
+
+    const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!strongRegex.test(form.newPassword)) {
+      setMsg('Password must include uppercase letter, number, and special character');
+      setMsgType('error');
+      return;
+    }
 
     setSubmitting(true);
     try {
       const res = await changePassword(form);
-      setMsg(res.data.message || "Password updated");
+      setMsg(res.data.message || 'Password updated successfully');
       setMsgType('success');
       setForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordStrength('');
+      setPasswordMatch('');
     } catch (err) {
-      setMsg(err.response?.data?.message || "Update failed");
+      setMsg(err.response?.data?.message || 'Update failed');
       setMsgType('error');
     } finally {
       setSubmitting(false);
+      setTimeout(() => setMsg(''), 5000);
     }
   };
 
@@ -62,12 +123,26 @@ export default function Profile() {
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <h3 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-orange-600 pb-2">Change Password</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input type="password" placeholder="Current Password" required value={form.oldPassword} onChange={e => setForm({...form, oldPassword: e.target.value})}
+              <input type="password" placeholder="Current Password" required value={form.oldPassword} onChange={e => handleOldPasswordChange(e.target.value)}
                 className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
-              <input type="password" placeholder="New Password" required value={form.newPassword} onChange={e => setForm({...form, newPassword: e.target.value})}
-                className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
-              <input type="password" placeholder="Confirm New Password" required value={form.confirmPassword} onChange={e => setForm({...form, confirmPassword: e.target.value})}
-                className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
+              <div>
+                <input type="password" placeholder="New Password" required value={form.newPassword} onChange={e => handleNewPasswordChange(e.target.value)}
+                  className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
+                {passwordStrength && (
+                  <div className={`text-sm mt-2 ${passwordStrength.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordStrength}
+                  </div>
+                )}
+              </div>
+              <div>
+                <input type="password" placeholder="Confirm New Password" required value={form.confirmPassword} onChange={e => handleConfirmPasswordChange(e.target.value)}
+                  className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
+                {passwordMatch && (
+                  <div className={`text-sm mt-2 ${passwordMatch.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordMatch}
+                  </div>
+                )}
+              </div>
               <button type="submit" disabled={submitting}
                 className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 text-sm rounded-lg transition disabled:opacity-60">
                 {submitting ? 'Updating...' : 'Update Password'}
