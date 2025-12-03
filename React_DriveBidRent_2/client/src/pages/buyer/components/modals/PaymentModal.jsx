@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function PaymentModal({
     isOpen,
@@ -9,6 +9,17 @@ export default function PaymentModal({
     onPaymentMethodSelect
 }) {
     const [paymentMethod, setPaymentMethod] = useState(selectedPaymentMethod || 'upi');
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
 
     const handlePaymentMethodSelect = (method) => {
         setPaymentMethod(method);

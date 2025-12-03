@@ -14,7 +14,13 @@ export default function DatePickerModal({ isOpen, onClose, onProceed, onDateSele
             setIncludeDriver(false);
             setTotalCost(0);
             setErrors({});
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
         }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
     }, [isOpen]);
 
     useEffect(() => {
@@ -82,6 +88,21 @@ export default function DatePickerModal({ isOpen, onClose, onProceed, onDateSele
         setErrors({});
     };
 
+    // Calculate max pickup date (4 days from today)
+    const getMaxPickupDate = () => {
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 4);
+        return formatDate(maxDate);
+    };
+
+    // Calculate max drop date (20 days from pickup date)
+    const getMaxDropDate = () => {
+        if (!pickupDate) return '';
+        const maxDate = new Date(pickupDate);
+        maxDate.setDate(maxDate.getDate() + 20);
+        return formatDate(maxDate);
+    };
+
     const handleDriverToggle = (e) => {
         setIncludeDriver(e.target.checked);
     };
@@ -132,12 +153,13 @@ export default function DatePickerModal({ isOpen, onClose, onProceed, onDateSele
                             value={pickupDate}
                             onChange={handlePickupDateChange}
                             min={formatDate(new Date())}
-                            max={formatDate(new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000))}
+                            max={getMaxPickupDate()}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
                         />
                         {errors.pickupDate && (
                             <p className="text-red-600 text-xs mt-1">❌ {errors.pickupDate}</p>
                         )}
+                        <p className="text-gray-500 text-xs mt-1">Can be selected up to 4 days from today</p>
                     </div>
 
                     {/* Drop Date */}
@@ -148,11 +170,16 @@ export default function DatePickerModal({ isOpen, onClose, onProceed, onDateSele
                             value={dropDate}
                             onChange={handleDropDateChange}
                             min={pickupDate ? formatDate(new Date(new Date(pickupDate).getTime() + 86400000)) : formatDate(new Date())}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+                            max={getMaxDropDate()}
+                            disabled={!pickupDate}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                         {errors.dropDate && (
                             <p className="text-red-600 text-xs mt-1">❌ {errors.dropDate}</p>
                         )}
+                        <p className="text-gray-500 text-xs mt-1">
+                            {pickupDate ? 'Can be selected up to 20 days from pickup date' : 'Select pickup date first'}
+                        </p>
                     </div>
 
                     {/* Driver Option */}

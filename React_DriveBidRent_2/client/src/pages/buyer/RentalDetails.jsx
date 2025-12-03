@@ -102,7 +102,14 @@ export default function RentalDetails() {
         if (new Date(dropDate) <= new Date(pickupDate)) return alert("Drop date must be after pickup date.");
 
         setShowDateModal(false);
-        setShowPaymentModal(true);
+        const scrollToCenter = () => {
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+            const centerPosition = (scrollHeight - clientHeight) / 2;
+            window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+        };
+        scrollToCenter();
+        setTimeout(() => setShowPaymentModal(true), 300);
     };
 
     const handlePayment = async (paymentMethod) => {
@@ -207,7 +214,16 @@ export default function RentalDetails() {
                         </div>
                         {isAvailable && (
                             <button
-                                onClick={() => setShowDateModal(true)}
+                                onClick={() => {
+                                    const scrollToCenter = () => {
+                                        const scrollHeight = document.documentElement.scrollHeight;
+                                        const clientHeight = document.documentElement.clientHeight;
+                                        const centerPosition = (scrollHeight - clientHeight) / 2;
+                                        window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                                    };
+                                    scrollToCenter();
+                                    setTimeout(() => setShowDateModal(true), 300);
+                                }}
                                 className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-10 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                             >
                                 Rent Now
@@ -403,7 +419,16 @@ export default function RentalDetails() {
 
                             {isAvailable && (
                                 <button
-                                    onClick={() => setShowDateModal(true)}
+                                    onClick={() => {
+                                        const scrollToCenter = () => {
+                                            const scrollHeight = document.documentElement.scrollHeight;
+                                            const clientHeight = document.documentElement.clientHeight;
+                                            const centerPosition = (scrollHeight - clientHeight) / 2;
+                                            window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                                        };
+                                        scrollToCenter();
+                                        setTimeout(() => setShowDateModal(true), 300);
+                                    }}
                                     className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all mt-6"
                                 >
                                     Book This Vehicle
