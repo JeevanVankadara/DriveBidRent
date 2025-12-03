@@ -24,6 +24,7 @@ export default function Profile() {
   const [passwordStrength, setPasswordStrength] = useState('Password must be at least 8 characters, include uppercase, number, and special character');
   const [confirmMessage, setConfirmMessage] = useState('');
   const [lastNameError, setLastNameError] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
 
   useEffect(() => {
     if (profile) {
@@ -56,10 +57,18 @@ export default function Profile() {
   };
 
   const handleProfileChange = (field, value) => {
+    if (field === 'firstName') {
+      const hasNumbers = /\d/.test(value);
+      if (value && hasNumbers) {
+        setFirstNameError('First name cannot contain numbers');
+      } else {
+        setFirstNameError('');
+      }
+    }
     if (field === 'lastName') {
-      const numbersOnlyRegex = /^\d+$/;
-      if (value && numbersOnlyRegex.test(value)) {
-        setLastNameError('Last name cannot contain only numbers');
+      const hasNumbers = /\d/.test(value);
+      if (value && hasNumbers) {
+        setLastNameError('Last name cannot contain numbers');
       } else {
         setLastNameError('');
       }
@@ -133,19 +142,14 @@ export default function Profile() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
 
-    if (lastNameError) {
-      showAlert('Last name cannot contain only numbers', 'error');
+    if (lastNameError || firstNameError) {
+      showAlert('Names cannot contain numbers', 'error');
       return;
     }
 
     const phoneRegex = /^\d{10}$/;
     if (profileForm.phone && !phoneRegex.test(profileForm.phone)) {
       showAlert('Phone number must be exactly 10 digits', 'error');
-      return;
-    }
-
-    if (profileForm.phone && profileForm.phone === profile.phone) {
-      showAlert('New phone number cannot be the same as current phone number', 'error');
       return;
     }
 
@@ -254,6 +258,7 @@ export default function Profile() {
                   value={profileForm.firstName}
                   onChange={(e) => handleProfileChange('firstName', e.target.value)}
                 />
+                {firstNameError && <div style={{ color: '#dc3545', fontSize: '0.85rem', marginTop: '0.25rem' }}>❌ {firstNameError}</div>}
               </div>
 
               <div className="form-group">

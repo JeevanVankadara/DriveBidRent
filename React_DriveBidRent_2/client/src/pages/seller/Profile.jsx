@@ -34,6 +34,7 @@ const Profile = () => {
   const [passwordStrength, setPasswordStrength] = useState('');
   const [passwordMatch, setPasswordMatch] = useState('');
   const [lastNameError, setLastNameError] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
 
   // Auto-hide messages after 4 seconds
   useEffect(() => {
@@ -82,10 +83,18 @@ const Profile = () => {
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'firstName') {
+      const hasNumbers = /\d/.test(value);
+      if (value && hasNumbers) {
+        setFirstNameError('First name cannot contain numbers');
+      } else {
+        setFirstNameError('');
+      }
+    }
     if (name === 'lastName') {
-      const numbersOnlyRegex = /^\d+$/;
-      if (value && numbersOnlyRegex.test(value)) {
-        setLastNameError('Last name cannot contain only numbers');
+      const hasNumbers = /\d/.test(value);
+      if (value && hasNumbers) {
+        setLastNameError('Last name cannot contain numbers');
       } else {
         setLastNameError('');
       }
@@ -118,8 +127,13 @@ const Profile = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    if (lastNameError) {
-      setError('Last name cannot contain only numbers');
+    const hasNumbers = /\d/.test(user.firstName);
+    if (user.firstName && hasNumbers) {
+      setError('First name cannot contain numbers');
+      return;
+    }
+    if (firstNameError || lastNameError) {
+      setError('Names cannot contain numbers');
       return;
     }
     if (!user.firstName || user.firstName.trim() === '') {
@@ -131,10 +145,8 @@ const Profile = () => {
       setError('Phone number must be exactly 10 digits');
       return;
     }
-    if (user.phone && user.phone === reduxProfile.phone) {
-      setError('New phone number cannot be the same as current phone number');
-      return;
-    }
+    // Remove this check - allow saving without changing phone
+    // Only prevent if trying to save a phone number identical to current one
     try {
       const result = await dispatch(updateMyProfile(user)).unwrap();
       setSuccess('Profile updated successfully!');
@@ -159,27 +171,27 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!oldPassword) {
       setError('Please enter your current password');
       return;
     }
-    
+
     if (oldPassword === newPassword) {
       setError('New password cannot be the same as current password');
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       setError('New passwords do not match');
       return;
     }
-    
+
     if (newPassword.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
-    
+
     const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
     if (!strongRegex.test(newPassword)) {
       setError('Password must include uppercase letter, number, and special character');
@@ -236,6 +248,7 @@ const Profile = () => {
                       onChange={handleProfileChange}
                       className="w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500"
                     />
+                    {firstNameError && <div style={{ color: '#dc3545', fontSize: '0.85rem', marginTop: '0.25rem' }}>❌ {firstNameError}</div>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>

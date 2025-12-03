@@ -16,11 +16,15 @@ const authController = {
         dateOfBirth,
         termsAccepted,
         experienceYears,
+        shopName,
+        repairBikes,
+        repairCars,
+        googleAddressLink,
         approved_status,
       } = req.body;
 
       // Optional field for mechanics only
-      const googleAddressLink = userType === "mechanic" ? req.body.googleAddressLink : undefined;
+      const mechanicGoogleLink = userType === "mechanic" ? googleAddressLink : undefined;
 
       // Normalize address fields (handles both string and array from frontend)
       let doorNo = "", street = "", city = "", state = "";
@@ -33,8 +37,9 @@ const authController = {
         if (field === "state") state = normalized;
       });
 
-      const repairBikes = req.body.repairBikes === "on" || req.body.repairBikes === true;
-      const repairCars = req.body.repairCars === "on" || req.body.repairCars === true;
+      // Convert boolean values from form
+      const isBikeRepair = repairBikes === "on" || repairBikes === true;
+      const isCarRepair = repairCars === "on" || repairCars === true;
 
       // === VALIDATIONS ===
       if (!firstName || !lastName || !email || !password) {
@@ -83,19 +88,23 @@ const authController = {
         userType,
         dateOfBirth: dob,
         phone,
-        address: { doorNo, street, city, state },
+        doorNo,
+        street,
+        city,
+        state,
+        shopName: userType === 'mechanic' ? shopName : undefined,
         experienceYears: experienceYears ? parseInt(experienceYears) : undefined,
         approved_status: approved_status || "No",
-        repairBikes,
-        repairCars,
-        googleAddressLink,
+        repairBikes: isBikeRepair,
+        repairCars: isCarRepair,
+        googleAddressLink: mechanicGoogleLink,
       };
 
       const user = new User(userData);
       await user.save();
 
       const token = generateToken(user);
-      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict"});
+      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict" });
 
       return res.status(201).json({
         success: true,
@@ -125,7 +134,7 @@ const authController = {
     try {
       const { email, password } = req.body;
       console.log('Login attempt for email:', email);
-      
+
       const user = await User.findOne({ email });
       console.log('User found:', user ? 'YES' : 'NO');
       if (user) {
@@ -159,12 +168,19 @@ const authController = {
 
       // Include notification flag in response so frontend can show badge immediately
       const responseUser = {
+        _id: user._id,
         id: user._id,
         userType: user.userType,
         firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        phone: user.phone,
         approved_status: user.approved_status,
-        notificationFlag: !!user.notificationFlag
+        notificationFlag: !!user.notificationFlag,
+        doorNo: user.doorNo || '',
+        street: user.street || '',
+        city: user.city || '',
+        state: user.state || ''
       };
 
       console.log('Sending response with user:', responseUser);
