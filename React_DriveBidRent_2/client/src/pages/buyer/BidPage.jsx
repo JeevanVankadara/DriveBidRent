@@ -20,14 +20,13 @@ export default function BidPage() {
     // Initial fetch with loading state
     fetchAuctionData(true);
     
-    // Set up polling for real-time bid updates every 1 second (without loading state)
+    // Set up polling for real-time bid updates every 1 second
     const intervalId = setInterval(() => {
       fetchAuctionData(false);
     }, 1000);
     
     return () => clearInterval(intervalId);
-    // profile hook will fetch 'me' automatically; update isLoggedIn when available
-    // checkAuth();
+    
   }, [id]);
 
   const fetchAuctionData = async (isInitial = false) => {
