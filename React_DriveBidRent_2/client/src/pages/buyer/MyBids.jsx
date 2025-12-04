@@ -162,12 +162,14 @@ export default function MyBids() {
 
                   {/* ACTION BUTTONS */}
                   <div className="flex flex-wrap gap-4">
-                    <Link
-                      to={`/buyer/auctions/${auctionBid.auction?._id}`}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-                    >
-                      View Auction
-                    </Link>
+                    {auctionBid.bidStatus !== "ended" && (
+                      <Link
+                        to={`/buyer/auctions/${auctionBid.auction?._id}`}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                      >
+                        View Auction
+                      </Link>
+                    )}
 
                     {auctionBid.bidStatus === "active" && (
                       <Link

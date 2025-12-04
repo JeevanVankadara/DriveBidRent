@@ -64,13 +64,37 @@ const wishlistSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Failed to fetch wishlist';
       })
+      .addCase(addWishlistItem.pending, (state) => {
+        state.error = null;
+      })
       .addCase(addWishlistItem.fulfilled, (state, action) => {
-        // Refetching is recommended, but for optimistic update:
-        // No-op, UI should trigger fetchWishlist after add
+        const { id, type } = action.payload;
+        if (type === 'auction') {
+          if (!state.auctions.some(item => item._id === id)) {
+            state.auctions.push({ _id: id, type: 'auction' });
+          }
+        } else if (type === 'rental') {
+          if (!state.rentals.some(item => item._id === id)) {
+            state.rentals.push({ _id: id, type: 'rental' });
+          }
+        }
+      })
+      .addCase(addWishlistItem.rejected, (state, action) => {
+        state.error = action.payload || 'Failed to add to wishlist';
+      })
+      .addCase(removeWishlistItem.pending, (state) => {
+        state.error = null;
       })
       .addCase(removeWishlistItem.fulfilled, (state, action) => {
-        // Refetching is recommended, but for optimistic update:
-        // No-op, UI should trigger fetchWishlist after remove
+        const { id, type } = action.payload;
+        if (type === 'auction') {
+          state.auctions = state.auctions.filter(item => item._id !== id);
+        } else if (type === 'rental') {
+          state.rentals = state.rentals.filter(item => item._id !== id);
+        }
+      })
+      .addCase(removeWishlistItem.rejected, (state, action) => {
+        state.error = action.payload || 'Failed to remove from wishlist';
       });
   },
 });
