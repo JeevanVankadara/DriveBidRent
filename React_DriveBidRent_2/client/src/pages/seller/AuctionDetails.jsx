@@ -195,6 +195,40 @@ const AuctionDetails = () => {
               </div>
             </div>
           )}
+
+          {/* Mechanic Details Component (if mechanic assigned) */}
+          {auction.status === 'assignedMechanic' && auction.assignedMechanic && (
+            <div className="lg:col-span-1">
+              <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-lg p-6 border-2 border-blue-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h2 className="text-2xl font-bold text-blue-800">Assigned Mechanic</h2>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Mechanic Name</span>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {auction.assignedMechanic?.firstName} {auction.assignedMechanic?.lastName}
+                    </p>
+                  </div>
+                  {auction.assignedMechanic?.phone && (
+                    <div>
+                      <span className="text-sm text-gray-600 font-medium">Phone</span>
+                      <p className="text-gray-900 font-semibold">{auction.assignedMechanic.phone}</p>
+                    </div>
+                  )}
+                  {auction.assignedMechanic?.shopName && (
+                    <div>
+                      <span className="text-sm text-gray-600 font-medium">Shop Name</span>
+                      <p className="text-gray-900 font-semibold">{auction.assignedMechanic.shopName}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
