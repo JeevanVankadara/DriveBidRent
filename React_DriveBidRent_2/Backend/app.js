@@ -6,9 +6,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";                 // Loads environment variables
 import morgan from "morgan";
-import helmet from "helmet";            // Security headers
-import rateLimit from "express-rate-limit"; // Rate limiting
-import compression from "compression";  // Response compression
 
 // Database connection
 import connectDB from "./config/db.js";
@@ -45,34 +42,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-
-// === SECURITY: Helmet - Set security headers ===
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP for now (can be configured later)
-  crossOriginEmbedderPolicy: false // Allow embedding if needed
-}));
-
-// === PERFORMANCE: Compression - Compress responses ===
-app.use(compression());
-
-// === RATE LIMITING: Prevent abuse ===
-// General API rate limiter
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: { success: false, message: "Too many requests, please try again later." },
-  standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
-  legacyHeaders: false, // Disable `X-RateLimit-*` headers
-});
-
-// Strict rate limiter for authentication routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit to 10 requests per 15 minutes for auth routes
-  message: { success: false, message: "Too many login/signup attempts. Please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 // === CORS Setup (Flexible & Secure) ===
 const allowedOrigins = [
@@ -111,14 +80,8 @@ app.use(express.urlencoded({ extended: true }));            // Parse form data
 app.use(cookieParser());                                    // Parse cookies
 app.use(express.static(path.join(__dirname, "public")));   // Serve static files (uploads, images, etc.)
 
-// Apply general rate limiting to all API routes
-app.use("/api", apiLimiter);
-
-// Apply general rate limiting to all API routes
-app.use("/api", apiLimiter);
-
 // === API ROUTES (Clean /api prefix) ===
-app.use("/api/auth", authLimiter, authRoutes); // Apply strict rate limiting to auth routes
+app.use("/api/auth", authRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/seller", sellerMiddleware, sellerRoutes);
 app.use("/api/buyer", buyerMiddleware, buyerRoutes);
