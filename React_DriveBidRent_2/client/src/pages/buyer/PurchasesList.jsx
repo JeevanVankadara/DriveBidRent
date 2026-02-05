@@ -101,7 +101,7 @@ export default function PurchasesList() {
       <section
         className="relative h-96 md:h-[400px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center text-white"
       >
-        <div className="absolute inset-0 bg-black/70" />
+        <div className="absolute inset-0 bg-black/90" />
         <div className="relative z-10 px-6">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
             My <span className="text-orange-500 font-black">Purchases</span>
