@@ -7,6 +7,7 @@ import cors from "cors";
 import "dotenv/config";
 import morgan from "morgan";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { createStream } from "rotating-file-stream";
 import fs from "fs";
 
@@ -131,6 +132,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true, 
+  legacyHeaders: false, 
+  skip: (req) => (
+    req.url.includes('/notifications') ||
+    req.url.includes('/auction/') ||
+    req.url.includes('/buyer/dashboard') ||
+    req.url.includes('/wishlist') ||
+    req.url.includes('/api/chat') ||
+    req.url.includes('/api/inspection-chat')
+  )
+});
+
+app.use(limiter);
 
 // Routes
 app.use("/api/auth", authRoutes);
