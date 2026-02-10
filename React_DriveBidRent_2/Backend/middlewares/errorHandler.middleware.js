@@ -1,4 +1,3 @@
-// Error creation functions
 const createError = (message, statusCode) => {
   const error = new Error(message);
   error.statusCode = statusCode;
@@ -13,15 +12,12 @@ const createNotFoundError = (message = 'Resource Not Found') => createError(mess
 const createConflictError = (message = 'Conflict') => createError(message, 409);
 const createValidationError = (message = 'Validation Error') => createError(message, 422);
 
-// 404 handler for unmatched routes
 const notFoundHandler = (req, res, next) => {
   const error = createNotFoundError(`Route ${req.originalUrl} not found`);
   next(error);
 };
 
-// Global error handler
 const errorHandler = (err, req, res, next) => {
-  // Prevent headers already sent error
   if (res.headersSent) {
     return next(err);
   }
@@ -39,26 +35,22 @@ const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || (res.statusCode !== 200 ? res.statusCode : 500);
   let message = err.message || 'Internal Server Error';
 
-  // MongoDB duplicate key error (11000)
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern || {})[0] || 'field';
     message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
     statusCode = 409;
   }
 
-  // Mongoose validation error
   if (err.name === 'ValidationError') {
     message = Object.values(err.errors).map(val => val.message).join(', ');
     statusCode = 400;
   }
 
-  // Mongoose CastError (invalid ObjectId)
   if (err.name === 'CastError') {
     message = `Invalid ${err.path}: ${err.value}`;
     statusCode = 400;
   }
 
-  // JWT errors
   if (err.name === 'JsonWebTokenError') {
     message = 'Invalid token. Please log in again';
     statusCode = 401;
@@ -69,7 +61,6 @@ const errorHandler = (err, req, res, next) => {
     statusCode = 401;
   }
 
-  // Multer file upload errors
   if (err.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {
       message = 'File too large. Max size exceeded';
@@ -83,43 +74,36 @@ const errorHandler = (err, req, res, next) => {
     statusCode = 400;
   }
 
-  // JSON parsing errors
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     message = 'Invalid JSON in request body';
     statusCode = 400;
   }
 
-  // CORS errors
   if (err.message && err.message.includes('CORS policy')) {
     statusCode = 403;
     message = 'CORS policy: Access denied';
   }
 
-  // MongoDB connection errors
   if (err.name === 'MongoNetworkError' || err.name === 'MongooseServerSelectionError') {
     message = 'Database connection error. Please try again later';
     statusCode = 503;
   }
 
-  // Rate limiting errors
   if (err.status === 429 || err.statusCode === 429) {
     message = 'Too many requests. Please try again later';
     statusCode = 429;
   }
 
-  // Cloudinary errors
   if (err.name === 'CloudinaryError' || (err.error && err.error.message)) {
     message = 'File upload service error. Please try again';
     statusCode = 500;
   }
 
-  // Request timeout
   if (err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED') {
     message = 'Request timeout. Please try again';
     statusCode = 408;
   }
 
-  // Send error response
   res.status(statusCode).json({
     success: false,
     message,
@@ -132,7 +116,6 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-// Async handler wrapper - Usage: asyncHandler(async (req, res) => {...})
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };

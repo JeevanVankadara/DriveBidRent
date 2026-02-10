@@ -5,11 +5,6 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
-import morgan from "morgan";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import { createStream } from "rotating-file-stream";
-import fs from "fs";
 
 import connectDB from "./config/db.js";
 import "./models/User.js";
@@ -36,120 +31,27 @@ import adminMiddleware from "./middlewares/admin.middleware.js";
 import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
 import buyerMiddleware from "./middlewares/buyer.middleware.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
+import { devLogger, accessLogger, errorLogger } from "./middlewares/logger.middleware.js";
+import { corsOptions, helmetConfig, limiter } from "./middlewares/security.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Create logs directory if needed
-const logsDirectory = path.join(__dirname, "logs");
-if (!fs.existsSync(logsDirectory)) {
-  fs.mkdirSync(logsDirectory, { recursive: true });
-}
-
-// Filename generators for rotating logs
-const pad = (num) => (num > 9 ? num : `0${num}`);
-
-const accessGenerator = (time) => {
-  if (!time) return "access.log";
-  const year = time.getFullYear();
-  const month = pad(time.getMonth() + 1);
-  const day = pad(time.getDate());
-  return `access-${year}${month}${day}.log`;
-};
-
-const errorGenerator = (time) => {
-  if (!time) return "error.log";
-  const year = time.getFullYear();
-  const month = pad(time.getMonth() + 1);
-  const day = pad(time.getDate());
-  return `error-${year}${month}${day}.log`;
-};
-
-// Rotating log streams
-const accessLogStream = createStream(accessGenerator, {
-  interval: "1d",
-  path: logsDirectory,
-  maxFiles: 14,
-  compress: "gzip",
-});
-
-const errorLogStream = createStream(errorGenerator, {
-  interval: "1d",
-  path: logsDirectory,
-  maxFiles: 30,
-  compress: "gzip",
-});
-
-// Morgan middlewares
-app.use(morgan("dev", {
-  skip: (req) => (
-    req.url.includes('/notifications') ||
-    req.url.includes('/auction/') ||
-    req.url.includes('/buyer/dashboard') ||
-    req.url.includes('/wishlist')
-  )
-}));
-
-app.use(morgan("combined", { stream: accessLogStream }));
-
-app.use(morgan("combined", {
-  stream: errorLogStream,
-  skip: (req, res) => res.statusCode < 400
-}));
+// Logging middlewares
+app.use(devLogger);
+app.use(accessLogger);
+app.use(errorLogger);
 
 // Security & parsing middlewares
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    const allowedOrigins = [
-      process.env.CLIENT_URL,
-      "http://localhost:3000",
-      "http://localhost:5173",
-    ].filter(Boolean);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error("CORS policy: Origin not allowed"));
-  },
-  credentials: true,
-}));
-
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
+app.use(cors(corsOptions));
+app.use(helmetConfig);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100,
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true, 
-  legacyHeaders: false, 
-  skip: (req) => (
-    req.url.includes('/notifications') ||
-    req.url.includes('/auction/') ||
-    req.url.includes('/buyer/dashboard') ||
-    req.url.includes('/wishlist') ||
-    req.url.includes('/api/chat') ||
-    req.url.includes('/api/inspection-chat')
-  )
-});
-
 app.use(limiter);
 
 // Routes

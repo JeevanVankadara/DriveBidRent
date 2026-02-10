@@ -1,6 +1,3 @@
-// middlewares/checkBlocked.middleware.js
-// Middleware to check if a user is blocked from performing certain actions
-
 const checkBlocked = (req, res, next) => {
   if (req.user && req.user.isBlocked) {
     return res.status(403).json({
