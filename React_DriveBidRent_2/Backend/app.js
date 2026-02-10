@@ -34,6 +34,7 @@ import mechanicMiddleware from "./middlewares/mechanic.middleware.js";
 import adminMiddleware from "./middlewares/admin.middleware.js";
 import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
 import buyerMiddleware from "./middlewares/buyer.middleware.js";
+import errorHandler from "./middlewares/errorHandler.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -172,10 +173,7 @@ app.use("/api", (req, res) => {
 });
 
 // Global error handler
-app.use((err, req, res, next) => {
-  console.error("Unhandled Error:", err);
-  res.status(500).json({ success: false, message: "Internal Server Error" });
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 

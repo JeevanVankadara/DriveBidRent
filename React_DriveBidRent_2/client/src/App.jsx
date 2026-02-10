@@ -6,6 +6,10 @@ import HomePage from './pages/auth/HomePage';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 
+// === COMPONENTS ===
+import PageNotFound from './pages/components/PageNotFound';
+import Footer from './pages/components/Footer';
+
 // === ADMIN ===
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -94,6 +98,7 @@ function App() {
         <Route path="analytics" element={<Analytics />} />
         <Route path="manage-earnings" element={<ManageEarnings />} />
         <Route path="admin-profile" element={<AdminProfile />} />
+        <Route path="*" element={<PageNotFound homeRoute="/admin" />} />
       </Route>
 
       {/* === BUYER SPA === */}
@@ -116,6 +121,7 @@ function App() {
         <Route path="about" element={<AboutUs />} />
         <Route path="chats" element={<ChatPageBuyer />} />
         <Route path="chats/:chatId" element={<ChatPageBuyer />} />
+        <Route path="*" element={<PageNotFound homeRoute="/buyer" />} />
       </Route>
 
       {/* === SELLER SPA === */}
@@ -134,6 +140,7 @@ function App() {
         <Route path="auction-details/:id" element={<AuctionDetailsSeller />} />
         <Route path="chats" element={<ChatPageSeller />} />
         <Route path="chats/:chatId" element={<ChatPageSeller />} />
+        <Route path="*" element={<PageNotFound homeRoute="/seller" />} />
       </Route>
 
       {/* === AUCTION MANAGER SPA === */}
@@ -149,6 +156,7 @@ function App() {
         <Route path="profile" element={<ManagerProfile />} />
         <Route path="chats" element={<ChatPageAuctionManager />} />
         <Route path="chats/:chatId" element={<ChatPageAuctionManager />} />
+        <Route path="*" element={<PageNotFound homeRoute="/auctionmanager" />} />
       </Route>
 
       {/* === MECHANIC SPA === */}
@@ -162,22 +170,20 @@ function App() {
         <Route path="profile" element={<MechanicProfile />} />
         <Route path="chats" element={<ChatPageMechanic />} />
         <Route path="chats/:chatId" element={<ChatPageMechanic />} />
+        <Route path="*" element={<PageNotFound homeRoute="/mechanic" />} />
       </Route>
 
       {/* === 404 NOT FOUND === */}
       <Route
         path="*"
-        element={
-          <div className="flex items-center justify-center min-h-screen text-2xl font-bold text-gray-700 bg-gray-50">
-            <div className="text-center">
-              <h1 className="text-6xl mb-4">404</h1>
-              <p>Page Not Found</p>
-              <p className="text-sm text-gray-500 mt-4">
-                The page you're looking for doesn't exist.
-              </p>
-            </div>
+        element={(
+          <div className="min-h-screen flex flex-col" style={{ background: '#0f172a', margin: 0 }}>
+            <main className="flex-grow flex items-center justify-center" style={{ width: '100%', margin: 0, padding: 0 }}>
+              <PageNotFound homeRoute="/" />
+            </main>
+            <Footer />
           </div>
-        }
+        )}
       />
     </Routes>
   );
