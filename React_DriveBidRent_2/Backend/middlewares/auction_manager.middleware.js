@@ -15,21 +15,34 @@ const auctionManagerMiddleware = async (req, res, next) => {
           decoded.email !== req.user.email) {
         return res.status(401).json({
           success: false,
-          message: 'Access denied. Auction Manager authentication required.'
+          message: 'Access denied. Auction Manager authentication required.',
+          redirectUrl: "/"
         });
       }
+
+      // Check if user is blocked
+      if (req.user.isBlocked) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account has been blocked. Please contact admin for assistance.',
+          redirectUrl: "/"
+        });
+      }
+
       next();
     } catch (error) {
       console.error('Error in auction_manager.middleware:', error);
       return res.status(401).json({
         success: false,
-        message: 'Invalid token.'
+        message: 'Invalid token.',
+        redirectUrl: "/"
       });
     }
   } else {
     return res.status(401).json({
       success: false,
-      message: 'No token provided. Please login.'
+      message: 'No token provided. Please login.',
+      redirectUrl: "/"
     });
   }
 };

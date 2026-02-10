@@ -15,7 +15,17 @@ const buyerMiddleware = async (req, res, next) => {
           decoded.email !== req.user.email) {
         return res.status(401).json({
           success: false,
-          message: 'Access denied. Buyer authentication required.'
+          message: 'Access denied. Buyer authentication required.',
+          redirectUrl: "/"
+        });
+      }
+
+      // Check if user is blocked
+      if (req.user.isBlocked) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account has been blocked. Please contact admin for assistance.',
+          redirectUrl: "/"
         });
       }
 
@@ -24,13 +34,15 @@ const buyerMiddleware = async (req, res, next) => {
       console.error('Error in buyer.middleware:', error);
       return res.status(401).json({
         success: false,
-        message: 'Invalid token.'
+        message: 'Invalid token.',
+        redirectUrl: "/"
       });
     }
   } else {
     return res.status(401).json({
       success: false,
-      message: 'No token provided. Please login.'
+      message: 'No token provided. Please login.',
+      redirectUrl: "/"
     });
   }
 };

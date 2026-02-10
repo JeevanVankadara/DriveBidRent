@@ -32,7 +32,7 @@ const helmetConfig = helmet({
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: 100,
+  max: 200,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true, 
   legacyHeaders: false, 
@@ -45,7 +45,8 @@ const limiter = rateLimit({
     req.url.includes('/auctionmanager/dashboard') ||
     req.url.includes('/wishlist') ||
     req.url.includes('/api/chat') ||
-    req.url.includes('/api/inspection-chat')
+    req.url.includes('/api/inspection-chat')||
+    req.url.includes('/api/buyer/')
   )
 });
 
