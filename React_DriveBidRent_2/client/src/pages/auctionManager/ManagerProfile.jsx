@@ -1,5 +1,6 @@
 // client/src/pages/auctionManager/ManagerProfile.jsx
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useProfile from '../../hooks/useProfile';
@@ -10,7 +11,6 @@ export default function ManagerProfile() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [alert, setAlert] = useState({ show: false, type: '', msg: '' });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
@@ -58,19 +58,16 @@ export default function ManagerProfile() {
     setOldPassword(value);
   };
 
-  const showAlert = (type, msg) => {
-    setAlert({ show: true, type, msg });
-    setTimeout(() => setAlert({ show: false, type: '', msg: '' }), 3000);
-  };
+
 
   const handlePhoneUpdate = async (e) => {
     e.preventDefault();
     if (!/^\d{10}$/.test(phone)) {
-      showAlert('error', 'Phone number must be 10 digits');
+      toast.error('Phone number must be 10 digits');
       return;
     }
     if (phone === user.phone) {
-      showAlert('error', 'New phone number cannot be the same as current phone number');
+      toast.error('New phone number cannot be the same as current phone number');
       return;
     }
     try {
@@ -78,15 +75,15 @@ export default function ManagerProfile() {
       const res = await auctionManagerServices.updatePhone(phone);
       const responseData = res.data || res;
       if (responseData.success) {
-        showAlert('success', 'Phone updated successfully');
+        toast.success('Phone updated successfully');
         // refresh redux profile
         try { refresh(); } catch (e) { }
         setUser(prev => ({ ...prev, phone }));
       } else {
-        showAlert('error', responseData.message || 'Failed to update phone');
+        toast.error(responseData.message || 'Failed to update phone');
       }
     } catch (err) {
-      showAlert('error', 'Failed to update phone');
+      toast.error('Failed to update phone');
     } finally {
       setUpdating(false);
     }
@@ -95,19 +92,19 @@ export default function ManagerProfile() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (!oldPassword) {
-      showAlert('error', 'Please enter your current password');
+      toast.error('Please enter your current password');
       return;
     }
     if (oldPassword === newPassword) {
-      showAlert('error', 'New password cannot be the same as current password');
+      toast.error('New password cannot be the same as current password');
       return;
     }
     if (newPassword !== confirmPassword) {
-      showAlert('error', 'Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
     if (newPassword.length < 8) {
-      showAlert('error', 'Password must be at least 8 characters');
+      toast.error('Password must be at least 8 characters');
       return;
     }
     try {
@@ -115,7 +112,7 @@ export default function ManagerProfile() {
       const res = await auctionManagerServices.changePassword({ oldPassword, newPassword });
       const responseData = res.data || res;
       if (responseData.success) {
-        showAlert('success', 'Password changed successfully');
+        toast.success('Password changed successfully');
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -123,10 +120,10 @@ export default function ManagerProfile() {
         setPasswordMatch('');
         try { refresh(); } catch (e) { }
       } else {
-        showAlert('error', responseData.message || 'Failed to change password');
+        toast.error(responseData.message || 'Failed to change password');
       }
     } catch (err) {
-      showAlert('error', err.response?.data?.message || 'Failed to change password');
+      toast.error(err.response?.data?.message || 'Failed to change password');
     } finally {
       setUpdating(false);
     }
@@ -137,12 +134,6 @@ export default function ManagerProfile() {
   return (
     <div className="max-w-6xl mx-auto p-6 font-montserrat">
       <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Auction Manager Profile</h2>
-
-      {alert.show && (
-        <div className={`p-4 rounded-lg mb-6 text-center font-medium ${alert.type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'}`}>
-          {alert.msg}
-        </div>
-      )}
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1 bg-white p-8 rounded-xl shadow-lg border border-orange-600">

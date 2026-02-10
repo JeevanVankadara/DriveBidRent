@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
+import { clearSuccess, clearError } from '../../redux/slices/authSlice';
 import axiosInstance from '../../utils/axiosInstance.util';
 import Footer from '../components/Footer'
 
@@ -7,20 +10,33 @@ const HomePage = () => {
   const [topRentals, setTopRentals] = useState([]);
   const [topAuctions, setTopAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loginMessage, setLoginMessage] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { success, error } = useSelector((state) => state.auth);
 
-  // show loginMessage once and auto-clear after 2s
+  // Show logout success or other auth messages
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      dispatch(clearSuccess());
+    }
+  }, [success, dispatch]);
+
+  // Show auth errors
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  // show loginMessage once using toast
   useEffect(() => {
     const message = localStorage.getItem('loginMessage');
     if (message) {
-      setLoginMessage(message);
+      toast.error(message);
       localStorage.removeItem('loginMessage');
-      const timer = setTimeout(() => setLoginMessage(''), 2000);
-      return () => clearTimeout(timer);
     }
-    // no cleanup needed if no message
-    return undefined;
   }, []);
 
   // fetch home data on mount
@@ -551,12 +567,6 @@ const HomePage = () => {
           </button>
         </div>
       </header>
-
-      {loginMessage && (
-        <div className="bg-red-100 text-red-700 p-4 text-center font-medium">
-          {loginMessage}
-        </div>
-      )}
 
       <section className="hero">
         <img

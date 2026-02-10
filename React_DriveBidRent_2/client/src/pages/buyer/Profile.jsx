@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useProfile } from '../../hooks/useBuyerHooks';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -19,8 +20,6 @@ export default function Profile() {
     newPassword: '',
     confirmPassword: ''
   });
-  const [successAlert, setSuccessAlert] = useState('');
-  const [errorAlert, setErrorAlert] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('Password must be at least 8 characters, include uppercase, number, and special character');
   const [confirmMessage, setConfirmMessage] = useState('');
   const [lastNameError, setLastNameError] = useState('');
@@ -41,20 +40,7 @@ export default function Profile() {
     }
   }, [profile]);
 
-  const showAlert = (message, type) => {
-    if (type === 'success') {
-      setSuccessAlert(message);
-      setErrorAlert('');
-    } else {
-      setErrorAlert(message);
-      setSuccessAlert('');
-    }
 
-    setTimeout(() => {
-      setSuccessAlert('');
-      setErrorAlert('');
-    }, 5000);
-  };
 
   const handleProfileChange = (field, value) => {
     if (field === 'firstName') {
@@ -103,38 +89,38 @@ export default function Profile() {
     e.preventDefault();
 
     if (!passwordForm.oldPassword) {
-      showAlert('Please enter your current password', 'error');
+      toast.error('Please enter your current password');
       return;
     }
 
     if (passwordForm.oldPassword === passwordForm.newPassword) {
-      showAlert('New password cannot be the same as current password', 'error');
+      toast.error('New password cannot be the same as current password');
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      showAlert('New passwords do not match', 'error');
+      toast.error('New passwords do not match');
       return;
     }
 
     const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
     if (!strongRegex.test(passwordForm.newPassword)) {
-      showAlert('Password must be at least 8 characters and include an uppercase letter, number, and special character', 'error');
+      toast.error('Password must be at least 8 characters and include an uppercase letter, number, and special character');
       return;
     }
 
     try {
       const result = await changePassword({ oldPassword: passwordForm.oldPassword, newPassword: passwordForm.newPassword, confirmPassword: passwordForm.confirmPassword });
       if (result && result.success) {
-        showAlert(result.message || 'Password changed successfully!', 'success');
+        toast.success(result.message || 'Password changed successfully!');
         setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
         setPasswordStrength('Password must be at least 8 characters, include uppercase, number, and special character');
         setConfirmMessage('');
       } else {
-        showAlert(result?.message || 'Failed to change password.', 'error');
+        toast.error(result?.message || 'Failed to change password.');
       }
     } catch (error) {
-      showAlert(error?.message || 'An error occurred. Please try again.', 'error');
+      toast.error(error?.message || 'An error occurred. Please try again.');
       console.error('Password change error:', error);
     }
   };
@@ -143,25 +129,25 @@ export default function Profile() {
     e.preventDefault();
 
     if (lastNameError || firstNameError) {
-      showAlert('Names cannot contain numbers', 'error');
+      toast.error('Names cannot contain numbers');
       return;
     }
 
     const phoneRegex = /^\d{10}$/;
     if (profileForm.phone && !phoneRegex.test(profileForm.phone)) {
-      showAlert('Phone number must be exactly 10 digits', 'error');
+      toast.error('Phone number must be exactly 10 digits');
       return;
     }
 
     try {
       const result = await updateProfile(profileForm);
       if (result && result.success) {
-        showAlert(result.message || 'Profile updated successfully!', 'success');
+        toast.success(result.message || 'Profile updated successfully!');
       } else {
-        showAlert(result?.message || 'Failed to update profile.', 'error');
+        toast.error(result?.message || 'Failed to update profile.');
       }
     } catch (error) {
-      showAlert(error?.message || 'An error occurred. Please try again.', 'error');
+      toast.error(error?.message || 'An error occurred. Please try again.');
       console.error('Profile update error:', error);
     }
   };
@@ -240,9 +226,6 @@ export default function Profile() {
             </p>
           </div>
         )}
-
-        <div className="alert alert-success" style={{ display: successAlert ? 'block' : 'none' }}>{successAlert}</div>
-        <div className="alert alert-danger" style={{ display: errorAlert ? 'block' : 'none' }}>{errorAlert}</div>
 
         <div className="profile-container">
           {/* Personal Details */}

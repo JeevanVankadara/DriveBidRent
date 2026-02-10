@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { signupUser } from '../../redux/slices/authSlice';
 
 const Signup = () => {
@@ -36,24 +37,18 @@ const Signup = () => {
 
   useEffect(() => {
     if (success) {
-      const alertDiv = document.createElement('div');
-      alertDiv.className = 'fixed top-4 right-4 bg-green-100 text-green-700 px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in';
-      alertDiv.innerHTML = `
-        <div class="flex items-center">
-          <i class="fas fa-check-circle mr-3 text-green-600"></i>
-          <div>
-            <p class="font-semibold">${message || 'Account created successfully!'}</p>
-            <p class="text-sm">Redirecting to login...</p>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(alertDiv);
+      toast.success(message || 'Account created successfully!');
       setTimeout(() => {
-        alertDiv.remove();
         navigate('/login');
-      }, 3000);
+      }, 2000);
     }
   }, [success, message, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -229,18 +224,6 @@ const Signup = () => {
                   {errors.userType}
                 </p>
               )}
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-6 animate-fade-in">
-              <div className="flex items-center">
-                <i className="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-                <div>
-                  <p className="font-medium text-red-700">Registration Error</p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-              </div>
             </div>
           )}
 

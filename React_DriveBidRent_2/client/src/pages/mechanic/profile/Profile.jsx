@@ -1,5 +1,6 @@
 // client/src/pages/mechanic/profile/Profile.jsx
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { changePassword } from '../../../services/mechanic.services';
 import useProfile from '../../../hooks/useProfile';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -7,8 +8,6 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 export default function Profile() {
   const { profile: user, loading } = useProfile();
   const [form, setForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
-  const [msg, setMsg] = useState('');
-  const [msgType, setMsgType] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
   const [passwordMatch, setPasswordMatch] = useState('');
@@ -44,50 +43,42 @@ export default function Profile() {
     e.preventDefault();
 
     if (!form.oldPassword) {
-      setMsg('Please enter your current password');
-      setMsgType('error');
+      toast.error('Please enter your current password');
       return;
     }
 
     if (form.oldPassword === form.newPassword) {
-      setMsg('New password cannot be the same as current password');
-      setMsgType('error');
+      toast.error('New password cannot be the same as current password');
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      setMsg("Passwords don't match");
-      setMsgType('error');
+      toast.error("Passwords don't match");
       return;
     }
 
     if (form.newPassword.length < 8) {
-      setMsg('New password must be 8+ characters');
-      setMsgType('error');
+      toast.error('New password must be 8+ characters');
       return;
     }
 
     const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
     if (!strongRegex.test(form.newPassword)) {
-      setMsg('Password must include uppercase letter, number, and special character');
-      setMsgType('error');
+      toast.error('Password must include uppercase letter, number, and special character');
       return;
     }
 
     setSubmitting(true);
     try {
       const res = await changePassword(form);
-      setMsg(res.data.message || 'Password updated successfully');
-      setMsgType('success');
+      toast.success(res.data.message || 'Password updated successfully');
       setForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
       setPasswordStrength('');
       setPasswordMatch('');
     } catch (err) {
-      setMsg(err.response?.data?.message || 'Update failed');
-      setMsgType('error');
+      toast.error(err.response?.data?.message || 'Update failed');
     } finally {
       setSubmitting(false);
-      setTimeout(() => setMsg(''), 5000);
     }
   };
 
@@ -97,12 +88,6 @@ export default function Profile() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
         <h2 className="text-3xl font-bold text-center text-orange-600 mb-6">My Profile</h2>
-
-        {msg && (
-          <div className={`text-center p-3 rounded-lg mb-4 text-sm ${msgType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {msg}
-          </div>
-        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">

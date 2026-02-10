@@ -11,7 +11,7 @@ export default function MechanicNavbar() {
 
   const handleLogout = async () => {
     try {
-      dispatch(logoutUser());
+      await dispatch(logoutUser()).unwrap();
       navigate('/');
     } catch (error) {
       console.error('Logout error:', error);

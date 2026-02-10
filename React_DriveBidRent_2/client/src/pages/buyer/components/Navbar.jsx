@@ -110,9 +110,10 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      dispatch(logoutUser());
+      await dispatch(logoutUser()).unwrap();
       navigate('/', { replace: true });
     } catch (err) {
+      console.error('Logout error:', err);
       navigate('/', { replace: true });
     }
   };

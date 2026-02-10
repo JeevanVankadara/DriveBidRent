@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 import adminServices from "../../services/admin.services";
 import LoadingSpinner from "../components/LoadingSpinner";
 import useProfile from "../../hooks/useProfile";
@@ -14,7 +15,6 @@ const AdminProfile = () => {
   });
   const [passwordStrength, setPasswordStrength] = useState("");
   const [passwordMatch, setPasswordMatch] = useState("");
-  const [alert, setAlert] = useState({ message: "", type: "" });
   const navigate = useNavigate();
 
 
@@ -52,37 +52,32 @@ const AdminProfile = () => {
     const { currentPassword, newPassword, confirmPassword } = formData;
 
     if (currentPassword === newPassword) {
-      showAlert("New password cannot be the same as current password", "error");
+      toast.error("New password cannot be the same as current password");
       return;
     }
     if (newPassword !== confirmPassword) {
-      showAlert("New passwords do not match", "error");
+      toast.error("New passwords do not match");
       return;
     }
     if (newPassword.length < 8) {
-      showAlert("Password must be at least 8 characters long", "error");
+      toast.error("Password must be at least 8 characters long");
       return;
     }
 
     try {
       const res = await adminServices.updateAdminPassword(formData);
       if (res.success) {
-        showAlert(res.message, "success");
+        toast.success(res.message);
         setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
         setPasswordStrength("Password must be at least 8 characters, include uppercase, number, special character");
         setPasswordMatch("");
         refresh();
       } else {
-        showAlert(res.message || "Password update failed", "error");
+        toast.error(res.message || "Password update failed");
       }
     } catch (err) {
-      showAlert("An error occurred. Please try again.", "error");
+      toast.error("An error occurred. Please try again.");
     }
-  };
-
-  const showAlert = (message, type) => {
-    setAlert({ message, type });
-    setTimeout(() => setAlert({ message: "", type: "" }), 5000);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -93,21 +88,6 @@ const AdminProfile = () => {
   return (
     <>
       <div className="profile-settings" style={{ padding: "4rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        {alert.message && (
-          <div
-            className={`alert alert-${alert.type}`}
-            style={{
-              padding: "1rem",
-              marginBottom: "1rem",
-              borderRadius: "0.5rem",
-              textAlign: "center",
-              backgroundColor: alert.type === "success" ? "#d4edda" : "#f8d7da",
-              color: alert.type === "success" ? "#155724" : "#721c24",
-            }}
-          >
-            {alert.message}
-          </div>
-        )}
         <h2 style={{ color: "#ff6b00", fontSize: "2.2rem", textAlign: "center", marginBottom: "2rem", fontWeight: 700 }}>
           Admin Profile
         </h2>

@@ -9,7 +9,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      dispatch(logoutUser());
+      await dispatch(logoutUser()).unwrap();
     } catch (err) {
       console.error('Logout error:', err);
     } finally {

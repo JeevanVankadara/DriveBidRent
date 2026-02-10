@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import { loginUser, clearError, clearSuccess, clearRedirect } from "../../redux/slices/authSlice";
 
 const Login = () => {
@@ -21,6 +22,20 @@ const Login = () => {
     dispatch(clearSuccess());
     dispatch(loginUser({ email, password }));
   };
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      dispatch(clearSuccess());
+    }
+  }, [success, dispatch]);
 
   useEffect(() => {
     if (isAuthenticated && redirect) {
@@ -70,9 +85,6 @@ const Login = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8">
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Login to Your Account</h1>
-
-          {error && <div className="bg-red-100 text-red-700 p-3 rounded text-center mb-4">{error}</div>}
-          {success && <div className="bg-green-100 text-green-700 p-3 rounded text-center mb-4">{success}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
