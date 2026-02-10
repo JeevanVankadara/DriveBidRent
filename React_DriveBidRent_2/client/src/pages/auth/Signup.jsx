@@ -184,9 +184,15 @@ const Signup = () => {
       />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center py-12 px-4">
-        <div className="max-w-4xl w-full bg-white p-8 rounded-2xl shadow-2xl">
+        <div className="relative max-w-4xl w-full bg-white p-8 rounded-2xl shadow-2xl">
+          <button
+            onClick={() => navigate('/')}
+            className="absolute top-4 left-4 w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
+          >
+            <i className="fas fa-times text-gray-600"></i>
+          </button>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">Create an Account</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mt-10">Create an Account</h1>
           </div>
 
           {/* Role Selection Cards */}

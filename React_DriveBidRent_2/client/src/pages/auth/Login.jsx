@@ -83,8 +83,22 @@ const Login = () => {
       )}
 
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Login to Your Account</h1>
+        <div className="relative w-full max-w-md bg-white shadow-lg rounded-xl p-8">
+          <button
+            onClick={() => navigate('/')}
+            className="absolute top-4 left-4 w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center bg-red-600 hover:bg-red-700 transition z-10"
+            style={{ zIndex: 10 }}
+          >
+            <i className="fas fa-times text-white text-lg"></i>
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="absolute top-4 left-4 w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center bg-white hover:bg-gray-100 transition z-10"
+            style={{ zIndex: 10 }}
+          >
+            <i className="fas fa-times text-gray-600"></i>
+          </button>
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-8 mt-6">Login to Your Account</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
