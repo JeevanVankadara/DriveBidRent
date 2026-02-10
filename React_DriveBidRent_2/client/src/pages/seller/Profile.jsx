@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
 import axiosInstance from '../../utils/axiosInstance.util';
 import { updateMyProfile } from '../../redux/slices/profileSlice';
 import useProfile from '../../hooks/useProfile';
@@ -29,24 +30,10 @@ const Profile = () => {
   const [rentalsCount, setRentalsCount] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [recentTransactions, setRecentTransactions] = useState([]);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const [passwordStrength, setPasswordStrength] = useState('');
   const [passwordMatch, setPasswordMatch] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const [firstNameError, setFirstNameError] = useState('');
-
-  // Auto-hide messages after 4 seconds
-  useEffect(() => {
-    if (success || error) {
-      const timer = setTimeout(() => {
-        setSuccess(null);
-        setError(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [success, error]);
 
   useEffect(() => {
     if (reduxProfile) {
@@ -73,7 +60,7 @@ const Profile = () => {
         if (auctionsRes.data.success) setAuctionsCount(auctionsRes.data.data.length);
         if (rentalsRes.data.success) setRentalsCount(rentalsRes.data.data.length);
       } catch (err) {
-        setError('Failed to load profile data');
+        toast.error('Failed to load profile data');
       } finally {
         setLoading(false);
       }
@@ -129,43 +116,34 @@ const Profile = () => {
     e.preventDefault();
     const hasNumbers = /\d/.test(user.firstName);
     if (user.firstName && hasNumbers) {
-      setError('First name cannot contain numbers');
+      toast.error('First name cannot contain numbers');
       return;
     }
     if (firstNameError || lastNameError) {
-      setError('Names cannot contain numbers');
+      toast.error('Names cannot contain numbers');
       return;
     }
     if (!user.firstName || user.firstName.trim() === '') {
-      setError('First name is required');
+      toast.error('First name is required');
       return;
     }
     const phoneRegex = /^\d{10}$/;
     if (user.phone && !phoneRegex.test(user.phone)) {
-      setError('Phone number must be exactly 10 digits');
+      toast.error('Phone number must be exactly 10 digits');
       return;
     }
     // Remove this check - allow saving without changing phone
     // Only prevent if trying to save a phone number identical to current one
     try {
       const result = await dispatch(updateMyProfile(user)).unwrap();
-      setSuccess('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
       setUser(result);
     } catch (err) {
-      setError(err || 'Failed to update profile');
+      toast.error(err || 'Failed to update profile');
     }
   };
 
-  const handlePreferencesSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const result = await dispatch(updateMyProfile({ notificationPreference: user.notificationPreference })).unwrap();
-      setSuccess('Preferences updated successfully!');
-      setUser(result);
-    } catch (err) {
-      setError(err || 'Failed to update preferences');
-    }
-  };
+
 
   if (loading || profileLoading) return <LoadingSpinner />;
 
@@ -173,28 +151,28 @@ const Profile = () => {
     e.preventDefault();
 
     if (!oldPassword) {
-      setError('Please enter your current password');
+      toast.error('Please enter your current password');
       return;
     }
 
     if (oldPassword === newPassword) {
-      setError('New password cannot be the same as current password');
+      toast.error('New password cannot be the same as current password');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
+      toast.error('New passwords do not match');
       return;
     }
 
     if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters');
+      toast.error('Password must be at least 8 characters');
       return;
     }
 
     const strongRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
     if (!strongRegex.test(newPassword)) {
-      setError('Password must include uppercase letter, number, and special character');
+      toast.error('Password must include uppercase letter, number, and special character');
       return;
     }
 
@@ -204,7 +182,7 @@ const Profile = () => {
         newPassword,
       });
       if (res.data.success) {
-        setSuccess('Password changed successfully!');
+        toast.success('Password changed successfully!');
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -212,10 +190,10 @@ const Profile = () => {
         setPasswordMatch('');
         refresh();
       } else {
-        setError(res.data.message);
+        toast.error(res.data.message);
       }
     } catch (err) {
-      setError('Failed to change password');
+      toast.error('Failed to change password');
     }
   };
 
@@ -223,13 +201,6 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-orange-600 mb-10">Seller Profile</h1>
-
-        {success && (
-          <div className="bg-green-100 text-green-700 p-4 rounded mb-6 text-center">{success}</div>
-        )}
-        {error && (
-          <div className="bg-red-100 text-red-700 p-4 rounded mb-6 text-center">{error}</div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT: Personal Info */}
@@ -337,33 +308,6 @@ const Profile = () => {
               </form>
             </div>
 
-            {/* Listings Overview - MOVED BELOW */}
-            <div className="bg-white p-6 rounded-xl shadow">
-              <h2 className="text-2xl font-semibold text-orange-600 mb-4">Listings Overview</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <h3 className="text-lg font-medium text-orange-600">Active Auctions</h3>
-                  <p className="text-2xl font-bold">Total: {auctionsCount}</p>
-                  <Link
-                    to="/seller/view-auctions"
-                    className="inline-block mt-2 bg-orange-600 text-white px-4 py-2 rounded-md text-sm hover:bg-orange-700"
-                  >
-                    View Auctions
-                  </Link>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <h3 className="text-lg font-medium text-orange-600">Active Rentals</h3>
-                  <p className="text-2xl font-bold">Total: {rentalsCount}</p>
-                  <Link
-                    to="/seller/view-rentals"
-                    className="inline-block mt-2 bg-orange-600 text-white px-4 py-2 rounded-md text-sm hover:bg-orange-700"
-                  >
-                    View Rentals
-                  </Link>
-                </div>
-              </div>
-            </div>
-
             {/* Earnings Summary */}
             <div className="bg-white p-6 rounded-xl shadow">
               <h2 className="text-2xl font-semibold text-orange-600 mb-4">Earnings Summary</h2>
@@ -398,30 +342,31 @@ const Profile = () => {
 
           {/* RIGHT: Preferences + Password */}
           <div className="space-y-6">
-            {/* Notification Preferences */}
+            {/* Listings Overview */}
             <div className="bg-white p-6 rounded-xl shadow">
-              <h2 className="text-2xl font-semibold text-orange-600 mb-4">Preferences</h2>
-              <form onSubmit={handlePreferencesSubmit}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notification Preferences
-                </label>
-                <select
-                  name="notificationPreference"
-                  value={user.notificationPreference}
-                  onChange={handleProfileChange}
-                  className="w-full px-3 py-2 border rounded-lg mb-4"
-                >
-                  <option value="all">All Notifications</option>
-                  <option value="important">Only Important</option>
-                  <option value="none">None</option>
-                </select>
-                <button
-                  type="submit"
-                  className="w-full bg-orange-600 text-white py-2 rounded-lg font-medium hover:bg-orange-700"
-                >
-                  Save Preferences
-                </button>
-              </form>
+              <h2 className="text-2xl font-semibold text-orange-600 mb-4">Listings Overview</h2>
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-orange-600">Active Auctions</h3>
+                  <p className="text-2xl font-bold mb-2">Total: {auctionsCount}</p>
+                  <Link
+                    to="/seller/view-auctions"
+                    className="inline-block bg-orange-600 text-white px-4 py-2 rounded-md text-sm hover:bg-orange-700 w-full text-center"
+                  >
+                    View Auctions
+                  </Link>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-orange-600">Active Rentals</h3>
+                  <p className="text-2xl font-bold mb-2">Total: {rentalsCount}</p>
+                  <Link
+                    to="/seller/view-rentals"
+                    className="inline-block bg-orange-600 text-white px-4 py-2 rounded-md text-sm hover:bg-orange-700 w-full text-center"
+                  >
+                    View Rentals
+                  </Link>
+                </div>
+              </div>
             </div>
 
             {/* Change Password */}

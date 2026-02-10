@@ -40,6 +40,9 @@ const limiter = rateLimit({
     req.url.includes('/notifications') ||
     req.url.includes('/auction/') ||
     req.url.includes('/buyer/dashboard') ||
+    req.url.includes('/seller/dashboard') ||
+    req.url.includes('/mechanic/dashboard') ||
+    req.url.includes('/auctionmanager/dashboard') ||
     req.url.includes('/wishlist') ||
     req.url.includes('/api/chat') ||
     req.url.includes('/api/inspection-chat')
