@@ -14,7 +14,6 @@ const AuctionManagers = () => {
   const [selectedManager, setSelectedManager] = useState(null);
   const [activeTab, setActiveTab] = useState('disapproved');
   const [searchTerm, setSearchTerm] = useState('');
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,7 +52,16 @@ const AuctionManagers = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (manager) => {
+    const carCount = manager.auctionCars?.length || 0;
+
+    if (carCount > 0) {
+      toast.error(
+        `Cannot delete this manager — ${carCount} car${carCount === 1 ? '' : 's'} ${carCount === 1 ? 'is' : 'are'} still assigned.`
+      );
+      return;
+    }
+
     if (
       !window.confirm(
         'Are you sure you want to delete this Auction Manager? This action cannot be undone.'
@@ -63,7 +71,7 @@ const AuctionManagers = () => {
     }
 
     try {
-      const res = await adminServices.deleteAuctionManager(id);
+      const res = await adminServices.deleteAuctionManager(manager._id);
       if (res.success) {
         toast.success('Auction Manager deleted successfully');
         await fetchAuctionManagers();
@@ -142,7 +150,6 @@ const AuctionManagers = () => {
                 </div>
               </div>
             </div>
-
             <div className="bg-white border border-green-200 rounded-lg p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -184,7 +191,6 @@ const AuctionManagers = () => {
                 Approved ({data.approvedManagers.length})
               </button>
             </div>
-
             <div className="relative flex-1 max-w-md">
               <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
               <input
@@ -284,8 +290,13 @@ const AuctionManagers = () => {
                           )}
 
                           <button
-                            onClick={() => handleDelete(manager._id)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-md text-sm transition"
+                            onClick={() => handleDelete(manager)}
+                            disabled={manager.auctionCars?.length > 0}
+                            className={`px-3.5 py-1.5 rounded-md text-sm transition ${
+                              manager.auctionCars?.length > 0
+                                ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
+                            }`}
                           >
                             Delete
                           </button>
@@ -395,8 +406,13 @@ const AuctionManagers = () => {
               )}
 
               <button
-                onClick={() => handleDelete(selectedManager._id)}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                onClick={() => handleDelete(selectedManager)}
+                disabled={selectedManager.auctionCars?.length > 0}
+                className={`flex-1 py-3 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
+                  selectedManager.auctionCars?.length > 0
+                    ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                }`}
               >
                 <i className="fas fa-trash-alt"></i>
                 Delete Manager

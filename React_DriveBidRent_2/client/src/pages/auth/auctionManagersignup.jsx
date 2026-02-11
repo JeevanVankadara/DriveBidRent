@@ -127,7 +127,7 @@ const AuctionManagerSignup = () => {
       if (response.success) {
         toast.success(response.message || 'Account created! Awaiting admin approval.');
         setTimeout(() => {
-          navigate('/secret-auction-manager-login');
+          navigate('/secret-login');
         }, 2000);
       }
     } catch (error) {
@@ -459,7 +459,7 @@ const AuctionManagerSignup = () => {
             <p className="text-gray-600">
               Already have an account?{' '}
               <Link
-                to="/secret-auction-manager-login"
+                to="/secret-login"
                 className="font-semibold text-orange-600 hover:text-orange-700 hover:underline"
               >
                 Sign in here

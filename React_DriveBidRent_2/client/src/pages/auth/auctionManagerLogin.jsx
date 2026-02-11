@@ -182,7 +182,7 @@ const AuctionManagerLogin = () => {
             <p className="text-center text-sm text-gray-600 mt-6">
               Don't have an account?{' '}
               <Link
-                to="/secret-auction-manager-signup"
+                to="/secret-signup"
                 className="text-orange-600 font-medium hover:underline"
               >
                 Register here
