@@ -1,6 +1,7 @@
 import InspectionChat from '../models/InspectionChat.js';
 import InspectionMessage from '../models/InspectionMessage.js';
 import User from '../models/User.js';
+import AuctionManager from '../models/AuctionManager.js';
 
 // lightweight utility to get current user's id
 const getUserId = (req) => req.user && req.user._id;

@@ -18,9 +18,6 @@ const AdminProfile = () => {
   const navigate = useNavigate();
 
 
-  // Note: profile is fetched automatically via useProfile hook from Redux
-  // No manual fetch needed here
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

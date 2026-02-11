@@ -8,6 +8,7 @@ import "dotenv/config";
 
 import connectDB from "./config/db.js";
 import "./models/User.js";
+import "./models/AuctionManager.js";
 import "./models/RentalRequest.js";
 import "./models/AuctionRequest.js";
 import "./models/Chat.js";

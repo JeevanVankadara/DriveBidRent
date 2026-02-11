@@ -54,26 +54,65 @@ export const assignMechanic = async (req, res) => {
   try {
     const { mechanicId, mechanicName } = req.body;
 
+    console.log('🔧 [assignMechanic] Starting assignment process:', {
+      carId: req.params.id,
+      mechanicId,
+      mechanicName,
+      auctionManagerId: req.user._id
+    });
+
     const updated = await AuctionRequest.findByIdAndUpdate(
       req.params.id,
       {
         status: 'assignedMechanic',
         assignedMechanic: mechanicId,
-        mechanicName
+        mechanicName,
+        assignedAuctionManager: req.user._id  // Track which auction manager assigned this
       },
       { new: true }
     );
 
-    if (!updated) return res.json(send(false, 'Request not found'));
+    if (!updated) {
+      console.log('❌ [assignMechanic] Request not found:', req.params.id);
+      return res.json(send(false, 'Request not found'));
+    }
 
+    console.log('✅ [assignMechanic] Car updated with auction manager assignment:', {
+      carId: updated._id,
+      assignedAuctionManager: updated.assignedAuctionManager,
+      vehicleName: updated.vehicleName
+    });
+
+    // Add car to auction manager's assigned cars array
+    try {
+      const AuctionManager = (await import('../../models/AuctionManager.js')).default;
+      const updatedManager = await AuctionManager.findByIdAndUpdate(
+        req.user._id,
+        { $addToSet: { auctionCars: updated._id } },
+        { new: true }
+      ).select('auctionCars firstName lastName');
+      
+      console.log('✅ [assignMechanic] Auction manager updated:', {
+        auctionManagerId: req.user._id,
+        name: `${updatedManager.firstName} ${updatedManager.lastName}`,
+        totalAssignedCars: updatedManager.auctionCars.length,
+        carId: updated._id
+      });
+    } catch (amErr) {
+      console.error('❌ [assignMechanic] Failed to update auction manager record:', amErr);
+      return res.json(send(false, 'Failed to assign car to auction manager'));
+    }
+
+    // Add to mechanic's assigned requests
     try {
       await User.findByIdAndUpdate(
         mechanicId,
         { $addToSet: { assignedRequests: updated._id } },
         { new: true }
       );
+      console.log('✅ [assignMechanic] Car added to mechanic\'s assigned requests');
     } catch (uErr) {
-      console.error('Failed to update mechanic assignedRequests:', uErr);
+      console.error('❌ [assignMechanic] Failed to update mechanic assignedRequests:', uErr);
       return res.json(send(true, 'Mechanic assigned successfully, but failed to update mechanic record'));
     }
 
@@ -90,9 +129,10 @@ export const assignMechanic = async (req, res) => {
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           title: `Inspection: ${updated.vehicleName}`
         });
-        console.log('InspectionChat created for:', updated.vehicleName, 'id=', created._id);
+        console.log('✅ [assignMechanic] InspectionChat created for:', updated.vehicleName, 'id=', created._id);
         chatDoc = created;
       } else {
+        console.log('ℹ️ [assignMechanic] Using existing InspectionChat');
         chatDoc = existingChat;
       }
 
@@ -103,9 +143,10 @@ export const assignMechanic = async (req, res) => {
           .populate({ path: 'inspectionTask', select: 'vehicleName vehicleImage _id' });
       }
     } catch (cErr) {
-      console.error('Failed to create or fetch InspectionChat:', cErr);
+      console.error('❌ [assignMechanic] Failed to create or fetch InspectionChat:', cErr);
     }
 
+    console.log('✅ [assignMechanic] Assignment completed successfully');
     res.json(send(true, 'Mechanic assigned successfully', { chat: chatDoc }));
   } catch (err) {
     console.error('Assign mechanic save error:', err);

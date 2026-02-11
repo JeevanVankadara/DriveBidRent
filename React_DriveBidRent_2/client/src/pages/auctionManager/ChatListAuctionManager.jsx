@@ -53,11 +53,13 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
-    const mechanicName = chat.mechanic?.name?.toLowerCase() || '';
+    const mechanicFirstName = chat.mechanic?.firstName?.toLowerCase() || '';
+    const mechanicLastName = chat.mechanic?.lastName?.toLowerCase() || '';
+    const mechanicFullName = `${mechanicFirstName} ${mechanicLastName}`.trim();
     const vehicleName = chat.inspectionTask?.vehicleName?.toLowerCase() || '';
     const inspectionId = chat.inspectionTask?._id?.toLowerCase() || '';
     
-    return mechanicName.includes(searchLower) || 
+    return mechanicFullName.includes(searchLower) || 
            vehicleName.includes(searchLower) ||
            inspectionId.includes(searchLower);
   });

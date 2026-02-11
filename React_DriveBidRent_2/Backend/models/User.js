@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   userType: { 
     type: String, 
     required: true, 
-    enum: ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'auction_manager'] 
+    enum: ['buyer', 'seller', 'driver', 'mechanic', 'admin'] 
   },
   dateOfBirth: { type: Date },
   doorNo: {
@@ -48,7 +48,14 @@ const userSchema = new mongoose.Schema({
   repairBikes: { type: Boolean, default: false },
   repairCars: { type: Boolean, default: false },
   experienceYears: { type: Number },
-  approved_status: { type: String, enum: ['Yes', 'No'], default: 'No' },
+  approved_status: { 
+    type: String, 
+    enum: ['Yes', 'No'], 
+    default: 'No',
+    required: function() {
+      return this.userType === 'mechanic';
+    }
+  },
   phone: {
     type: String,
     required: true,

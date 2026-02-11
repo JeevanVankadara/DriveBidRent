@@ -13,17 +13,23 @@ export default function ApprovedCars() {
 
   useEffect(() => {
     const fetchCars = async () => {
+      console.log('🔍 [Frontend - ApprovedCars] Fetching approved cars assigned to this auction manager...');
       try {
         setLoading(true);
         const res = await auctionManagerServices.getApproved();
         const responseData = res.data || res;
         
+        console.log('📦 [Frontend - ApprovedCars] API response:', responseData);
+        
         if (responseData.success) {
+          console.log('✅ [Frontend - ApprovedCars] Loaded', responseData.data?.length || 0, 'approved cars assigned to me');
           setCars(responseData.data || []);
         } else {
+          console.log('❌ [Frontend - ApprovedCars] Failed:', responseData.message);
           setError(responseData.message || 'Failed to load approved cars');
         }
       } catch (err) {
+        console.error('❌ [Frontend - ApprovedCars] Error:', err);
         setError(err.response?.data?.message || 'Failed to load approved cars');
       } finally {
         setLoading(false);
@@ -33,17 +39,23 @@ export default function ApprovedCars() {
   }, []);
 
   const startAuction = async (id) => {
+    console.log('🚀 [Frontend - ApprovedCars] Starting auction for car:', id);
     try {
       const res = await auctionManagerServices.startAuction(id);
       const responseData = res.data || res;
       
+      console.log('📦 [Frontend - ApprovedCars] Start auction response:', responseData);
+      
       if (responseData.success) {
+        console.log('✅ [Frontend - ApprovedCars] Auction started successfully');
         setCars(cars.map(car => car._id === id ? { ...car, started_auction: 'yes' } : car));
         alert('Auction started successfully!');
       } else {
+        console.log('❌ [Frontend - ApprovedCars] Failed to start auction:', responseData.message);
         alert(responseData.message || 'Failed to start auction');
       }
     } catch (err) {
+      console.error('❌ [Frontend - ApprovedCars] Error starting auction:', err);
       alert(err.response?.data?.message || 'Failed to start auction');
     }
   };
@@ -51,11 +63,15 @@ export default function ApprovedCars() {
   const reAuctionCar = async (id) => {
     if (!window.confirm('Are you sure you want to re-auction this car? The buyer will be reported to admin.')) return;
     
+    console.log('🔄 [Frontend - ApprovedCars] Re-auctioning car:', id);
     try {
       const res = await auctionManagerServices.reAuction(id);
       const responseData = res.data || res;
       
+      console.log('📦 [Frontend - ApprovedCars] Re-auction response:', responseData);
+      
       if (responseData.success) {
+        console.log('✅ [Frontend - ApprovedCars] Car re-auctioned successfully');
         // Refresh the car list
         setCars(cars.map(car => 
           car._id === id 
@@ -64,9 +80,11 @@ export default function ApprovedCars() {
         ));
         alert('Car re-auctioned successfully! Buyer has been reported to admin.');
       } else {
+        console.log('❌ [Frontend - ApprovedCars] Failed to re-auction:', responseData.message);
         alert(responseData.message || 'Failed to re-auction');
       }
     } catch (err) {
+      console.error('❌ [Frontend - ApprovedCars] Error re-auctioning:', err);
       alert(err.response?.data?.message || 'Failed to re-auction');
     }
   };

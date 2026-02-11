@@ -33,6 +33,24 @@ const adminServices = {
     return response.data;
   },
 
+  // Manage Auction Managers
+  getAuctionManagers: async () => {
+    const response = await axiosInstance.get("admin/auction-managers");
+    return response.data;
+  },
+  approveAuctionManager: async (id) => {
+    const response = await axiosInstance.post(`admin/approve-auction-manager/${id}`);
+    return response.data;
+  },
+  disapproveAuctionManager: async (id) => {
+    const response = await axiosInstance.post(`admin/disapprove-auction-manager/${id}`);
+    return response.data;
+  },
+  deleteAuctionManager: async (id) => {
+    const response = await axiosInstance.post(`admin/delete-auction-manager/${id}`);
+    return response.data;
+  },
+
   // Analytics
   getAnalytics: async () => {
     const response = await axiosInstance.get("admin/analytics");

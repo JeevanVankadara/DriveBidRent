@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
-import useProfile from '../../hooks/useProfile';
 
 export default function ManagerProfile() {
   const [user, setUser] = useState({});
@@ -16,20 +15,42 @@ export default function ManagerProfile() {
   const [passwordStrength, setPasswordStrength] = useState('');
   const [passwordMatch, setPasswordMatch] = useState('');
 
-  const { profile, loading: profileLoading, refresh } = useProfile();
-
+  // Fetch profile directly from auction manager endpoint
   useEffect(() => {
-    // when redux profile updates, reflect in local state
-    if (profile) {
-      setUser(profile);
-      setPhone(profile.phone || '');
-    }
-  }, [profile]);
-
-  useEffect(() => {
-    // set initial loading state from profileLoading
-    setLoading(!!profileLoading);
-  }, [profileLoading]);
+    const fetchProfile = async () => {
+      console.log('🔍 [Frontend] Fetching auction manager profile...');
+      try {
+        setLoading(true);
+        const response = await auctionManagerServices.getProfile();
+        console.log('📦 [Frontend] Profile API response:', response);
+        
+        const profileData = response?.data?.data?.user || response?.data?.user || response?.data || {};
+        console.log('✅ [Frontend] Extracted profile data:', profileData);
+        
+        // Set userType as 'auction_manager' by default
+        const userWithType = {
+          ...profileData,
+          userType: 'auction_manager'
+        };
+        
+        setUser(userWithType);
+        setPhone(userWithType.phone || '');
+        console.log('✅ [Frontend] Profile loaded successfully:', {
+          name: `${userWithType.firstName} ${userWithType.lastName}`,
+          email: userWithType.email,
+          phone: userWithType.phone,
+          userType: userWithType.userType
+        });
+      } catch (error) {
+        console.error('❌ [Frontend] Failed to fetch profile:', error);
+        toast.error('Failed to load profile. Please try refreshing the page.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfile();
+  }, []);
 
   const handleNewPasswordChange = (value) => {
     setNewPassword(value);
@@ -62,27 +83,34 @@ export default function ManagerProfile() {
 
   const handlePhoneUpdate = async (e) => {
     e.preventDefault();
+    console.log('📱 [Frontend] Updating phone number to:', phone);
+    
     if (!/^\d{10}$/.test(phone)) {
+      console.log('❌ [Frontend] Invalid phone format:', phone);
       toast.error('Phone number must be 10 digits');
       return;
     }
     if (phone === user.phone) {
+      console.log('❌ [Frontend] New phone same as current phone');
       toast.error('New phone number cannot be the same as current phone number');
       return;
     }
     try {
       setUpdating(true);
       const res = await auctionManagerServices.updatePhone(phone);
+      console.log('📦 [Frontend] Update phone response:', res);
+      
       const responseData = res.data || res;
       if (responseData.success) {
+        console.log('✅ [Frontend] Phone updated successfully');
         toast.success('Phone updated successfully');
-        // refresh redux profile
-        try { refresh(); } catch (e) { }
         setUser(prev => ({ ...prev, phone }));
       } else {
+        console.log('❌ [Frontend] Phone update failed:', responseData.message);
         toast.error(responseData.message || 'Failed to update phone');
       }
     } catch (err) {
+      console.error('❌ [Frontend] Phone update error:', err);
       toast.error('Failed to update phone');
     } finally {
       setUpdating(false);
@@ -91,38 +119,48 @@ export default function ManagerProfile() {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+    console.log('🔐 [Frontend] Attempting to change password');
+    
     if (!oldPassword) {
+      console.log('❌ [Frontend] Current password not provided');
       toast.error('Please enter your current password');
       return;
     }
     if (oldPassword === newPassword) {
+      console.log('❌ [Frontend] New password same as current');
       toast.error('New password cannot be the same as current password');
       return;
     }
     if (newPassword !== confirmPassword) {
+      console.log('❌ [Frontend] Passwords do not match');
       toast.error('Passwords do not match');
       return;
     }
     if (newPassword.length < 8) {
+      console.log('❌ [Frontend] Password too short');
       toast.error('Password must be at least 8 characters');
       return;
     }
     try {
       setUpdating(true);
       const res = await auctionManagerServices.changePassword({ oldPassword, newPassword });
+      console.log('📦 [Frontend] Change password response:', res);
+      
       const responseData = res.data || res;
       if (responseData.success) {
+        console.log('✅ [Frontend] Password changed successfully');
         toast.success('Password changed successfully');
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
         setPasswordStrength('');
         setPasswordMatch('');
-        try { refresh(); } catch (e) { }
       } else {
+        console.log('❌ [Frontend] Password change failed:', responseData.message);
         toast.error(responseData.message || 'Failed to change password');
       }
     } catch (err) {
+      console.error('❌ [Frontend] Password change error:', err);
       toast.error(err.response?.data?.message || 'Failed to change password');
     } finally {
       setUpdating(false);
@@ -152,7 +190,7 @@ export default function ManagerProfile() {
             </div>
             <div>
               <strong className="block text-gray-700 mb-1">Role:</strong>
-              <div className="bg-gray-100 p-3 rounded-lg text-gray-700 font-semibold">{user.userType?.replace(/_/g, ' ').toUpperCase()}</div>
+              <div className="bg-gray-100 p-3 rounded-lg text-gray-700 font-semibold">AUCTION MANAGER</div>
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Phone Number:</label>

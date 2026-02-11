@@ -3,6 +3,7 @@ const router = express.Router();
 
 import dashboardControllers from '../controllers/adminControllers/dashboard.controllers.js';
 import manageUsersControllers from '../controllers/adminControllers/manageUsers.controllers.js';
+import manageAuctionManagersControllers from '../controllers/adminControllers/manageAuctionManagers.controllers.js';
 import analyticsControllers from '../controllers/adminControllers/analytics.controllers.js';
 import manageEarningsControllers from '../controllers/adminControllers/manageEarnings.controllers.js';
 import adminProfileControllers from '../controllers/adminControllers/adminProfile.controllers.js';
@@ -18,6 +19,12 @@ router.post("/decline-user/:id", isAdminLoggedin, manageUsersControllers.decline
 router.post("/delete-buyer/:id", isAdminLoggedin, manageUsersControllers.deleteBuyer);
 router.post("/delete-seller/:id", isAdminLoggedin, manageUsersControllers.deleteSeller);
 router.post("/block-user/:id", isAdminLoggedin, manageUsersControllers.blockUser);
+
+// Manage Auction Managers
+router.get("/auction-managers", isAdminLoggedin, manageAuctionManagersControllers.getAuctionManagers);
+router.post("/approve-auction-manager/:id", isAdminLoggedin, manageAuctionManagersControllers.approveAuctionManager);
+router.post("/disapprove-auction-manager/:id", isAdminLoggedin, manageAuctionManagersControllers.disapproveAuctionManager);
+router.post("/delete-auction-manager/:id", isAdminLoggedin, manageAuctionManagersControllers.deleteAuctionManager);
 
 // Analytics
 router.get("/analytics", isAdminLoggedin, analyticsControllers.getAnalytics);

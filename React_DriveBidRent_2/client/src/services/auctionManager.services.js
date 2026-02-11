@@ -37,5 +37,8 @@ export const auctionManagerServices = {
   // Profile
   getProfile: () => axiosInstance.get('/auctionmanager/profile'),
   updatePhone: (phone) => axiosInstance.post('/auctionmanager/update-phone', { phone }),
-  changePassword: (data) => axiosInstance.post('/auctionmanager/change-password', data)
+  changePassword: (data) => axiosInstance.post('/auctionmanager/change-password', data),
+
+  // Migration (run once to fix existing data)
+  migrateAssignments: () => axiosInstance.post('/auctionmanager/migrate-assignments')
 };  

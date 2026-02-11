@@ -51,12 +51,16 @@ export default function ChatListMechanic({ onSelect, selectedId }) {
   // Helper function to get manager initials
   const getManagerInitials = (manager) => {
     if (!manager) return 'M';
-    const name = manager.name || 'Manager';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return (names[0][0] + names[1][0]).toUpperCase();
+    const firstName = manager.firstName || manager.first_name || '';
+    const lastName = manager.lastName || manager.last_name || '';
+    
+    if (firstName && lastName) {
+      return (firstName[0] + lastName[0]).toUpperCase();
     }
-    return name[0] ? name[0].toUpperCase() : 'M';
+    if (firstName) {
+      return firstName[0].toUpperCase();
+    }
+    return 'M';
   };
 
   // Helper function to format date
@@ -98,11 +102,13 @@ export default function ChatListMechanic({ onSelect, selectedId }) {
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
-    const managerName = chat.auctionManager?.name?.toLowerCase() || '';
+    const managerFirstName = chat.auctionManager?.firstName?.toLowerCase() || '';
+    const managerLastName = chat.auctionManager?.lastName?.toLowerCase() || '';
+    const managerFullName = `${managerFirstName} ${managerLastName}`.trim();
     const vehicleName = chat.inspectionTask?.vehicleName?.toLowerCase() || '';
     const inspectionId = chat.inspectionTask?._id?.toLowerCase() || '';
     
-    return managerName.includes(searchLower) || 
+    return managerFullName.includes(searchLower) || 
            vehicleName.includes(searchLower) ||
            inspectionId.includes(searchLower);
   });
@@ -178,7 +184,11 @@ export default function ChatListMechanic({ onSelect, selectedId }) {
             {sortedChats.map(chat => {
               const isSelected = String(selectedId) === String(chat._id);
               const isUnread = chat.unreadCount > 0;
-              const managerName = chat.auctionManager?.name || 'Auction Manager';
+              const managerFirstName = chat.auctionManager?.firstName || '';
+              const managerLastName = chat.auctionManager?.lastName || '';
+              const managerName = managerFirstName && managerLastName 
+                ? `${managerFirstName} ${managerLastName}` 
+                : managerFirstName || 'Auction Manager';
               const vehicleName = chat.inspectionTask?.vehicleName || 'Vehicle';
               const status = chat.status || 'ASSIGNED';
               const lastUpdated = chat.updatedAt || chat.createdAt;

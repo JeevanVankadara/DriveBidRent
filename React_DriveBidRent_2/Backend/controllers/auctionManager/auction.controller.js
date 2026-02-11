@@ -15,23 +15,58 @@ const send = (success, message, data = null) => ({
 
 export const startAuction = async (req, res) => {
   try {
-    const auction = await AuctionRequest.findByIdAndUpdate(
-      req.params.id,
-      { started_auction: 'yes' },
-      { new: true }
-    );
-    if (!auction) return res.json(send(false, 'Auction not found'));
+    console.log('🚀 [startAuction] Starting auction:', req.params.id, 'by auction manager:', req.user._id);
+    
+    // Verify this car is assigned to the auction manager using assignedAuctionManager field
+    const auction = await AuctionRequest.findById(req.params.id);
+    
+    if (!auction) {
+      console.log('❌ [startAuction] Auction not found');
+      return res.json(send(false, 'Auction not found'));
+    }
+
+    console.log('📌 [startAuction] Car details:', {
+      carId: auction._id.toString(),
+      vehicleName: auction.vehicleName,
+      assignedAuctionManager: auction.assignedAuctionManager?.toString(),
+      requestingManager: req.user._id.toString()
+    });
+
+    if (!auction.assignedAuctionManager || auction.assignedAuctionManager.toString() !== req.user._id.toString()) {
+      console.log('❌ [startAuction] Car not assigned to this auction manager');
+      return res.json(send(false, 'You are not authorized to start this auction'));
+    }
+
+    auction.started_auction = 'yes';
+    await auction.save();
+    
+    console.log('✅ [startAuction] Auction started successfully');
     res.json(send(true, 'Auction started'));
   } catch (err) {
-    console.error('Start auction error:', err);
+    console.error('❌ [startAuction] Error:', err);
     res.json(send(false, 'Failed to start auction'));
   }
 };
 
 export const stopAuction = async (req, res) => {
   try {
+    console.log('🛑 [stopAuction] Stopping auction:', req.params.id, 'by auction manager:', req.user._id);
+    
     const auction = await AuctionRequest.findById(req.params.id);
-    if (!auction || auction.started_auction !== 'yes' || auction.auction_stopped) {
+    
+    if (!auction) {
+      console.log('❌ [stopAuction] Auction not found');
+      return res.json(send(false, 'Auction not found'));
+    }
+
+    // Verify this car is assigned to the auction manager
+    if (!auction.assignedAuctionManager || auction.assignedAuctionManager.toString() !== req.user._id.toString()) {
+      console.log('❌ [stopAuction] Car not assigned to this auction manager');
+      return res.json(send(false, 'You are not authorized to stop this auction'));
+    }
+
+    if (auction.started_auction !== 'yes' || auction.auction_stopped) {
+      console.log('❌ [stopAuction] Invalid auction state');
       return res.json(send(false, 'Invalid auction state'));
     }
 
@@ -75,20 +110,32 @@ export const stopAuction = async (req, res) => {
     }
 
     await auction.save();
+    console.log('✅ [stopAuction] Auction stopped successfully, hasWinner:', !!currentBid);
     res.json(send(true, 'Auction stopped', { hasWinner: !!currentBid }));
   } catch (err) {
-    console.error('Stop auction error:', err);
+    console.error('❌ [stopAuction] Error:', err);
     res.json(send(false, 'Server error'));
   }
 };
 
 export const viewBids = async (req, res) => {
   try {
+    console.log('👀 [viewBids] Viewing bids for auction:', req.params.id, 'by auction manager:', req.user._id);
+    
     const auction = await AuctionRequest.findById(req.params.id)
       .populate('sellerId', 'firstName lastName email city')
       .lean();
 
-    if (!auction) return res.json(send(false, 'Auction not found'));
+    if (!auction) {
+      console.log('❌ [viewBids] Auction not found');
+      return res.json(send(false, 'Auction not found'));
+    }
+
+    // Verify this car is assigned to the auction manager
+    if (!auction.assignedAuctionManager || auction.assignedAuctionManager.toString() !== req.user._id.toString()) {
+      console.log('❌ [viewBids] Car not assigned to this auction manager');
+      return res.json(send(false, 'You are not authorized to view bids for this auction'));
+    }
 
     const bids = await AuctionBid.getBidsForAuction(req.params.id);
     
@@ -106,19 +153,32 @@ export const viewBids = async (req, res) => {
     const currentBid = filteredBids.find(b => b.isCurrentBid) || null;
     const pastBids = filteredBids.filter(b => !b.isCurrentBid).slice(0, 3);
 
+    console.log('✅ [viewBids] Loaded', filteredBids.length, 'bids for auction');
     res.json(send(true, 'Bids loaded', { auction, currentBid, pastBids }));
   } catch (err) {
-    console.error('View bids error:', err);
+    console.error('❌ [viewBids] Error:', err);
     res.json(send(false, 'Failed to load bids'));
   }
 };
 
 export const reAuction = async (req, res) => {
   try {
+    console.log('🔄 [reAuction] Re-auction attempt for:', req.params.id, 'by auction manager:', req.user._id);
+    
     const auction = await AuctionRequest.findById(req.params.id);
-    if (!auction) return res.json(send(false, 'Auction not found'));
+    
+    if (!auction) {
+      console.log('❌ [reAuction] Auction not found');
+      return res.json(send(false, 'Auction not found'));
+    }
 
-    console.log('Re-auction attempt:', {
+    // Verify this car is assigned to the auction manager
+    if (!auction.assignedAuctionManager || auction.assignedAuctionManager.toString() !== req.user._id.toString()) {
+      console.log('❌ [reAuction] Car not assigned to this auction manager');
+      return res.json(send(false, 'You are not authorized to re-auction this car'));
+    }
+
+    console.log('ℹ️ [reAuction] Auction state:', {
       auctionId: auction._id,
       paymentDeadline: auction.paymentDeadline,
       currentTime: new Date(),
@@ -187,10 +247,10 @@ export const reAuction = async (req, res) => {
     }
 
     await auction.save();
-    console.log('Re-auction successful for:', auction._id);
+    console.log('✅ [reAuction] Re-auction successful for:', auction._id);
     res.json(send(true, 'Auction re-opened successfully'));
   } catch (err) {
-    console.error('Re-auction error:', err);
+    console.error('❌ [reAuction] Error:', err);
     res.json(send(false, `Failed to re-auction: ${err.message}`));
   }
 };

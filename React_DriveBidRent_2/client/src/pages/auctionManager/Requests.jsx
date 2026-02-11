@@ -11,17 +11,23 @@ export default function Requests() {
 
   useEffect(() => {
     const fetchRequests = async () => {
+      console.log('🔍 [Frontend - Requests] Fetching all vehicle requests...');
       try {
         setLoading(true);
         const res = await auctionManagerServices.getRequests();
         const responseData = res.data || res;
         
+        console.log('📦 [Frontend - Requests] API response:', responseData);
+        
         if (responseData.success) {
+          console.log('✅ [Frontend - Requests] Loaded', responseData.data?.length || 0, 'requests');
           setRequests(responseData.data || []);
         } else {
+          console.log('❌ [Frontend - Requests] Failed:', responseData.message);
           setError(responseData.message || 'Failed to load requests');
         }
       } catch (err) {
+        console.error('❌ [Frontend - Requests] Error:', err);
         setError(err.response?.data?.message || 'Failed to load requests');
       } finally {
         setLoading(false);

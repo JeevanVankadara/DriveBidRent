@@ -5,6 +5,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/auth/HomePage';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+import AuctionManagerSignup from './pages/auth/auctionManagersignup';
+import AuctionManagerLogin from './pages/auth/auctionManagerLogin';
 
 // === COMPONENTS ===
 import PageNotFound from './pages/components/PageNotFound';
@@ -14,6 +16,7 @@ import Footer from './pages/components/Footer';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import ManageUsers from './pages/admin/ManageUsers';
+import AuctionManagers from './pages/admin/AuctionManagers';
 import Analytics from './pages/admin/Analytics';
 import ManageEarnings from './pages/admin/ManageEarnings';
 import AdminProfile from './pages/admin/AdminProfile';
@@ -44,14 +47,14 @@ import SellerLayout from './pages/seller/SellerLayout';
 import SellerDashboard from './pages/seller/Dashboard';
 import AddAuction from './pages/seller/AddAuction';
 import AddRental from './pages/seller/AddRental';
-import SellerProfile from './pages/seller/Profile';           // Consistent name
+import SellerProfile from './pages/seller/Profile';           
 import ViewAuctions from './pages/seller/ViewAuctions';
 import ViewBids from './pages/seller/ViewBids';
 import ViewEarnings from './pages/seller/ViewEarnings';
 import ViewRentals from './pages/seller/ViewRentals';
 import UpdateRental from './pages/seller/UpdateRental';
 import RentalDetailsAlt from './pages/seller/RentalDetailsAlt';
-import AuctionDetailsSeller from './pages/seller/AuctionDetails';  // Clear distinction
+import AuctionDetailsSeller from './pages/seller/AuctionDetails';  
 import ChatListSeller from './pages/seller/ChatListSeller';
 import ChatRoomSeller from './pages/seller/ChatRoomSeller';
 import ChatPageSeller from './pages/seller/ChatPageSeller';
@@ -89,12 +92,17 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      
+      {/* === HIDDEN AUCTION MANAGER ROUTES === */}
+      <Route path="/secret-signup" element={<AuctionManagerSignup />} />
+      <Route path="/secret-login" element={<AuctionManagerLogin />} />
 
       {/* === ADMIN SPA === */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="manage-users" element={<ManageUsers />} />
+        <Route path="auction-managers" element={<AuctionManagers />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="manage-earnings" element={<ManageEarnings />} />
         <Route path="admin-profile" element={<AdminProfile />} />

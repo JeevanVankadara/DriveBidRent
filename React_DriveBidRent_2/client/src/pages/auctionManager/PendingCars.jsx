@@ -11,17 +11,23 @@ export default function PendingCars() {
 
   useEffect(() => {
     const fetchCars = async () => {
+      console.log('🔍 [Frontend - PendingCars] Fetching pending inspections assigned to this auction manager...');
       try {
         setLoading(true);
         const res = await auctionManagerServices.getPending();
         const responseData = res.data || res;
         
+        console.log('📦 [Frontend - PendingCars] API response:', responseData);
+        
         if (responseData.success) {
+          console.log('✅ [Frontend - PendingCars] Loaded', responseData.data?.length || 0, 'pending cars assigned to me');
           setCars(responseData.data || []);
         } else {
+          console.log('❌ [Frontend - PendingCars] Failed:', responseData.message);
           setError(responseData.message || 'Failed to load pending cars');
         }
       } catch (err) {
+        console.error('❌ [Frontend - PendingCars] Error:', err);
         setError(err.response?.data?.message || 'Failed to load pending cars');
       } finally {
         setLoading(false);

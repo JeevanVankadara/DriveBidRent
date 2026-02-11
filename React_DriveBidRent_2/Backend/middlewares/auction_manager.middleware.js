@@ -1,16 +1,15 @@
 // middlewares/auction_manager.middleware.js
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import AuctionManager from '../models/AuctionManager.js';
 
 const auctionManagerMiddleware = async (req, res, next) => {
   let token = req.cookies.jwt;
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev');
-      req.user = await User.findById(decoded.id).select("-password");
+      req.user = await AuctionManager.findById(decoded.id).select("-password");
 
       if (!req.user || 
-          req.user.userType !== "auction_manager" || 
           decoded.userType !== "auction_manager" || 
           decoded.email !== req.user.email) {
         return res.status(401).json({

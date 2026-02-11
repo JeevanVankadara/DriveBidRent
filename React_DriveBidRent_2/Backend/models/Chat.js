@@ -14,7 +14,7 @@ const chatSchema = new Schema({
   buyer: { type: Schema.Types.ObjectId, ref: 'User' },
   seller: { type: Schema.Types.ObjectId, ref: 'User' },
   mechanic: { type: Schema.Types.ObjectId, ref: 'User' },
-  auctionManager: { type: Schema.Types.ObjectId, ref: 'User' },
+  auctionManager: { type: Schema.Types.ObjectId, ref: 'AuctionManager' },
 
   // References
   rentalRequest: { type: Schema.Types.ObjectId, ref: 'RentalRequest' },

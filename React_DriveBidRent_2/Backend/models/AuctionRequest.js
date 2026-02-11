@@ -35,6 +35,10 @@ const auctionRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User' 
   },
+  assignedAuctionManager: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AuctionManager'
+  },
   auction_stopped: { 
     type: Boolean, 
     default: false 

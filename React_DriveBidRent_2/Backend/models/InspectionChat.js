@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const inspectionChatSchema = new Schema({
   mechanic: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  auctionManager: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  auctionManager: { type: Schema.Types.ObjectId, ref: 'AuctionManager', required: true },
   inspectionTask: { type: Schema.Types.ObjectId, ref: 'AuctionRequest', required: true },
   title: { type: String },
   expiresAt: { type: Date, required: true },

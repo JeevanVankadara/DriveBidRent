@@ -4,7 +4,7 @@ import isAuctionManager from '../middlewares/auction_manager.middleware.js';
 
 // Controllers - using named imports (clean & consistent)
 import { getDashboard } from '../controllers/auctionManager/dashboard.controller.js';
-import { getRequests } from '../controllers/auctionManager/requests.controller.js';
+import { getRequests, migrateExistingAssignments } from '../controllers/auctionManager/requests.controller.js';
 import {
   getPending,
   getReview,
@@ -26,6 +26,7 @@ router.get('/dashboard', getDashboard);
 
 // === Requests ===
 router.get('/requests', getRequests);
+router.post('/migrate-assignments', migrateExistingAssignments);
 
 // === Pending Cars ===
 router.get('/pending', getPending);

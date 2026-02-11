@@ -13,18 +13,24 @@ export default function PendingCarDetails() {
 
   useEffect(() => {
     const fetchCar = async () => {
+      console.log('🔍 [Frontend - PendingCarDetails] Fetching car details for:', id);
       try {
         setLoading(true);
         const res = await auctionManagerServices.getPendingCarDetails(id);
         const data = res.data || res;
 
+        console.log('📦 [Frontend - PendingCarDetails] API response:', data);
+
         if (data.success) {
+          console.log('✅ [Frontend - PendingCarDetails] Car details loaded:', data.data?.vehicleName);
           setCar(data.data);
           setStatus(data.data.status || 'pending');
         } else {
+          console.log('❌ [Frontend - PendingCarDetails] Failed:', data.message);
           setError(data.message || 'Failed to load details');
         }
       } catch (err) {
+        console.error('❌ [Frontend - PendingCarDetails] Error:', err);
         setError(err.response?.data?.message || 'Network error');
       } finally {
         setLoading(false);
@@ -34,7 +40,10 @@ export default function PendingCarDetails() {
   }, [id]);
 
   const updateStatus = async (newStatus) => {
+    console.log('🔄 [Frontend - PendingCarDetails] Updating status to:', newStatus, 'for car:', id);
+    
     if (newStatus === 'approved' && (!car.mechanicReview?.mechanicalCondition || !car.mechanicReview?.bodyCondition)) {
+      console.log('❌ [Frontend - PendingCarDetails] Cannot approve without complete review');
       alert('Cannot approve without complete mechanic review');
       return;
     }
@@ -42,15 +51,20 @@ export default function PendingCarDetails() {
 
     try {
       const res = await auctionManagerServices.updateStatus(id, newStatus);
+      console.log('📦 [Frontend - PendingCarDetails] Update status response:', res);
+      
       if (res.data.success) {
+        console.log('✅ [Frontend - PendingCarDetails] Status updated to:', newStatus);
         setStatus(newStatus);
         alert(`Vehicle ${newStatus} successfully!`);
           if (newStatus === 'approved') {
+            console.log('➡️ [Frontend - PendingCarDetails] Redirecting to Approved Cars page');
             // redirect to Approved Cars page after approval
             navigate('/auctionmanager/approved');
           }
       }
     } catch (err) {
+      console.error('❌ [Frontend - PendingCarDetails] Error updating status:', err);
       alert('Update failed');
     }
   };

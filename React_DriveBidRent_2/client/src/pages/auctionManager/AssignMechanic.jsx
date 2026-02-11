@@ -17,25 +17,28 @@ export default function AssignMechanic() {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log('🔧 [Frontend - AssignMechanic] Fetching data for request:', id);
       try {
         setLoading(true);
         const res = await auctionManagerServices.getAssignMechanic(id);
         const responseData = res.data || res;
         
-        console.log('=== FRONTEND: Assign Mechanic Response ===', responseData);
+        console.log('📦 [Frontend - AssignMechanic] API response:', responseData);
         
         if (responseData.success) {
+          console.log('✅ [Frontend - AssignMechanic] Request loaded:', responseData.data.request?.vehicleName);
+          console.log('✅ [Frontend - AssignMechanic] Found', responseData.data.mechanics?.length || 0, 'mechanics in city:', responseData.data.request?.sellerId?.city);
           setRequest(responseData.data.request);
           setMechanics(responseData.data.mechanics || []);
-          console.log('Loaded mechanics:', responseData.data.mechanics?.length || 0);
           if (responseData.data.mechanics?.length === 0) {
-            console.log('No mechanics found for seller city:', responseData.data.request?.sellerId?.city);
+            console.log('⚠️ [Frontend - AssignMechanic] No mechanics available in seller city');
           }
         } else {
+          console.log('❌ [Frontend - AssignMechanic] Failed:', responseData.message);
           setError(responseData.message || 'Failed to load data');
         }
       } catch (err) {
-        console.error('Error fetching assign mechanic data:', err);
+        console.error('❌ [Frontend - AssignMechanic] Error:', err);
         setError(err.response?.data?.message || 'Failed to load data');
       } finally {
         setLoading(false);
@@ -56,6 +59,12 @@ export default function AssignMechanic() {
       return;
     }
 
+    console.log('🔧 [Frontend - AssignMechanic] Assigning mechanic:', {
+      requestId: id,
+      mechanicId: selected,
+      mechanicName: `${mechanic.firstName} ${mechanic.lastName}`
+    });
+
     try {
       setAssigning(true);
       const res = await auctionManagerServices.assignMechanic(id, {
@@ -65,18 +74,25 @@ export default function AssignMechanic() {
       
       const responseData = res.data || res;
       
+      console.log('📦 [Frontend - AssignMechanic] Assignment response:', responseData);
+      
       if (responseData.success) {
+        console.log('✅ [Frontend - AssignMechanic] Mechanic assigned successfully!');
+        console.log('📝 [Frontend - AssignMechanic] Car is now assigned to this auction manager');
         setAssigned(true);
         const chat = responseData.data?.chat;
         if (chat && chat._id) {
+          console.log('💬 [Frontend - AssignMechanic] Navigating to inspection chat:', chat._id);
           // navigate to the auction manager chat view for this inspection
           navigate(`/auctionmanager/chats/${chat._id}`);
           return;
         }
       } else {
+        console.log('❌ [Frontend - AssignMechanic] Failed to assign:', responseData.message);
         alert(responseData.message || 'Failed to assign mechanic');
       }
     } catch (err) {
+      console.error('❌ [Frontend - AssignMechanic] Error assigning mechanic:', err);
       alert(err.response?.data?.message || 'Failed to assign mechanic');
     } finally {
       setAssigning(false);
