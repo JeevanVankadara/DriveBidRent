@@ -1,6 +1,5 @@
-// middlewares/buyer.middleware.js
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js'; // ESM import with .js
+import User from '../models/User.js'; 
 
 const buyerMiddleware = async (req, res, next) => {
   let token = req.cookies.jwt;

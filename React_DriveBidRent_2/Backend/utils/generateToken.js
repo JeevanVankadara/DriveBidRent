@@ -8,7 +8,7 @@ const generateToken = (user) => {
       userType: user.userType,
       email: user.email
     },
-    process.env.JWT_SECRET || 'fallback_secret_for_dev', // fallback for dev
+    process.env.JWT_SECRET || 'fallback_secret_for_dev',
     {
       expiresIn: "7d",
     }
