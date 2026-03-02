@@ -280,7 +280,7 @@ export default function AssignMechanic() {
               {/* Pollution & Fitness */}
               <div className="mb-4 bg-white rounded-lg p-4 shadow-sm">
                 <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  Pollution & Fitness
+                  🍃 Pollution & Fitness
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                   {request.vehicleDocumentation.pollutionCertificate && (
@@ -289,21 +289,21 @@ export default function AssignMechanic() {
                   {request.vehicleDocumentation.pollutionExpiryDate && (
                     <p><strong>PUC Expiry:</strong> {new Date(request.vehicleDocumentation.pollutionExpiryDate).toLocaleDateString()}</p>
                   )}
-                  {request.vehicleDocumentation.fitnessCertificate && (
-                    <p><strong>Fitness Status:</strong> {request.vehicleDocumentation.fitnessCertificate}</p>
+                  {request.vehicleDocumentation.fitnessCertificateExpiry && (
+                    <p><strong>Fitness Certificate Expiry:</strong> {new Date(request.vehicleDocumentation.fitnessCertificateExpiry).toLocaleDateString()}</p>
                   )}
                   {request.vehicleDocumentation.fitnessValidUntil && (
                     <p><strong>Fitness Valid Till:</strong> {new Date(request.vehicleDocumentation.fitnessValidUntil).toLocaleDateString()}</p>
                   )}
                 </div>
-                {request.vehicleDocumentation.fitnessCertificateDoc && (
+                {(request.vehicleDocumentation.fitnessCertificate || request.vehicleDocumentation.fitnessCertificateDoc) && (
                   <a 
-                    href={request.vehicleDocumentation.fitnessCertificateDoc} 
+                    href={request.vehicleDocumentation.fitnessCertificate || request.vehicleDocumentation.fitnessCertificateDoc} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="inline-block mt-3 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition text-sm"
                   >
-                    View Fitness Certificate →
+                    📄 View Fitness Certificate
                   </a>
                 )}
               </div>

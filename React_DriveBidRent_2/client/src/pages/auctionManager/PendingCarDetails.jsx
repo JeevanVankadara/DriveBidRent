@@ -320,8 +320,8 @@ export default function PendingCarDetails() {
 
               {/* Pollution & Fitness */}
               <div className="bg-white rounded-2xl p-6 mb-6 border border-teal-200">
-                <h4 className="text-xl font-bold text-teal-800 mb-4">
-                  Pollution & Fitness
+                <h4 className="text-xl font-bold text-teal-800 mb-4 flex items-center">
+                  <span className="text-2xl mr-2">🍃</span> Pollution & Fitness
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div><strong>Pollution Certificate:</strong> <span className={`font-semibold ${car.vehicleDocumentation.pollutionCertificate === 'Valid' ? 'text-green-600' : 'text-red-600'}`}>
@@ -330,12 +330,20 @@ export default function PendingCarDetails() {
                   {car.vehicleDocumentation.pollutionExpiryDate && (
                     <div><strong>PUC Expiry:</strong> {new Date(car.vehicleDocumentation.pollutionExpiryDate).toLocaleDateString()}</div>
                   )}
+                  {car.vehicleDocumentation.fitnessCertificateExpiry && (
+                    <div><strong>Fitness Certificate Expiry:</strong> {new Date(car.vehicleDocumentation.fitnessCertificateExpiry).toLocaleDateString()}</div>
+                  )}
                   {car.vehicleDocumentation.fitnessCertificate && (
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-2 mt-2">
                       <a href={car.vehicleDocumentation.fitnessCertificate} target="_blank" rel="noopener noreferrer"
                          className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
-                        View Fitness Certificate
+                        📄 View Fitness Certificate
                       </a>
+                    </div>
+                  )}
+                  {!car.vehicleDocumentation.fitnessCertificate && !car.vehicleDocumentation.fitnessCertificateExpiry && (
+                    <div className="md:col-span-2 text-gray-500 italic">
+                      No fitness certificate uploaded (not required for private vehicles)
                     </div>
                   )}
                 </div>
