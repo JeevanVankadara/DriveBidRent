@@ -313,17 +313,27 @@ export const createChatForRentalHandler = async (req, res) => {
 // Route handler: create (or fetch) chat for an auction (not requiring a purchase)
 export const createChatForAuctionHandler = async (req, res) => {
   try {
+    console.log('=== CREATE AUCTION CHAT HANDLER ===');
     const { auctionId } = req.params;
+    console.log('Auction ID:', auctionId);
+    console.log('User:', req.user);
+    
     if (!auctionId) return res.status(400).json({ success: false, message: 'auctionId required' });
 
     const AuctionRequest = (await import('../models/AuctionRequest.js')).default;
+    console.log('Looking up auction...');
     const auction = await AuctionRequest.findById(auctionId).lean();
+    console.log('Auction found:', auction ? 'Yes' : 'No');
+    
     if (!auction) return res.status(404).json({ success: false, message: 'Auction not found' });
 
     const buyerId = req.user._id; // The logged-in buyer
     const sellerId = auction.sellerId;
+    console.log('Buyer ID:', buyerId);
+    console.log('Seller ID:', sellerId);
 
     // Check if chat already exists between this buyer and seller for this auction
+    console.log('Checking for existing chat...');
     const existing = await Chat.findOne({ 
       auctionRequest: auctionId, 
       buyer: buyerId, 
@@ -331,9 +341,11 @@ export const createChatForAuctionHandler = async (req, res) => {
     });
     
     if (existing) {
+      console.log('Existing chat found:', existing._id);
       return res.json({ success: true, data: { chat: existing } });
     }
 
+    console.log('Creating new chat...');
     // Create new chat with 30 days expiry (or until auction ends + 5 days)
     const auctionEndDate = auction.endDate ? new Date(auction.endDate) : new Date();
     const expiresAt = new Date(Math.max(
@@ -350,10 +362,12 @@ export const createChatForAuctionHandler = async (req, res) => {
       title: `Auction: ${auction.vehicleName || 'Vehicle'}`
     });
 
+    console.log('Chat created successfully:', chat._id);
     res.json({ success: true, data: { chat } });
   } catch (err) {
     console.error('createChatForAuctionHandler error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error stack:', err.stack);
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 };
 

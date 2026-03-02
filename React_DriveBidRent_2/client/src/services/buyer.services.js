@@ -147,11 +147,16 @@ export const createOrGetChatForRental = async (rentalId) => {
 
 export const createOrGetChatForAuction = async (auctionId) => {
   try {
+    console.log('Creating chat for auction:', auctionId);
     const response = await axios.post(`/chat/create/auction/${auctionId}`);
+    console.log('Chat creation response:', response.data);
     return response.data.data?.chat || null;
   } catch (error) {
     console.error('Error creating/getting chat for auction:', error);
-    return null;
+    console.error('Error response:', error.response?.data);
+    console.error('Error status:', error.response?.status);
+    console.error('Error message:', error.message);
+    throw error; // Re-throw to let the caller handle it
   }
 };
 

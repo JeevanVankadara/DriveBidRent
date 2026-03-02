@@ -128,15 +128,19 @@ export default function AuctionDetails() {
   const handleContactSeller = async () => {
     try {
       setChatLoading(true);
+      setError('');
+      console.log('Attempting to create chat for auction:', id);
       const chat = await createOrGetChatForAuction(id);
+      console.log('Chat result:', chat);
       if (chat) {
         navigate(`/buyer/chats/${chat._id}`);
       } else {
-        setError('Failed to create chat. Please try again.');
+        setError('Unable to create chat. You may need to be logged in.');
       }
     } catch (error) {
       console.error('Error creating chat:', error);
-      setError('Failed to create chat. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create chat';
+      setError(`Error: ${errorMessage}`);
     } finally {
       setChatLoading(false);
     }
