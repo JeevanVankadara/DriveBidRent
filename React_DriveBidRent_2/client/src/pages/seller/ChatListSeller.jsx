@@ -18,10 +18,10 @@ export default function ChatListSeller({ onSelect, selectedId }) {
       setIsLoading(true);
       try {
         const res = await axiosInstance.get('/chat/my-chats');
-        // Filter to show only rental chats for buyer-seller communication
+        // Filter to show rental and auction chats for buyer-seller communication
         const allChats = res.data.data || [];
-        const rentalChats = allChats.filter(chat => chat.type === 'rental');
-        setChats(rentalChats);
+        const sellerChats = allChats.filter(chat => chat.type === 'rental' || chat.type === 'auction');
+        setChats(sellerChats);
       } catch (err) {
         console.error('Error fetching chats:', err);
       } finally {
@@ -139,7 +139,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
     
     const searchLower = searchTerm.toLowerCase();
     const chatterName = getChatterName(chat).toLowerCase();
-    const vehicleName = chat.rentalRequest?.vehicleName?.toLowerCase() || '';
+    const vehicleName = (chat.rentalRequest?.vehicleName || chat.auctionRequest?.vehicleName || chat.title || '').toLowerCase();
     
     return chatterName.includes(searchLower) || 
            vehicleName.includes(searchLower);
@@ -219,7 +219,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
               const isUnread = chat.unreadCount > 0;
               const otherUser = getOtherUser(chat);
               const chatterName = getChatterName(chat);
-              const vehicleName = chat.rentalRequest?.vehicleName || 'Vehicle';
+              const vehicleName = chat.rentalRequest?.vehicleName || chat.auctionRequest?.vehicleName || chat.title || 'Vehicle';
               const lastUpdated = chat.updatedAt || chat.createdAt;
               const lastMessagePreview = getLastMessagePreview(chat);
               

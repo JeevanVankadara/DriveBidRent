@@ -29,43 +29,98 @@ const RentalChatHeader = ({ chat, otherUser, carName, rentalPeriod, onDeleteChat
   };
 
   const getCarImage = () => {
-    console.log('=== RENTAL CAR IMAGE DEBUG ===');
+    console.log('=== CAR IMAGE DEBUG ===');
     console.log('chat.rentalRequest:', chat?.rentalRequest);
+    console.log('chat.auctionRequest:', chat?.auctionRequest);
     
-    // Try multiple possible image paths for rental chat
+    // Try multiple possible image paths for rental or auction chat
     const imagePaths = [
       chat?.rentalRequest?.vehicleImage,
       chat?.rentalRequest?.carImage,
       chat?.rentalRequest?.image,
       chat?.rentalRequest?.vehicleImages?.[0],
+      chat?.auctionRequest?.vehicleImage,
+      chat?.auctionRequest?.carImage,
+      chat?.auctionRequest?.image,
+      chat?.auctionRequest?.vehicleImages?.[0],
       chat?.vehicleImage,
       chat?.carImage,
       chat?.image
     ];
     
-    console.log('Rental image paths available:', imagePaths.filter(Boolean));
+    console.log('Image paths available:', imagePaths.filter(Boolean));
     
     const image = imagePaths.find(img => img && img !== null && img !== 'null' && img !== '');
-    console.log('Selected rental image:', image);
+    console.log('Selected image:', image);
     
-    return image || 'https://placehold.co/400x300/3b82f6/ffffff?text=Rental+Vehicle';
+    const placeholderText = chat?.type === 'auction' ? 'Auction+Vehicle' : 'Rental+Vehicle';
+    return image || `https://placehold.co/400x300/3b82f6/ffffff?text=${placeholderText}`;
   };
 
   const getCarName = () => {
-    return carName || chat?.rentalRequest?.vehicleName || 'Vehicle';
+    return carName || 
+           chat?.rentalRequest?.vehicleName || 
+           chat?.auctionRequest?.vehicleName || 
+           chat?.title || 
+           'Vehicle';
   };
 
   const getRentalPeriod = () => {
     if (rentalPeriod) return rentalPeriod;
+    
+    // For auction chats
+    if (chat?.type === 'auction') {
+      if (chat?.auctionRequest?.startDate && chat?.auctionRequest?.endDate) {
+        const start = new Date(chat.auctionRequest.startDate).toLocaleDateString();
+        const end = new Date(chat.auctionRequest.endDate).toLocaleDateString();
+        return `Auction: ${start} - ${end}`;
+      }
+      return 'Auction Discussion';
+    }
+    
+    // For rental chats
     if (chat?.rentalRequest?.pickupDate && chat?.rentalRequest?.dropDate) {
       const pickup = new Date(chat.rentalRequest.pickupDate).toLocaleDateString();
       const drop = new Date(chat.rentalRequest.dropDate).toLocaleDateString();
       return `${pickup} - ${drop}`;
     }
+    
     return 'Rental Period';
   };
 
   const getRentalStatus = () => {
+    // For auction chats
+    if (chat?.type === 'auction') {
+      if (chat?.auctionRequest?.auction_stopped) {
+        return (
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+            AUCTION STOPPED
+          </span>
+        );
+      }
+      const endDate = chat?.auctionRequest?.endDate ? new Date(chat.auctionRequest.endDate) : null;
+      const now = new Date();
+      if (endDate && now < endDate) {
+        return (
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+            ACTIVE AUCTION
+          </span>
+        );
+      } else if (endDate && now >= endDate) {
+        return (
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+            AUCTION ENDED
+          </span>
+        );
+      }
+      return (
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800">
+          AUCTION
+        </span>
+      );
+    }
+    
+    // For rental chats
     if (chat?.rentalRequest?.status === 'active') {
       return (
         <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">

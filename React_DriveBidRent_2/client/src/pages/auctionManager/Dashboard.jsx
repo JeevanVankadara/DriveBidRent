@@ -91,6 +91,40 @@ export default function Dashboard() {
                         <p className="text-sm">
                           <span className="font-semibold">Location:</span> {req.sellerId?.city || 'Not specified'}
                         </p>
+                        
+                        {/* Documentation Quick View */}
+                        {req.vehicleDocumentation && (
+                          <div className="mt-2 pt-2 border-t border-orange-200">
+                            <p className="text-xs font-semibold text-gray-600 mb-2">Documentation:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {req.vehicleDocumentation.registrationNumber && (
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                                  ✓ RC
+                                </span>
+                              )}
+                              {req.vehicleDocumentation.vinNumber && (
+                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+                                  ✓ VIN
+                                </span>
+                              )}
+                              {req.vehicleDocumentation.insuranceStatus === 'Valid' && (
+                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+                                  ✓ Insurance
+                                </span>
+                              )}
+                              {req.vehicleDocumentation.pollutionCertificate === 'Valid' && (
+                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+                                  ✓ PUC
+                                </span>
+                              )}
+                              {req.vehicleDocumentation.accidentHistory && (
+                                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">
+                                  ⚠ Accident
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <Link

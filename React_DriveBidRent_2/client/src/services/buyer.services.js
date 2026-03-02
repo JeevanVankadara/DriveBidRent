@@ -145,6 +145,16 @@ export const createOrGetChatForRental = async (rentalId) => {
   }
 };
 
+export const createOrGetChatForAuction = async (auctionId) => {
+  try {
+    const response = await axios.post(`/chat/create/auction/${auctionId}`);
+    return response.data.data?.chat || null;
+  } catch (error) {
+    console.error('Error creating/getting chat for auction:', error);
+    return null;
+  }
+};
+
 // === AUCTION PAYMENTS ===
 export const getAuctionPaymentDetails = async (auctionId) => {
   try {

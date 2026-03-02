@@ -15,7 +15,7 @@ export const deleteFromCloudinary = async (public_id) => {
 };
 
 /**
- * 
+ * Upload file buffer to Cloudinary
  * @param {Buffer} fileBuffer 
  * @param {string} folder 
  * @returns {Promise<Object>} 
@@ -25,7 +25,7 @@ export const uploadToCloudinary = async (fileBuffer, folder = 'drivebidrent') =>
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
-        resource_type: 'image'
+        resource_type: 'auto' // Auto-detect file type (image, video, pdf, etc.)
       },
       (error, result) => {
         if (error) {

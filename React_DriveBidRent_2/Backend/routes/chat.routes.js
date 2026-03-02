@@ -32,5 +32,6 @@ router.delete('/:chatId', ChatController.deleteChat);
 
 // Create-or-get chat endpoints (used by frontend Contact Seller)
 router.post('/create/rental/:rentalId', ChatController.createChatForRentalHandler);
+router.post('/create/auction/:auctionId', ChatController.createChatForAuctionHandler);
 
 export default router;

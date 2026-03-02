@@ -16,6 +16,7 @@ export const getMyChats = async (req, res) => {
       .populate('mechanic', 'firstName lastName profileImage _id')
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('rentalRequest')
+      .populate('auctionRequest')
       .populate({ path: 'inspectionTask', select: 'vehicleName vehiclePhotos make model year images' })
       .sort({ lastMessageAt: -1, createdAt: -1 })
       .lean();
@@ -53,6 +54,7 @@ export const getChatById = async (req, res) => {
       .populate('mechanic', 'firstName lastName profileImage _id')
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('rentalRequest')
+      .populate('auctionRequest')
       .populate({ path: 'inspectionTask', select: 'vehicleName vehiclePhotos make model year images' })
       .lean();
 
@@ -308,7 +310,64 @@ export const createChatForRentalHandler = async (req, res) => {
   }
 };
 
-export default { getMyChats, getChatById, getMessages, sendMessage, markMessagesRead, deleteChat, createChatForRental, createChatForRentalHandler };
+// Route handler: create (or fetch) chat for an auction (not requiring a purchase)
+export const createChatForAuctionHandler = async (req, res) => {
+  try {
+    const { auctionId } = req.params;
+    if (!auctionId) return res.status(400).json({ success: false, message: 'auctionId required' });
+
+    const AuctionRequest = (await import('../models/AuctionRequest.js')).default;
+    const auction = await AuctionRequest.findById(auctionId).lean();
+    if (!auction) return res.status(404).json({ success: false, message: 'Auction not found' });
+
+    const buyerId = req.user._id; // The logged-in buyer
+    const sellerId = auction.sellerId;
+
+    // Check if chat already exists between this buyer and seller for this auction
+    const existing = await Chat.findOne({ 
+      auctionRequest: auctionId, 
+      buyer: buyerId, 
+      seller: sellerId 
+    });
+    
+    if (existing) {
+      return res.json({ success: true, data: { chat: existing } });
+    }
+
+    // Create new chat with 30 days expiry (or until auction ends + 5 days)
+    const auctionEndDate = auction.endDate ? new Date(auction.endDate) : new Date();
+    const expiresAt = new Date(Math.max(
+      auctionEndDate.getTime() + 5 * 24 * 60 * 60 * 1000, // auction end + 5 days
+      Date.now() + 30 * 24 * 60 * 60 * 1000 // or 30 days from now
+    ));
+
+    const chat = await Chat.create({
+      type: 'auction',
+      auctionRequest: auctionId,
+      buyer: buyerId,
+      seller: sellerId,
+      expiresAt,
+      title: `Auction: ${auction.vehicleName || 'Vehicle'}`
+    });
+
+    res.json({ success: true, data: { chat } });
+  } catch (err) {
+    console.error('createChatForAuctionHandler error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export default { 
+  getMyChats, 
+  getChatById, 
+  getMessages, 
+  sendMessage, 
+  markMessagesRead, 
+  deleteChat, 
+  createChatForRental, 
+  createChatForRentalHandler,
+  createChatForAuctionHandler
+};
 
 // Utility to expire an inspection chat immediately (call when inspection/report completes)
 export const expireInspectionChat = async (auctionRequestId) => {

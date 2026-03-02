@@ -1,17 +1,19 @@
 // client/src/pages/buyer/AuctionDetails.jsx
 import { useState, useEffect } from 'react';
 import './AuctionDetails.css';
-import { useParams } from 'react-router-dom';
-import { getAuctionById, placeBid } from '../../services/buyer.services';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getAuctionById, placeBid, createOrGetChatForAuction } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function AuctionDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [auction, setAuction] = useState(null);
   const [currentBid, setCurrentBid] = useState(null);
   const [bidAmount, setBidAmount] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isCurrentBidder, setIsCurrentBidder] = useState(false);
@@ -123,6 +125,23 @@ export default function AuctionDetails() {
     setError('');
   };
 
+  const handleContactSeller = async () => {
+    try {
+      setChatLoading(true);
+      const chat = await createOrGetChatForAuction(id);
+      if (chat) {
+        navigate(`/buyer/chats/${chat._id}`);
+      } else {
+        setError('Failed to create chat. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating chat:', error);
+      setError('Failed to create chat. Please try again.');
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
 
   if (!auction) {
@@ -148,6 +167,11 @@ export default function AuctionDetails() {
             <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black text-white tracking-tight mb-2 sm:mb-4">
               {auction.vehicleName}
             </h1>
+            {auction.carType && (
+              <p className="text-lg sm:text-xl md:text-2xl text-blue-300 font-bold mb-2">
+                {auction.carType}
+              </p>
+            )}
             <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-orange-400 font-bold">
               Current Bid: ₹{currentBid ? currentBid.bidAmount.toLocaleString() : auction.startingBid.toLocaleString()}
             </p>
@@ -174,6 +198,12 @@ export default function AuctionDetails() {
                   <p className="text-gray-600 font-semibold text-sm sm:text-base">Year</p>
                   <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">{auction.year}</p>
                 </div>
+                {auction.carType && (
+                  <div>
+                    <p className="text-gray-600 font-semibold text-sm sm:text-base">Car Type</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">{auction.carType}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-gray-600 font-semibold text-sm sm:text-base">Condition</p>
                   <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 capitalize">
@@ -209,6 +239,146 @@ export default function AuctionDetails() {
               </div>
             </div>
           </div>
+
+          {/* Vehicle Documentation Highlights - For Buyers */}
+          {auction.vehicleDocumentation && (
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border-2 border-blue-200">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-6 sm:mb-8">
+                Vehicle Verification Report
+              </h2>
+
+              {/* Key Highlights Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                {/* Ownership */}
+                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
+                  <div className="flex items-center mb-2">
+                    <p className="font-bold text-gray-700 text-sm">Ownership</p>
+                  </div>
+                  <p className="text-lg font-bold text-blue-600">{auction.vehicleDocumentation.ownershipType}</p>
+                </div>
+
+                {/* Insurance Status */}
+                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
+                  <div className="flex items-center mb-2">
+                    <p className="font-bold text-gray-700 text-sm">Insurance</p>
+                  </div>
+                  <p className={`text-lg font-bold ${auction.vehicleDocumentation.insuranceStatus === 'Valid' ? 'text-green-600' : 'text-red-600'}`}>
+                    {auction.vehicleDocumentation.insuranceStatus}
+                  </p>
+                </div>
+
+                {/* Accident History */}
+                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
+                  <div className="flex items-center mb-2">
+                    <p className="font-bold text-gray-700 text-sm">Accidents</p>
+                  </div>
+                  <p className={`text-lg font-bold ${auction.vehicleDocumentation.accidentHistory ? 'text-red-600' : 'text-green-600'}`}>
+                    {auction.vehicleDocumentation.accidentHistory ? `${auction.vehicleDocumentation.numberOfAccidents} Reported` : 'No Accidents'}
+                  </p>
+                </div>
+
+                {/* Odometer */}
+                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
+                  <div className="flex items-center mb-2">
+                    <p className="font-bold text-gray-700 text-sm">Odometer</p>
+                  </div>
+                  <p className="text-lg font-bold text-indigo-600">{auction.vehicleDocumentation.odometerReading?.toLocaleString()} km</p>
+                  <p className={`text-xs font-semibold mt-1 ${auction.vehicleDocumentation.odometerTampering === 'No Tampering' ? 'text-green-600' : 'text-red-600'}`}>
+                    {auction.vehicleDocumentation.odometerTampering === 'No Tampering' ? '✅ Verified' : '⚠️ ' + auction.vehicleDocumentation.odometerTampering}
+                  </p>
+                </div>
+
+                {/* Loan Status */}
+                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
+                  <div className="flex items-center mb-2">
+                    <p className="font-bold text-gray-700 text-sm">Loan Status</p>
+                  </div>
+                  <p className={`text-sm font-bold ${auction.vehicleDocumentation.hypothecationStatus?.includes('Clear') ? 'text-green-600' : 'text-orange-600'}`}>
+                    {auction.vehicleDocumentation.hypothecationStatus}
+                  </p>
+                </div>
+
+                {/* Pollution Certificate */}
+                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
+                  <div className="flex items-center mb-2">
+                    <p className="font-bold text-gray-700 text-sm">PUC</p>
+                  </div>
+                  <p className={`text-lg font-bold ${auction.vehicleDocumentation.pollutionCertificate === 'Valid' ? 'text-green-600' : 'text-red-600'}`}>
+                    {auction.vehicleDocumentation.pollutionCertificate}
+                  </p>
+                </div>
+              </div>
+
+              {/* Important Notices */}
+              <div className="space-y-3">
+                {auction.vehicleDocumentation.previousInsuranceClaims && (
+                  <div className="bg-orange-100 border-l-4 border-orange-500 p-3 rounded">
+                    <p className="text-sm font-semibold text-orange-800">
+                      ⚠ This vehicle has previous insurance claims
+                    </p>
+                  </div>
+                )}
+                
+                {auction.vehicleDocumentation.majorRepairs && (
+                  <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded">
+                    <p className="text-sm font-semibold text-yellow-800">
+                      Vehicle has undergone major repairs
+                    </p>
+                  </div>
+                )}
+
+                {!auction.vehicleDocumentation.readyForTransfer && (
+                  <div className="bg-red-100 border-l-4 border-red-500 p-3 rounded">
+                    <p className="text-sm font-semibold text-red-800">
+                      Transfer documentation pending - verify before bidding
+                    </p>
+                  </div>
+                )}
+
+                {auction.vehicleDocumentation.stolenVehicleCheck === 'Verified Clean' && (
+                  <div className="bg-green-100 border-l-4 border-green-500 p-3 rounded">
+                    <p className="text-sm font-semibold text-green-800">
+                      ✓ Vehicle verified - Not reported stolen
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Registration Info */}
+              <div className="mt-6 bg-white rounded-xl p-4 border border-gray-200">
+                <h4 className="font-bold text-gray-700 mb-3">
+                  Registration Details
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-gray-600">Registration No:</span>
+                    <p className="font-bold text-blue-600 font-mono">{auction.vehicleDocumentation.registrationNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">State:</span>
+                    <p className="font-bold text-gray-800">{auction.vehicleDocumentation.registrationState}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">VIN:</span>
+                    <p className="font-mono text-xs text-gray-700">{auction.vehicleDocumentation.vinNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Service Records:</span>
+                    <p className="font-bold text-gray-800">{auction.vehicleDocumentation.serviceHistory}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verification Badge */}
+              {auction.vehicleDocumentation.documentsVerified && (
+                <div className="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl p-4 text-center">
+                  <p className="text-lg font-bold">
+                    ✓ DOCUMENTS VERIFIED BY AUCTION MANAGER
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Column - Bid Form */}
@@ -267,6 +437,23 @@ export default function AuctionDetails() {
                 </form>
               </>
             )}
+
+            {/* Book Appointment Button */}
+            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+              <button
+                onClick={handleContactSeller}
+                disabled={chatLoading}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-base sm:text-lg lg:text-xl font-bold py-3 sm:py-4 lg:py-5 rounded-xl sm:rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {chatLoading ? 'Loading...' : 'Book an Appointment'}
+              </button>
+              <p className="text-center mt-3 text-xs sm:text-sm text-gray-500">
+                Schedule a viewing or chat with the seller
+              </p>
+            </div>
           </div>
         </div>
       </div>

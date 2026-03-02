@@ -241,7 +241,7 @@ export default function ChatRoomBuyer({ chatIdProp }) {
           </div>
           <h3 className="text-3xl font-bold text-gray-800 mb-3">Select a Conversation</h3>
           <p className="text-gray-600 text-lg mb-8">
-            Choose a chat from the sidebar to start communicating with sellers about rentals
+            Choose a chat from the sidebar to start communicating with sellers
           </p>
           <div className="inline-flex items-center justify-center space-x-2 text-orange-600">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,7 +296,7 @@ export default function ChatRoomBuyer({ chatIdProp }) {
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-700 mb-2">Start the Conversation</h3>
                 <p className="text-gray-500 max-w-md mx-auto">
-                  Send your first message to discuss the rental details with the seller
+                  Send your first message to discuss {chat?.type === 'auction' ? 'the auction' : 'the rental details'} with the seller
                 </p>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function ChatRoomBuyer({ chatIdProp }) {
               <div className="text-center mb-8">
                 <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
                   <span className="text-sm font-medium text-blue-700">
-                    Rental Chat Started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
+                    {chat?.type === 'auction' ? 'Auction Chat Started' : 'Rental Chat Started'} • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export default function ChatRoomBuyer({ chatIdProp }) {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-amber-800">This rental chat has expired</p>
+              <p className="text-sm font-medium text-amber-800">This {chat?.type === 'auction' ? 'auction' : 'rental'} chat has expired</p>
               <p className="text-xs text-amber-600">The conversation is now read-only</p>
             </div>
           </div>

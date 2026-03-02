@@ -32,6 +32,10 @@ const adminServices = {
     const response = await axiosInstance.post(`admin/block-user/${id}`);
     return response.data;
   },
+  getUserDetails: async (id) => {
+    const response = await axiosInstance.get(`admin/user-details/${id}`);
+    return response.data;
+  },
 
   // Manage Auction Managers
   getAuctionManagers: async () => {

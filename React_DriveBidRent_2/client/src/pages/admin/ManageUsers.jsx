@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminServices from '../../services/admin.services';
 import LoadingSpinner from '../components/LoadingSpinner';
+import UserStatisticsDetail from './UserStatisticsDetail';
 
 const ManageUsers = () => {
   const [data, setData] = useState({
@@ -15,6 +16,9 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [userStatistics, setUserStatistics] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
   const [searchTerms, setSearchTerms] = useState({
     pendingMechanic: '',
     approvedMechanic: '',
@@ -90,12 +94,35 @@ const ManageUsers = () => {
     }
   };
 
-  const openModal = (user) => {
+  const openModal = async (user) => {
     setSelectedUser(user);
+    setLoadingStats(true);
+    setUserStatistics(null);
+    
+    try {
+      const res = await adminServices.getUserDetails(user._id);
+      if (res.success) {
+        setUserStatistics(res.statistics);
+      }
+    } catch (err) {
+      console.error('Error fetching user statistics:', err);
+    } finally {
+      setLoadingStats(false);
+    }
   };
 
   const closeModal = () => {
     setSelectedUser(null);
+    setUserStatistics(null);
+    setLoadingStats(false);
+    setExpandedSections({});
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const filterUsers = (users, searchTerm) => {
@@ -293,7 +320,7 @@ const ManageUsers = () => {
 
       {selectedUser && (
         <div className="modal fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
-          <div className="modal-content relative bg-white m-auto p-8 w-full max-w-4xl rounded-lg shadow-2xl">
+          <div className="modal-content relative bg-white m-auto p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl">
             <span className="close absolute top-4 right-6 text-2xl cursor-pointer text-gray-500 hover:text-gray-700" onClick={closeModal}>&times;</span>
             <h2 className="text-xl font-bold text-gray-800 mb-6">User Details</h2>
             <div className="details-grid grid grid-cols-2 gap-4 text-gray-700">
@@ -323,6 +350,22 @@ const ManageUsers = () => {
               <p><strong>Address:</strong> {selectedUser.doorNo}, {selectedUser.street}, {selectedUser.city}, {selectedUser.state}</p>
               {selectedUser.googleAddressLink && <p><strong>Google Address:</strong> <a href={selectedUser.googleAddressLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">View on Google Maps</a></p>}
             </div>
+            
+            {/* Statistics Section */}
+            {loadingStats && (
+              <div className="mt-6 p-4 bg-gray-50 rounded border border-gray-200">
+                <p className="text-center text-gray-600">Loading statistics...</p>
+              </div>
+            )}
+            
+            {!loadingStats && userStatistics && (
+              <UserStatisticsDetail
+                userType={selectedUser.userType}
+                statistics={userStatistics}
+                expandedSections={expandedSections}
+                toggleSection={toggleSection}
+              />
+            )}
             
             {/* Block/Unblock Button */}
             <div className="mt-6 flex justify-end gap-3">

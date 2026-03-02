@@ -262,7 +262,7 @@ export default function ChatRoomSeller({ chatIdProp }) {
               <div className="text-center mb-4">
                 <div className="inline-block px-3 py-1 bg-gray-100 rounded-full">
                   <span className="text-xs text-gray-600">
-                    Chat started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
+                    {chat?.type === 'auction' ? 'Auction Chat Started' : chat?.type === 'rental' ? 'Rental Chat Started' : 'Chat Started'} • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
               </div>

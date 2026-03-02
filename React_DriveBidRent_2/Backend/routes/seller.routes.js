@@ -21,8 +21,17 @@ const router = express.Router();
 // Apply seller authentication middleware to all routes
 router.use(sellerMiddleware);
 
-// POST: Add auction
-router.post('/add-auction', upload.single('vehicleImage'), postAddAuction);
+// POST: Add auction with multiple document uploads
+router.post('/add-auction', upload.fields([
+  { name: 'vehicleImage', maxCount: 1 },
+  { name: 'registration-certificate', maxCount: 1 },
+  { name: 'insurance-document', maxCount: 1 },
+  { name: 'fitness-certificate', maxCount: 1 },
+  { name: 'rc-transfer-form29', maxCount: 1 },
+  { name: 'rc-transfer-form30', maxCount: 1 },
+  { name: 'road-tax-receipt', maxCount: 1 },
+  { name: 'address-proof', maxCount: 1 }
+]), postAddAuction);
 
 // POST: Add rental
 router.post('/add-rental', upload.single('vehicleImage'), postAddRental);

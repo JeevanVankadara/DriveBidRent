@@ -85,6 +85,40 @@ export default function CarCard({ item, type, isInWishlist, onToggleWishlist, re
           )}
         </div>
 
+        {/* Vehicle Documentation Status - For Auctions */}
+        {isAuction && item.vehicleDocumentation && (
+          <div className="mt-4 bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg border border-blue-200">
+            <p className="text-xs font-bold text-blue-700 mb-2">Vehicle Verification</p>
+            <div className="flex flex-wrap gap-2">
+              {item.vehicleDocumentation.registrationNumber && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                  ✓ Registered
+                </span>
+              )}
+              {item.vehicleDocumentation.insuranceStatus === 'Valid' && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                  ✓ Insured
+                </span>
+              )}
+              {item.vehicleDocumentation.pollutionCertificate === 'Valid' && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                  ✓ PUC
+                </span>
+              )}
+              {item.vehicleDocumentation.accidentHistory === 'no' && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                  ✓ No Accident
+                </span>
+              )}
+              {item.vehicleDocumentation.accidentHistory !== 'no' && (
+                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">
+                  ⚠ Accident History
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Price */}
         <div className="mt-4">
           {isAuction ? (

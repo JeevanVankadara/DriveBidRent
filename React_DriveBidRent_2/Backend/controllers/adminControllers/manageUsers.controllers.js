@@ -1,4 +1,11 @@
 import User from '../../models/User.js';
+import AuctionRequest from '../../models/AuctionRequest.js';
+import AuctionBid from '../../models/AuctionBid.js';
+import AuctionCost from '../../models/AuctionCost.js';
+import Purchase from '../../models/Purchase.js';
+import RentalRequest from '../../models/RentalRequest.js';
+import RentalCost from '../../models/RentalCost.js';
+import mongoose from 'mongoose';
 
 const getManageUsers = async (req, res) => {
   try {
@@ -176,4 +183,222 @@ const blockUser = async (req, res) => {
   }
 };
 
-export default { getManageUsers, approveMechanic, declineUser, deleteBuyer, deleteSeller, blockUser };
+const getUserDetails = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId).lean();
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    let statistics = {};
+
+    // Seller statistics
+    if (user.userType === 'seller') {
+      // Total cars listed for auction - with details
+      const auctionsList = await AuctionRequest.find({ sellerId: new mongoose.Types.ObjectId(userId) })
+        .select('vehicleName year mileage startingBid status started_auction finalPurchasePrice createdAt')
+        .lean();
+      
+      // Cars sold through auction (auctions that have ended with a winner)
+      const soldCars = await AuctionRequest.find({ 
+        sellerId: new mongoose.Types.ObjectId(userId), 
+        started_auction: 'ended',
+        winnerId: { $exists: true, $ne: null }
+      })
+      .select('vehicleName year finalPurchasePrice winnerId createdAt')
+      .populate('winnerId', 'firstName lastName email')
+      .lean();
+      
+      // Total rental listings - with details
+      const rentalsList = await RentalRequest.find({ sellerId: new mongoose.Types.ObjectId(userId) })
+        .select('vehicleName year costPerDay status buyerId pickupDate dropDate createdAt')
+        .populate('buyerId', 'firstName lastName email')
+        .lean();
+      
+      // Currently active auctions
+      const activeAuctionsList = await AuctionRequest.find({ 
+        sellerId: new mongoose.Types.ObjectId(userId), 
+        started_auction: 'yes'
+      })
+      .select('vehicleName year startingBid auctionDate')
+      .lean();
+      
+      // Currently active rentals (rented out)
+      const activeRentalsList = await RentalRequest.find({ 
+        sellerId: new mongoose.Types.ObjectId(userId), 
+        status: 'unavailable'
+      })
+      .select('vehicleName year costPerDay buyerId pickupDate dropDate')
+      .populate('buyerId', 'firstName lastName email')
+      .lean();
+      
+      // Money earned from auctions
+      const auctionEarnings = await AuctionCost.aggregate([
+        { $match: { sellerId: new mongoose.Types.ObjectId(userId) } },
+        { $group: { _id: null, total: { $sum: '$amountPaid' } } }
+      ]);
+      const totalAuctionEarnings = auctionEarnings.length > 0 ? auctionEarnings[0].total : 0;
+      
+      // Money earned from rentals
+      const rentalEarnings = await RentalCost.aggregate([
+        { $match: { sellerId: new mongoose.Types.ObjectId(userId) } },
+        { $group: { _id: null, total: { $sum: '$totalCost' } } }
+      ]);
+      const totalRentalEarnings = rentalEarnings.length > 0 ? rentalEarnings[0].total : 0;
+      
+      statistics = {
+        totalAuctionsListed: auctionsList.length,
+        carsSold: soldCars.length,
+        totalRentalListings: rentalsList.length,
+        activeAuctions: activeAuctionsList.length,
+        activeRentals: activeRentalsList.length,
+        auctionEarnings: totalAuctionEarnings,
+        rentalEarnings: totalRentalEarnings,
+        totalEarnings: totalAuctionEarnings + totalRentalEarnings,
+        auctionsList,
+        soldCarsList: soldCars,
+        rentalsList,
+        activeAuctionsList,
+        activeRentalsList
+      };
+    }
+    
+    // Mechanic statistics
+    else if (user.userType === 'mechanic') {
+      // Cars assigned to this mechanic - with details
+      const assignedCars = await AuctionRequest.find({ 
+        assignedMechanic: new mongoose.Types.ObjectId(userId)
+      })
+      .select('vehicleName year mileage reviewStatus status createdAt')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      // Cars inspected (review completed)
+      const inspectedCars = await AuctionRequest.find({ 
+        assignedMechanic: new mongoose.Types.ObjectId(userId),
+        reviewStatus: 'completed'
+      })
+      .select('vehicleName year mileage mechanicReview createdAt')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      statistics = {
+        carsAssigned: assignedCars.length,
+        carsInspected: inspectedCars.length,
+        assignedCarsList: assignedCars,
+        inspectedCarsList: inspectedCars
+      };
+    }
+    
+    // Auction Manager statistics
+    else if (user.userType === 'auction_manager') {
+      // Cars accepted (approved) - with details
+      const acceptedCars = await AuctionRequest.find({ 
+        status: 'approved'
+      })
+      .select('vehicleName year mileage startingBid status started_auction createdAt')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      // Cars auctioned (started or ended) - with details
+      const auctionedCars = await AuctionRequest.find({ 
+        started_auction: { $in: ['yes', 'ended'] }
+      })
+      .select('vehicleName year mileage startingBid status started_auction auctionDate winnerId createdAt')
+      .populate('sellerId', 'firstName lastName email')
+      .populate('winnerId', 'firstName lastName email')
+      .lean();
+      
+      statistics = {
+        carsAccepted: acceptedCars.length,
+        carsAuctioned: auctionedCars.length,
+        acceptedCarsList: acceptedCars,
+        auctionedCarsList: auctionedCars
+      };
+    }
+    
+    // Buyer statistics
+    else if (user.userType === 'buyer') {
+      // Auctions participated in (unique auctions where user placed bids) - with details
+      const auctionBids = await AuctionBid.find({ 
+        buyerId: new mongoose.Types.ObjectId(userId)
+      })
+      .populate({
+        path: 'auctionId',
+        select: 'vehicleName year startingBid started_auction',
+        populate: { path: 'sellerId', select: 'firstName lastName' }
+      })
+      .lean();
+      
+      // Get unique auctions
+      const uniqueAuctions = [...new Map(auctionBids.map(bid => [bid.auctionId?._id?.toString(), bid.auctionId])).values()].filter(a => a);
+      
+      // Auctions won - with details
+      const wonAuctions = await AuctionRequest.find({ 
+        winnerId: new mongoose.Types.ObjectId(userId),
+        started_auction: 'ended'
+      })
+      .select('vehicleName year finalPurchasePrice createdAt')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      // Cars purchased - with details
+      const purchasedCars = await Purchase.find({ 
+        buyerId: new mongoose.Types.ObjectId(userId)
+      })
+      .select('vehicleName year purchasePrice purchaseDate')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      // Total rentals - with details
+      const rentalsList = await RentalRequest.find({ 
+        buyerId: new mongoose.Types.ObjectId(userId)
+      })
+      .select('vehicleName year costPerDay status pickupDate dropDate')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      // Currently active rentals
+      const activeRentalsList = await RentalRequest.find({ 
+        buyerId: new mongoose.Types.ObjectId(userId),
+        status: 'unavailable'
+      })
+      .select('vehicleName year costPerDay pickupDate dropDate')
+      .populate('sellerId', 'firstName lastName email')
+      .lean();
+      
+      statistics = {
+        auctionsParticipated: uniqueAuctions.length,
+        auctionsWon: wonAuctions.length,
+        carsPurchased: purchasedCars.length,
+        totalRentals: rentalsList.length,
+        activeRentals: activeRentalsList.length,
+        participatedAuctionsList: uniqueAuctions,
+        wonAuctionsList: wonAuctions,
+        purchasedCarsList: purchasedCars,
+        rentalsList,
+        activeRentalsList
+      };
+    }
+
+    res.json({
+      success: true,
+      user,
+      statistics
+    });
+    
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching user details: ' + error.message 
+    });
+  }
+};
+
+export default { getManageUsers, approveMechanic, declineUser, deleteBuyer, deleteSeller, blockUser, getUserDetails };

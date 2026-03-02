@@ -12,6 +12,9 @@ const AuctionManagers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedManager, setSelectedManager] = useState(null);
+  const [managerStatistics, setManagerStatistics] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
   const [activeTab, setActiveTab] = useState('disapproved');
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
@@ -83,12 +86,36 @@ const AuctionManagers = () => {
     }
   };
 
-  const openModal = (manager) => {
+  const openModal = async (manager) => {
     setSelectedManager(manager);
+    setLoadingStats(true);
+    setManagerStatistics(null);
+    
+    try {
+      const res = await adminServices.getUserDetails(manager._id);
+      if (res.success) {
+        setManagerStatistics(res.statistics);
+      }
+    } catch (err) {
+      console.error('Error fetching manager statistics:', err);
+      toast.error('Failed to load statistics');
+    } finally {
+      setLoadingStats(false);
+    }
   };
 
   const closeModal = () => {
     setSelectedManager(null);
+    setManagerStatistics(null);
+    setLoadingStats(false);
+    setExpandedSections({});
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const filterManagers = (managers) => {
@@ -326,7 +353,7 @@ const AuctionManagers = () => {
       {/* Modal */}
       {selectedManager && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
             {/* Close Button */}
             <button
               onClick={closeModal}
@@ -392,6 +419,164 @@ const AuctionManagers = () => {
                 </div>
               </div>
             </div>
+
+            {/* Statistics Section */}
+            {loadingStats && (
+              <div className="p-6 bg-gray-50 border-t">
+                <p className="text-center text-gray-600">Loading statistics...</p>
+              </div>
+            )}
+            
+            {!loadingStats && managerStatistics && (
+              <div className="p-6 border-t bg-gradient-to-br from-gray-50 to-white">
+                <h3 className="text-xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+                  <i className="fas fa-chart-line"></i>
+                  Performance Statistics
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Cars Accepted Card */}
+                  <div className="bg-white border-2 border-blue-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-blue-900 text-lg">Cars Accepted</h4>
+                        <div className="bg-blue-100 rounded-full p-3">
+                          <i className="fas fa-check-double text-blue-600 text-xl"></i>
+                        </div>
+                      </div>
+                      <p className="text-4xl font-bold text-blue-700 mb-2">{managerStatistics.carsAccepted}</p>
+                      <p className="text-sm text-gray-600 mb-3">Total requests approved</p>
+                      
+                      {managerStatistics.acceptedCarsList?.length > 0 && (
+                        <button
+                          onClick={() => toggleSection('accepted')}
+                          className="w-full mt-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-sm font-medium transition flex items-center justify-center gap-2"
+                        >
+                          {expandedSections.accepted ? (
+                            <>
+                              <i className="fas fa-chevron-up"></i>
+                              Hide Details
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-chevron-down"></i>
+                              View Details
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    
+                    {expandedSections.accepted && managerStatistics.acceptedCarsList?.length > 0 && (
+                      <div className="border-t border-blue-200 bg-blue-50/50 max-h-64 overflow-y-auto">
+                        {managerStatistics.acceptedCarsList.map((car, idx) => (
+                          <div key={idx} className="px-5 py-3 border-b border-blue-100 last:border-b-0 hover:bg-blue-100/50 transition">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-semibold text-gray-900">{car.vehicleName}</p>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {car.year} • ₹{car.startingBid?.toLocaleString()} • {car.mileage?.toLocaleString()} km
+                                </p>
+                                {car.sellerId && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Seller: {car.sellerId.firstName} {car.sellerId.lastName}
+                                  </p>
+                                )}
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
+                                car.started_auction === 'yes' ? 'bg-green-100 text-green-800 animate-pulse' :
+                                car.started_auction === 'ended' ? 'bg-gray-100 text-gray-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {car.started_auction === 'yes' ? 'LIVE' :
+                                 car.started_auction === 'ended' ? 'Ended' : 'Pending'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Cars Auctioned Card */}
+                  <div className="bg-white border-2 border-green-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-green-900 text-lg">Cars Auctioned</h4>
+                        <div className="bg-green-100 rounded-full p-3">
+                          <i className="fas fa-gavel text-green-600 text-xl"></i>
+                        </div>
+                      </div>
+                      <p className="text-4xl font-bold text-green-700 mb-2">{managerStatistics.carsAuctioned}</p>
+                      <p className="text-sm text-gray-600 mb-3">Started or completed auctions</p>
+                      
+                      {managerStatistics.auctionedCarsList?.length > 0 && (
+                        <button
+                          onClick={() => toggleSection('auctioned')}
+                          className="w-full mt-2 px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-md text-sm font-medium transition flex items-center justify-center gap-2"
+                        >
+                          {expandedSections.auctioned ? (
+                            <>
+                              <i className="fas fa-chevron-up"></i>
+                              Hide Details
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-chevron-down"></i>
+                              View Details
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    
+                    {expandedSections.auctioned && managerStatistics.auctionedCarsList?.length > 0 && (
+                      <div className="border-t border-green-200 bg-green-50/50 max-h-64 overflow-y-auto">
+                        {managerStatistics.auctionedCarsList.map((car, idx) => (
+                          <div key={idx} className="px-5 py-3 border-b border-green-100 last:border-b-0 hover:bg-green-100/50 transition">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-semibold text-gray-900">{car.vehicleName}</p>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {car.year} • Starting: ₹{car.startingBid?.toLocaleString()}
+                                </p>
+                                {car.winnerId && (
+                                  <p className="text-xs text-green-700 mt-1 font-medium">
+                                    <i className="fas fa-trophy text-xs"></i> Winner: {car.winnerId.firstName} {car.winnerId.lastName}
+                                  </p>
+                                )}
+                                {car.sellerId && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Seller: {car.sellerId.firstName} {car.sellerId.lastName}
+                                  </p>
+                                )}
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
+                                car.started_auction === 'ended' ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800 animate-pulse'
+                              }`}>
+                                {car.started_auction === 'ended' ? 'Completed' : 'LIVE'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                  <div className="flex items-center gap-3">
+                    <i className="fas fa-info-circle text-indigo-600 text-xl"></i>
+                    <p className="text-sm text-gray-700">
+                      <strong className="text-indigo-900">Success Rate:</strong> 
+                      {managerStatistics.carsAccepted > 0 
+                        ? ` ${((managerStatistics.carsAuctioned / managerStatistics.carsAccepted) * 100).toFixed(1)}% of accepted cars have been auctioned`
+                        : ' No data available yet'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="p-6 border-t flex gap-4">

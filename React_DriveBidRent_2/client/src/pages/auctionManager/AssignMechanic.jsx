@@ -175,6 +175,196 @@ export default function AssignMechanic() {
             )}
           </div>
 
+          {/* Vehicle Documentation Section */}
+          {request.vehicleDocumentation && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-300 rounded-lg p-5">
+              <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
+                Vehicle Documentation
+              </h3>
+              
+              {/* Registration & Ownership */}
+              <div className="mb-4 bg-white rounded-lg p-4 shadow-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  Registration & Ownership
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  {request.vehicleDocumentation.registrationNumber && (
+                    <p><strong>Registration:</strong> {request.vehicleDocumentation.registrationNumber}</p>
+                  )}
+                  {request.vehicleDocumentation.registrationState && (
+                    <p><strong>State:</strong> {request.vehicleDocumentation.registrationState}</p>
+                  )}
+                  {request.vehicleDocumentation.vinNumber && (
+                    <p><strong>VIN:</strong> {request.vehicleDocumentation.vinNumber}</p>
+                  )}
+                  {request.vehicleDocumentation.chassisNumber && (
+                    <p><strong>Chassis No:</strong> {request.vehicleDocumentation.chassisNumber}</p>
+                  )}
+                  {request.vehicleDocumentation.engineNumber && (
+                    <p><strong>Engine No:</strong> {request.vehicleDocumentation.engineNumber}</p>
+                  )}
+                  {request.vehicleDocumentation.ownershipType && (
+                    <p><strong>Ownership:</strong> {request.vehicleDocumentation.ownershipType}</p>
+                  )}
+                  {request.vehicleDocumentation.numberOfOwners && (
+                    <p><strong>No. of Owners:</strong> {request.vehicleDocumentation.numberOfOwners}</p>
+                  )}
+                </div>
+                {request.vehicleDocumentation.registrationCertificate && (
+                  <a 
+                    href={request.vehicleDocumentation.registrationCertificate} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    View RC Document →
+                  </a>
+                )}
+              </div>
+
+              {/* Insurance Information */}
+              <div className="mb-4 bg-white rounded-lg p-4 shadow-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  Insurance Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  {request.vehicleDocumentation.insuranceStatus && (
+                    <p><strong>Status:</strong> <span className={request.vehicleDocumentation.insuranceStatus === 'Valid' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>{request.vehicleDocumentation.insuranceStatus}</span></p>
+                  )}
+                  {request.vehicleDocumentation.insuranceProvider && (
+                    <p><strong>Provider:</strong> {request.vehicleDocumentation.insuranceProvider}</p>
+                  )}
+                  {request.vehicleDocumentation.insurancePolicyNumber && (
+                    <p><strong>Policy No:</strong> {request.vehicleDocumentation.insurancePolicyNumber}</p>
+                  )}
+                  {request.vehicleDocumentation.insuranceExpiryDate && (
+                    <p><strong>Expiry:</strong> {new Date(request.vehicleDocumentation.insuranceExpiryDate).toLocaleDateString()}</p>
+                  )}
+                  {request.vehicleDocumentation.insuranceType && (
+                    <p><strong>Type:</strong> {request.vehicleDocumentation.insuranceType}</p>
+                  )}
+                </div>
+                {request.vehicleDocumentation.insuranceCertificate && (
+                  <a 
+                    href={request.vehicleDocumentation.insuranceCertificate} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    View Insurance Document →
+                  </a>
+                )}
+              </div>
+
+              {/* Accident & Damage History */}
+              <div className="mb-4 bg-white rounded-lg p-4 shadow-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  Accident & Damage History
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  {request.vehicleDocumentation.accidentHistory && (
+                    <p><strong>Accident History:</strong> <span className={request.vehicleDocumentation.accidentHistory === 'no' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'}>{request.vehicleDocumentation.accidentHistory === 'no' ? 'No Accidents' : 'Has Accident History'}</span></p>
+                  )}
+                  {request.vehicleDocumentation.accidentDetails && request.vehicleDocumentation.accidentHistory !== 'no' && (
+                    <p className="col-span-2"><strong>Details:</strong> {request.vehicleDocumentation.accidentDetails}</p>
+                  )}
+                  {request.vehicleDocumentation.structuralDamage && (
+                    <p><strong>Structural Damage:</strong> {request.vehicleDocumentation.structuralDamage}</p>
+                  )}
+                  {request.vehicleDocumentation.floodDamage && (
+                    <p><strong>Flood Damage:</strong> {request.vehicleDocumentation.floodDamage}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Pollution & Fitness */}
+              <div className="mb-4 bg-white rounded-lg p-4 shadow-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  Pollution & Fitness
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  {request.vehicleDocumentation.pollutionCertificate && (
+                    <p><strong>PUC Status:</strong> <span className={request.vehicleDocumentation.pollutionCertificate === 'Valid' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>{request.vehicleDocumentation.pollutionCertificate}</span></p>
+                  )}
+                  {request.vehicleDocumentation.pollutionExpiryDate && (
+                    <p><strong>PUC Expiry:</strong> {new Date(request.vehicleDocumentation.pollutionExpiryDate).toLocaleDateString()}</p>
+                  )}
+                  {request.vehicleDocumentation.fitnessCertificate && (
+                    <p><strong>Fitness Status:</strong> {request.vehicleDocumentation.fitnessCertificate}</p>
+                  )}
+                  {request.vehicleDocumentation.fitnessValidUntil && (
+                    <p><strong>Fitness Valid Till:</strong> {new Date(request.vehicleDocumentation.fitnessValidUntil).toLocaleDateString()}</p>
+                  )}
+                </div>
+                {request.vehicleDocumentation.fitnessCertificateDoc && (
+                  <a 
+                    href={request.vehicleDocumentation.fitnessCertificateDoc} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    View Fitness Certificate →
+                  </a>
+                )}
+              </div>
+
+              {/* Odometer & Service */}
+              <div className="mb-4 bg-white rounded-lg p-4 shadow-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  Odometer & Service
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  {request.vehicleDocumentation.odometerReading && (
+                    <p><strong>Odometer:</strong> {request.vehicleDocumentation.odometerReading.toLocaleString()} km</p>
+                  )}
+                  {request.vehicleDocumentation.lastServiceDate && (
+                    <p><strong>Last Service:</strong> {new Date(request.vehicleDocumentation.lastServiceDate).toLocaleDateString()}</p>
+                  )}
+                  {request.vehicleDocumentation.serviceHistory && (
+                    <p><strong>Service History:</strong> {request.vehicleDocumentation.serviceHistory}</p>
+                  )}
+                  {request.vehicleDocumentation.nextServiceDue && (
+                    <p><strong>Next Service Due:</strong> {new Date(request.vehicleDocumentation.nextServiceDue).toLocaleDateString()}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Legal & Transfer */}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  Legal & Transfer Status
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  {request.vehicleDocumentation.hypothecationStatus && (
+                    <p><strong>Hypothecation:</strong> {request.vehicleDocumentation.hypothecationStatus}</p>
+                  )}
+                  {request.vehicleDocumentation.financierName && (
+                    <p><strong>Financier:</strong> {request.vehicleDocumentation.financierName}</p>
+                  )}
+                  {request.vehicleDocumentation.nocStatus && (
+                    <p><strong>NOC Status:</strong> {request.vehicleDocumentation.nocStatus}</p>
+                  )}
+                  {request.vehicleDocumentation.roadTaxPaid && (
+                    <p><strong>Road Tax:</strong> {request.vehicleDocumentation.roadTaxPaid}</p>
+                  )}
+                  {request.vehicleDocumentation.rcTransferReady && (
+                    <p><strong>RC Transfer Ready:</strong> <span className={request.vehicleDocumentation.rcTransferReady === 'yes' ? 'text-green-600 font-semibold' : 'text-yellow-600'}>{request.vehicleDocumentation.rcTransferReady === 'yes' ? 'Yes' : 'No'}</span></p>
+                  )}
+                </div>
+                {request.vehicleDocumentation.roadTaxReceipt && (
+                  <a 
+                    href={request.vehicleDocumentation.roadTaxReceipt} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    View Road Tax Receipt →
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="mt-8">
             {assigned ? (
               <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center font-bold text-lg">

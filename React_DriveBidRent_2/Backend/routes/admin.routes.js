@@ -14,6 +14,7 @@ router.get("/admin", isAdminLoggedin, dashboardControllers.getAdminDashboard);
 
 // Manage Users
 router.get("/manage-user", isAdminLoggedin, manageUsersControllers.getManageUsers);
+router.get("/user-details/:id", isAdminLoggedin, manageUsersControllers.getUserDetails);
 router.post("/approve-user/:id", isAdminLoggedin, manageUsersControllers.approveMechanic);
 router.post("/decline-user/:id", isAdminLoggedin, manageUsersControllers.declineUser);
 router.post("/delete-buyer/:id", isAdminLoggedin, manageUsersControllers.deleteBuyer);

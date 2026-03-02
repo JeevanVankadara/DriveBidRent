@@ -18,10 +18,10 @@ export default function ChatListBuyer({ onSelect, selectedId }) {
       setIsLoading(true);
       try {
         const res = await axiosInstance.get('/chat/my-chats');
-        // Filter to show only rental chats for buyer-seller communication
+        // Filter to show rental and auction chats for buyer-seller communication
         const allChats = res.data.data || [];
-        const rentalChats = allChats.filter(chat => chat.type === 'rental');
-        setChats(rentalChats);
+        const buyerChats = allChats.filter(chat => chat.type === 'rental' || chat.type === 'auction');
+        setChats(buyerChats);
       } catch (err) {
         console.error('Error fetching chats:', err);
       } finally {
@@ -135,7 +135,7 @@ export default function ChatListBuyer({ onSelect, selectedId }) {
     const searchLower = searchTerm.toLowerCase();
     const otherUser = getOtherUser(chat);
     const userName = otherUser ? `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.toLowerCase() : '';
-    const vehicleName = chat.rentalRequest?.vehicleName?.toLowerCase() || '';
+    const vehicleName = (chat.rentalRequest?.vehicleName || chat.auctionRequest?.vehicleName || chat.title || '').toLowerCase();
     
     return userName.includes(searchLower) || 
            vehicleName.includes(searchLower);
@@ -159,7 +159,7 @@ export default function ChatListBuyer({ onSelect, selectedId }) {
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Chats</h2>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">Rental communications</p>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">Rental & Auction communications</p>
           </div>
           {chats.filter(c => c.unreadCount > 0).length > 0 && (
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm sm:text-base font-bold">
@@ -208,7 +208,7 @@ export default function ChatListBuyer({ onSelect, selectedId }) {
             <p className="text-gray-500 text-center text-sm max-w-xs">
               {searchTerm 
                 ? 'Try searching with different terms'
-                : 'Start a conversation by contacting a seller about a rental'}
+                : 'Start a conversation by contacting a seller about a rental or auction'}
             </p>
             {searchTerm && (
               <button 
@@ -226,11 +226,11 @@ export default function ChatListBuyer({ onSelect, selectedId }) {
               const isUnread = chat.unreadCount > 0;
               const otherUser = getOtherUser(chat);
               const userName = otherUser ? `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.trim() || 'Seller' : 'Seller';
-              const vehicleName = chat.rentalRequest?.vehicleName || 'Vehicle';
-              const status = chat.status || 'ACTIVE';
+              const vehicleName = chat.rentalRequest?.vehicleName || chat.auctionRequest?.vehicleName || chat.title || 'Vehicle';
+              const status = chat.status || (chat.type === 'auction' ? 'AUCTION' : 'ACTIVE');
               const lastUpdated = chat.updatedAt || chat.createdAt;
               const lastMessagePreview = getLastMessagePreview(chat);
-              const rentalDate = chat.rentalRequest?.pickupDate || lastUpdated;
+              const rentalDate = chat.rentalRequest?.pickupDate || chat.auctionRequest?.startDate || lastUpdated;
               
               return onSelect ? (
                 <div
