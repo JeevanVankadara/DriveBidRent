@@ -1,6 +1,6 @@
 import User from '../../models/User.js';
 import RentalCost from '../../models/RentalCost.js';
-import AuctionCost from '../../models/AuctionCost.js';
+import Purchase from '../../models/Purchase.js';
 import AuctionBid from '../../models/AuctionBid.js';
 import AuctionRequest from '../../models/AuctionRequest.js';
 
@@ -18,12 +18,13 @@ const getAdminDashboard = async (req, res) => {
 
     const totalRentalEarnings = rentalCosts.reduce((sum, cost) => sum + (cost.totalCost || 0), 0);
 
-    const auctionCosts = await AuctionCost.find()
+    const purchases = await Purchase.find()
       .populate("sellerId", "firstName lastName")
       .populate("auctionId", "vehicleName")
       .lean();
 
-    const totalAuctionEarnings = auctionCosts.reduce((sum, cost) => sum + (cost.totalAmount || 0), 0);
+    // Platform earns 1% convenience fee from auctions
+    const totalAuctionEarnings = purchases.reduce((sum, purchase) => sum + (purchase.purchasePrice * 0.01 || 0), 0);
     const totalEarnings = totalRentalEarnings + totalAuctionEarnings;
 
     const rentalActivities = rentalCosts.map((cost) => ({
@@ -31,10 +32,13 @@ const getAdminDashboard = async (req, res) => {
       timestamp: cost.createdAt,
     }));
 
-    const auctionActivities = auctionCosts.map((cost) => ({
-      description: `Auction earning: ₹${cost.totalAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 })} from ${cost.sellerId?.firstName || ""} ${cost.sellerId?.lastName || ""} (${cost.auctionId?.vehicleName || "Unknown"})`,
-      timestamp: cost.paymentDate,
-    }));
+    const auctionActivities = purchases.map((purchase) => {
+      const convenienceFee = purchase.purchasePrice * 0.01;
+      return {
+        description: `Auction fee: ₹${convenienceFee.toLocaleString("en-IN", { minimumFractionDigits: 2 })} from ${purchase.sellerId?.firstName || ""} ${purchase.sellerId?.lastName || ""} (₹${purchase.purchasePrice.toLocaleString("en-IN")} sale)`,
+        timestamp: purchase.purchaseDate,
+      };
+    });
 
     const recentBids = await AuctionBid.find()
       .populate("buyerId", "firstName lastName")

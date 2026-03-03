@@ -24,27 +24,65 @@ const getAnalytics = async (req, res) => {
     ].filter(item => item.value > 0); // Only include types with users
 
     // ===== CAR TYPE DISTRIBUTION =====
+    // Count ALL cars requested by sellers, regardless of status
     const carTypeDistribution = await AuctionRequest.aggregate([
-      { $match: { status: 'approved' } },
       { $group: { _id: '$carType', count: { $sum: 1 } } },
       { $project: { name: '$_id', value: '$count', _id: 0 } },
       { $sort: { value: -1 } },
     ]);
 
     // ===== CAR MODEL DISTRIBUTION =====
+    // Count ALL car models requested, regardless of approval status
     const carModelDistribution = await AuctionRequest.aggregate([
-      { $match: { status: 'approved', vehicleName: { $exists: true, $ne: null } } },
-      { $group: { _id: '$vehicleName', count: { $sum: 1 } } },
-      { $project: { name: '$_id', value: '$count', _id: 0 } },
+      { $match: { vehicleName: { $exists: true, $ne: null } } },
+      { 
+        $project: {
+          vehicleName: 1,
+          carType: 1,
+          // Normalize vehicle name by trimming and converting to lowercase
+          normalizedName: { 
+            $toLower: { 
+              $trim: { input: '$vehicleName' } 
+            } 
+          }
+        }
+      },
+      { 
+        $group: { 
+          _id: { 
+            carType: '$carType', 
+            normalizedName: '$normalizedName' 
+          }, 
+          count: { $sum: 1 },
+          // Keep original name for display (first occurrence)
+          displayName: { $first: '$vehicleName' }
+        } 
+      },
+      { 
+        $project: { 
+          // Combine car type and name for display
+          name: { 
+            $concat: [
+              { $toUpper: { $substrCP: ['$displayName', 0, 1] } },
+              { $substrCP: ['$displayName', 1, { $strLenCP: '$displayName' }] },
+              ' (', 
+              '$_id.carType', 
+              ')'
+            ]
+          },
+          value: '$count', 
+          _id: 0 
+        } 
+      },
       { $sort: { value: -1 } },
       { $limit: 10 }, // Top 10 models
     ]);
 
     // ===== TOP SELLERS =====
+    // Count ALL cars listed by sellers, regardless of approval status
     const topSellers = await AuctionRequest.aggregate([
       { 
         $match: { 
-          status: 'approved', 
           sellerId: { $exists: true, $ne: null } 
         } 
       },
@@ -193,12 +231,22 @@ const getAnalytics = async (req, res) => {
     ]);
 
     // ===== REVENUE STATISTICS =====
-    const totalAuctionRevenue = await AuctionCost.aggregate([
-      { $group: { _id: null, total: { $sum: '$platformFee' } } }
+    // Calculate auction revenue from Purchase documents (1% convenience fee)
+    const totalAuctionRevenue = await Purchase.aggregate([
+      { 
+        $group: { 
+          _id: null, 
+          total: { 
+            $sum: { 
+              $multiply: ['$purchasePrice', 0.01] // 1% convenience fee
+            } 
+          } 
+        } 
+      }
     ]);
     
     const totalRentalRevenue = await RentalCost.aggregate([
-      { $group: { _id: null, total: { $sum: '$platformFee' } } }
+      { $group: { _id: null, total: { $sum: '$totalCost' } } }
     ]);
 
     const auctionRevenue = totalAuctionRevenue[0]?.total || 0;
@@ -210,20 +258,28 @@ const getAnalytics = async (req, res) => {
     ];
 
     // ===== AUCTION STATUS DISTRIBUTION =====
-    const liveAuctions = await AuctionRequest.countDocuments({ started_auction: 'yes' });
-    const endedAuctions = await AuctionRequest.countDocuments({ started_auction: 'ended' });
-    const pendingAuctions = await AuctionRequest.countDocuments({ 
+    // Show detailed status of all auction requests
+    const pendingApproval = await AuctionRequest.countDocuments({ status: 'pending' });
+    const assignedToMechanic = await AuctionRequest.countDocuments({ status: 'assignedMechanic' });
+    const approvedNotStarted = await AuctionRequest.countDocuments({ 
+      status: 'approved', 
       $or: [
+        { started_auction: 'no' },
         { started_auction: { $exists: false } },
-        { started_auction: null },
-        { status: 'pending' }
+        { started_auction: null }
       ]
     });
+    const liveAuctions = await AuctionRequest.countDocuments({ started_auction: 'yes' });
+    const endedAuctions = await AuctionRequest.countDocuments({ started_auction: 'ended' });
+    const rejectedAuctions = await AuctionRequest.countDocuments({ status: 'rejected' });
 
     const auctionStatusDistribution = [
+      { name: 'Pending Approval', value: pendingApproval },
+      { name: 'Assigned to Mechanic', value: assignedToMechanic },
+      { name: 'Approved (Not Started)', value: approvedNotStarted },
       { name: 'Live Auctions', value: liveAuctions },
       { name: 'Ended Auctions', value: endedAuctions },
-      { name: 'Pending Approval', value: pendingAuctions },
+      { name: 'Rejected', value: rejectedAuctions },
     ].filter(item => item.value > 0);
 
     // ===== GENERAL STATISTICS =====

@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import adminServices from "../../services/admin.services";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+import { Pie, Bar } from 'react-chartjs-2';
+
+// Register Chart.js components
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const COLORS = ['#FF6B00', '#4CAF50', '#2196F3', '#FFC107', '#9C27B0', '#00BCD4', '#E91E63', '#FF5722'];
 
@@ -31,19 +35,93 @@ const Analytics = () => {
     fetchAnalytics();
   }, [navigate]);
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-          <p className="font-semibold">{payload[0].name}</p>
-          <p className="text-orange-600">{typeof payload[0].value === 'number' && payload[0].value > 1000 
-            ? `₹${payload[0].value.toLocaleString()}` 
-            : payload[0].value}
-          </p>
-        </div>
-      );
+  // Chart.js configuration options
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 15,
+          font: { size: 12 }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
     }
-    return null;
+  };
+
+  const revenueOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 15,
+          font: { size: 12 }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ₹${value.toLocaleString()}`;
+          }
+        }
+      }
+    }
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          callback: function(value) {
+            if (Number.isInteger(value)) return value;
+          }
+        },
+        title: {
+          display: true,
+          text: 'Count',
+          font: { size: 14, weight: 'bold' }
+        }
+      },
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          font: { size: 11 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `Count: ${context.parsed.y}`;
+          }
+        }
+      }
+    }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -85,26 +163,20 @@ const Analytics = () => {
                 <i className="fas fa-users text-orange-600"></i>
                 User Type Distribution
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={data.userTypeDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {data.userTypeDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ height: '300px' }}>
+                <Pie 
+                  data={{
+                    labels: data.userTypeDistribution.map(item => item.name),
+                    datasets: [{
+                      data: data.userTypeDistribution.map(item => item.value),
+                      backgroundColor: COLORS.slice(0, data.userTypeDistribution.length),
+                      borderWidth: 2,
+                      borderColor: '#fff'
+                    }]
+                  }}
+                  options={pieOptions}
+                />
+              </div>
             </div>
           )}
 
@@ -112,29 +184,32 @@ const Analytics = () => {
           {data.revenueDistribution && data.revenueDistribution.length > 0 && (
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i className="fas fa-dollar-sign text-green-600"></i>
+                <i className="fas fa-rupee-sign text-green-600"></i>
                 Revenue Distribution
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={data.revenueDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ₹${value.toLocaleString()}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {data.revenueDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={[COLORS[0], COLORS[1]][index]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {data.totalRevenue > 0 ? (
+                <div style={{ height: '300px' }}>
+                  <Pie 
+                    data={{
+                      labels: data.revenueDistribution.filter(item => item.value > 0).map(item => item.name),
+                      datasets: [{
+                        data: data.revenueDistribution.filter(item => item.value > 0).map(item => item.value),
+                        backgroundColor: [COLORS[0], COLORS[1]],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                      }]
+                    }}
+                    options={revenueOptions}
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-500">
+                  <div className="text-center">
+                    <i className="fas fa-chart-pie text-6xl mb-4 opacity-20"></i>
+                    <p>No revenue data available yet</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -145,26 +220,20 @@ const Analytics = () => {
                 <i className="fas fa-car text-blue-600"></i>
                 Car Type Distribution
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={data.carTypeDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {data.carTypeDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ height: '300px' }}>
+                <Pie 
+                  data={{
+                    labels: data.carTypeDistribution.map(item => item.name),
+                    datasets: [{
+                      data: data.carTypeDistribution.map(item => item.value),
+                      backgroundColor: COLORS.slice(0, data.carTypeDistribution.length),
+                      borderWidth: 2,
+                      borderColor: '#fff'
+                    }]
+                  }}
+                  options={pieOptions}
+                />
+              </div>
             </div>
           )}
 
@@ -175,26 +244,20 @@ const Analytics = () => {
                 <i className="fas fa-gavel text-purple-600"></i>
                 Auction Status
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={data.auctionStatusDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {data.auctionStatusDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ height: '300px' }}>
+                <Pie 
+                  data={{
+                    labels: data.auctionStatusDistribution.map(item => item.name),
+                    datasets: [{
+                      data: data.auctionStatusDistribution.map(item => item.value),
+                      backgroundColor: COLORS.slice(0, data.auctionStatusDistribution.length),
+                      borderWidth: 2,
+                      borderColor: '#fff'
+                    }]
+                  }}
+                  options={pieOptions}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -206,15 +269,21 @@ const Analytics = () => {
               <i className="fas fa-chart-bar text-orange-600"></i>
               Top 10 Car Models Listed
             </h2>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={data.carModelDistribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" fill={COLORS[0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ height: '400px' }}>
+              <Bar 
+                data={{
+                  labels: data.carModelDistribution.map(item => item.name),
+                  datasets: [{
+                    label: 'Count',
+                    data: data.carModelDistribution.map(item => item.value),
+                    backgroundColor: COLORS[0],
+                    borderColor: COLORS[0],
+                    borderWidth: 1
+                  }]
+                }}
+                options={barOptions}
+              />
+            </div>
           </div>
         )}
 

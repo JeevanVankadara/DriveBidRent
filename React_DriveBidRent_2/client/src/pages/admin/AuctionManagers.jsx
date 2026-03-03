@@ -352,19 +352,20 @@ const AuctionManagers = () => {
 
       {/* Modal */}
       {selectedManager && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
             {/* Close Button */}
             <button
               onClick={closeModal}
-              className="absolute top-4 right-5 text-gray-500 hover:text-gray-800 text-3xl font-bold transition-colors focus:outline-none"
+              className="absolute top-4 right-5 z-10 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               aria-label="Close modal"
+              title="Close"
             >
               ×
             </button>
 
             {/* Header */}
-            <div className="p-6 border-b">
+            <div className="p-6 border-b pr-16">
               <h2 className="text-2xl font-bold text-gray-900">
                 {selectedManager.firstName} {selectedManager.lastName}
               </h2>
@@ -447,6 +448,32 @@ const AuctionManagers = () => {
                       <p className="text-4xl font-bold text-blue-700 mb-2">{managerStatistics.carsAccepted}</p>
                       <p className="text-sm text-gray-600 mb-3">Total requests approved</p>
                       
+                      {/* Show preview of accepted cars */}
+                      {managerStatistics.acceptedCarsList?.length > 0 && (
+                        <div className="mb-3 p-3 bg-blue-50 rounded-md">
+                          <p className="text-xs text-gray-700 font-medium mb-2">
+                            <i className="fas fa-info-circle text-blue-600"></i> Recent Accepted Cars:
+                          </p>
+                          <div className="space-y-1">
+                            {managerStatistics.acceptedCarsList.slice(0, 2).map((car, idx) => (
+                              <div key={idx} className="text-xs text-gray-700">
+                                • <span className="font-semibold">{car.vehicleName}</span>
+                                {car.sellerId && (
+                                  <span className="text-gray-600 ml-1">
+                                    (Seller: {car.sellerId.firstName} {car.sellerId.lastName})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {managerStatistics.acceptedCarsList.length > 2 && (
+                              <p className="text-xs text-blue-600 font-medium">
+                                +{managerStatistics.acceptedCarsList.length - 2} more
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
                       {managerStatistics.acceptedCarsList?.length > 0 && (
                         <button
                           onClick={() => toggleSection('accepted')}
@@ -455,12 +482,12 @@ const AuctionManagers = () => {
                           {expandedSections.accepted ? (
                             <>
                               <i className="fas fa-chevron-up"></i>
-                              Hide Details
+                              Hide Full Details
                             </>
                           ) : (
                             <>
                               <i className="fas fa-chevron-down"></i>
-                              View Details
+                              View All Details
                             </>
                           )}
                         </button>
@@ -469,6 +496,9 @@ const AuctionManagers = () => {
                     
                     {expandedSections.accepted && managerStatistics.acceptedCarsList?.length > 0 && (
                       <div className="border-t border-blue-200 bg-blue-50/50 max-h-64 overflow-y-auto">
+                        <div className="p-3 bg-blue-100 border-b border-blue-200">
+                          <p className="text-xs font-semibold text-blue-900 uppercase">All Accepted Cars</p>
+                        </div>
                         {managerStatistics.acceptedCarsList.map((car, idx) => (
                           <div key={idx} className="px-5 py-3 border-b border-blue-100 last:border-b-0 hover:bg-blue-100/50 transition">
                             <div className="flex items-start justify-between">
@@ -478,8 +508,8 @@ const AuctionManagers = () => {
                                   {car.year} • ₹{car.startingBid?.toLocaleString()} • {car.mileage?.toLocaleString()} km
                                 </p>
                                 {car.sellerId && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    Seller: {car.sellerId.firstName} {car.sellerId.lastName}
+                                  <p className="text-xs text-gray-700 mt-1 font-medium">
+                                    <i className="fas fa-user text-blue-600"></i> Seller: {car.sellerId.firstName} {car.sellerId.lastName}
                                   </p>
                                 )}
                               </div>
@@ -510,6 +540,37 @@ const AuctionManagers = () => {
                       <p className="text-4xl font-bold text-green-700 mb-2">{managerStatistics.carsAuctioned}</p>
                       <p className="text-sm text-gray-600 mb-3">Started or completed auctions</p>
                       
+                      {/* Show preview of auctioned cars */}
+                      {managerStatistics.auctionedCarsList?.length > 0 && (
+                        <div className="mb-3 p-3 bg-green-50 rounded-md">
+                          <p className="text-xs text-gray-700 font-medium mb-2">
+                            <i className="fas fa-info-circle text-green-600"></i> Recent Auctioned Cars:
+                          </p>
+                          <div className="space-y-1">
+                            {managerStatistics.auctionedCarsList.slice(0, 2).map((car, idx) => (
+                              <div key={idx} className="text-xs text-gray-700">
+                                • <span className="font-semibold">{car.vehicleName}</span>
+                                {car.winnerId && (
+                                  <span className="text-green-700 ml-1 font-medium">
+                                    (Winner: {car.winnerId.firstName} {car.winnerId.lastName})
+                                  </span>
+                                )}
+                                {!car.winnerId && car.sellerId && (
+                                  <span className="text-gray-600 ml-1">
+                                    (Seller: {car.sellerId.firstName} {car.sellerId.lastName})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {managerStatistics.auctionedCarsList.length > 2 && (
+                              <p className="text-xs text-green-600 font-medium">
+                                +{managerStatistics.auctionedCarsList.length - 2} more
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
                       {managerStatistics.auctionedCarsList?.length > 0 && (
                         <button
                           onClick={() => toggleSection('auctioned')}
@@ -518,12 +579,12 @@ const AuctionManagers = () => {
                           {expandedSections.auctioned ? (
                             <>
                               <i className="fas fa-chevron-up"></i>
-                              Hide Details
+                              Hide Full Details
                             </>
                           ) : (
                             <>
                               <i className="fas fa-chevron-down"></i>
-                              View Details
+                              View All Details
                             </>
                           )}
                         </button>
@@ -532,6 +593,9 @@ const AuctionManagers = () => {
                     
                     {expandedSections.auctioned && managerStatistics.auctionedCarsList?.length > 0 && (
                       <div className="border-t border-green-200 bg-green-50/50 max-h-64 overflow-y-auto">
+                        <div className="p-3 bg-green-100 border-b border-green-200">
+                          <p className="text-xs font-semibold text-green-900 uppercase">All Auctioned Cars</p>
+                        </div>
                         {managerStatistics.auctionedCarsList.map((car, idx) => (
                           <div key={idx} className="px-5 py-3 border-b border-green-100 last:border-b-0 hover:bg-green-100/50 transition">
                             <div className="flex items-start justify-between">
@@ -542,12 +606,12 @@ const AuctionManagers = () => {
                                 </p>
                                 {car.winnerId && (
                                   <p className="text-xs text-green-700 mt-1 font-medium">
-                                    <i className="fas fa-trophy text-xs"></i> Winner: {car.winnerId.firstName} {car.winnerId.lastName}
+                                    <i className="fas fa-trophy text-yellow-600 text-xs"></i> Winner: {car.winnerId.firstName} {car.winnerId.lastName}
                                   </p>
                                 )}
                                 {car.sellerId && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    Seller: {car.sellerId.firstName} {car.sellerId.lastName}
+                                  <p className="text-xs text-gray-700 mt-1">
+                                    <i className="fas fa-user text-gray-500"></i> Seller: {car.sellerId.firstName} {car.sellerId.lastName}
                                   </p>
                                 )}
                               </div>
@@ -579,7 +643,7 @@ const AuctionManagers = () => {
             )}
 
             {/* Actions */}
-            <div className="p-6 border-t flex gap-4">
+            <div className="p-6 border-t flex flex-col sm:flex-row gap-3">
               {!selectedManager.approved && (
                 <button
                   onClick={() => handleApprove(selectedManager._id)}
@@ -601,6 +665,14 @@ const AuctionManagers = () => {
               >
                 <i className="fas fa-trash-alt"></i>
                 Delete Manager
+              </button>
+
+              <button
+                onClick={closeModal}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-medium transition flex items-center justify-center gap-2"
+              >
+                <i className="fas fa-times"></i>
+                Close
               </button>
             </div>
           </div>
