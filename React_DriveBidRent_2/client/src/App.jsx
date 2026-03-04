@@ -21,6 +21,15 @@ import Analytics from './pages/admin/Analytics';
 import ManageEarnings from './pages/admin/ManageEarnings';
 import AdminProfile from './pages/admin/AdminProfile';
 
+// === SUPER ADMIN ===
+import SuperAdminLayout from './pages/superadmin/SuperAdminLayout';
+import SuperAdminDashboard from './pages/superadmin/Dashboard';
+import SuperAdminAnalytics from './pages/superadmin/Analytics';
+import SuperAdminUserActivities from './pages/superadmin/UserActivities';
+import SuperAdminRevenue from './pages/superadmin/Revenue';
+import SuperAdminTrends from './pages/superadmin/Trends';
+import SuperAdminProfile from './pages/superadmin/Profile';
+
 // === BUYER ===
 import BuyerLayout from './pages/buyer/BuyerLayout';
 import BuyerDashboard from './pages/buyer/Dashboard';
@@ -107,6 +116,18 @@ function App() {
         <Route path="manage-earnings" element={<ManageEarnings />} />
         <Route path="admin-profile" element={<AdminProfile />} />
         <Route path="*" element={<PageNotFound homeRoute="/admin" />} />
+      </Route>
+
+      {/* === SUPER ADMIN SPA === */}
+      <Route path="/superadmin" element={<SuperAdminLayout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<SuperAdminDashboard />} />
+        <Route path="analytics" element={<SuperAdminAnalytics />} />
+        <Route path="user-activities" element={<SuperAdminUserActivities />} />
+        <Route path="revenue" element={<SuperAdminRevenue />} />
+        <Route path="trends" element={<SuperAdminTrends />} />
+        <Route path="profile" element={<SuperAdminProfile />} />
+        <Route path="*" element={<PageNotFound homeRoute="/superadmin" />} />
       </Route>
 
       {/* === BUYER SPA === */}

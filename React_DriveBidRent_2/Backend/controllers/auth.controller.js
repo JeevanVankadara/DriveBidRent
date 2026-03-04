@@ -46,7 +46,7 @@ const authController = {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
       }
 
-      const allowedTypes = ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'auction_manager'];
+      const allowedTypes = ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'auction_manager', 'superadmin'];
       if (!userType || !allowedTypes.includes(userType)) {
         return res.status(400).json({ success: false, message: 'Invalid or missing userType' });
       }
@@ -161,7 +161,8 @@ const authController = {
         driver: "/driver-dashboard",        // Adjust if you have a driver layout
         mechanic: "/mechanic/dashboard",    // Correct
         admin: "/admin",                    // Updated: now uses /admin base
-        auction_manager: "/auctionmanager" // Updated to match frontend
+        auction_manager: "/auctionmanager", // Updated to match frontend
+        superadmin: "/superadmin"          // Super Admin route
       };
 
       const redirectUrl = redirectMap[user.userType] || "/";

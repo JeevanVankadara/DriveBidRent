@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   userType: { 
     type: String, 
     required: true, 
-    enum: ['buyer', 'seller', 'driver', 'mechanic', 'admin'] 
+    enum: ['buyer', 'seller', 'driver', 'mechanic', 'admin', 'superadmin'] 
   },
   dateOfBirth: { type: Date },
   doorNo: {

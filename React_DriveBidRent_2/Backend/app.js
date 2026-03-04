@@ -23,6 +23,7 @@ import auctionManagerRoutes from "./routes/auctionManager.routes.js";
 import mechanicRoutes from "./routes/mechanic.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import buyerRoutes from "./routes/buyer.routes.js";
+import superadminRoutes from "./routes/superadmin.routes.js";
 import chatRoutes from './routes/chat.routes.js';
 import inspectionChatRoutes from './routes/inspectionChat.routes.js';
 
@@ -31,6 +32,7 @@ import mechanicMiddleware from "./middlewares/mechanic.middleware.js";
 import adminMiddleware from "./middlewares/admin.middleware.js";
 import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
 import buyerMiddleware from "./middlewares/buyer.middleware.js";
+import superadminMiddleware from "./middlewares/superadmin.middleware.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 import { devLogger, accessLogger, errorLogger } from "./middlewares/logger.middleware.js";
 import { corsOptions, helmetConfig, limiter } from "./middlewares/security.middleware.js";
@@ -63,6 +65,7 @@ app.use("/api/buyer", buyerMiddleware, buyerRoutes);
 app.use("/api/auctionmanager", auctionManagerMiddleware, auctionManagerRoutes);
 app.use("/api/mechanic", mechanicMiddleware, mechanicRoutes);
 app.use("/api/admin", adminMiddleware, adminRoutes);
+app.use("/api/superadmin", superadminMiddleware, superadminRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/inspection-chat', inspectionChatRoutes);
 
