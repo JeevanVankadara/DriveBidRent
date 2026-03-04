@@ -43,11 +43,11 @@ const getTrends = async (req, res) => {
 
     // Bidding activity trends
     const recentBids = await AuctionBid.countDocuments({ 
-      createdAt: { $gte: thirtyDaysAgo } 
+      bidTime: { $gte: thirtyDaysAgo } 
     });
     
     const previousBids = await AuctionBid.countDocuments({ 
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } 
+      bidTime: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } 
     });
 
     const biddingGrowth = previousBids > 0 
@@ -125,10 +125,10 @@ const getTrends = async (req, res) => {
 
     // Most active time of day for bids
     const biddingTimeDistribution = await AuctionBid.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      { $match: { bidTime: { $gte: thirtyDaysAgo } } },
       {
         $group: {
-          _id: { $hour: "$createdAt" },
+          _id: { $hour: "$bidTime" },
           count: { $sum: 1 }
         }
       },
@@ -137,11 +137,11 @@ const getTrends = async (req, res) => {
 
     // User retention (users who bid in both periods)
     const activeUsersRecent = await AuctionBid.distinct('buyerId', {
-      createdAt: { $gte: thirtyDaysAgo }
+      bidTime: { $gte: thirtyDaysAgo }
     });
 
     const activeUsersPrevious = await AuctionBid.distinct('buyerId', {
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
+      bidTime: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
     });
 
     const retainedUsers = activeUsersRecent.filter(id => 

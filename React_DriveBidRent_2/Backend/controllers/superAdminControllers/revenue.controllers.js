@@ -229,31 +229,25 @@ const getRevenueDetails = async (req, res) => {
     }));
 
     // Revenue by vehicle type
-    const revenueByVehicleType = await Purchase.aggregate([
-      { 
-        $match: { 
-          paymentStatus: "completed",
-          purchaseDate: { $gte: startDate }
-        } 
-      },
-      {
-        $lookup: {
-          from: "auctionrequests",
-          localField: "auctionId",
-          foreignField: "_id",
-          as: "auction"
-        }
-      },
-      { $unwind: "$auction" },
-      {
-        $group: {
-          _id: "$auction.carType",
-          revenue: { $sum: "$purchasePrice" },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { revenue: -1 } }
-    ]);
+    const purchasesForType = await Purchase.find({
+      paymentStatus: "completed",
+      purchaseDate: { $gte: startDate }
+    })
+      .select('auctionId purchasePrice')
+      .populate('auctionId', 'carType')
+      .lean();
+
+    const vehicleTypeMap = new Map();
+    purchasesForType.forEach((purchase) => {
+      const vehicleType = purchase.auctionId?.carType || 'Unknown';
+      const existing = vehicleTypeMap.get(vehicleType) || { _id: vehicleType, revenue: 0, count: 0 };
+      existing.revenue += purchase.purchasePrice || 0;
+      existing.count += 1;
+      vehicleTypeMap.set(vehicleType, existing);
+    });
+
+    const revenueByVehicleType = Array.from(vehicleTypeMap.values())
+      .sort((a, b) => b.revenue - a.revenue);
 
     // Platform fees collected (assuming 5% platform fee on total revenue)
     const platformFeePercentage = 0.05;
