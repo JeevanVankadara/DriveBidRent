@@ -189,8 +189,14 @@ const getAnalytics = async (req, res) => {
     // Peak activity hours (based on bid times)
     const peakHours = await AuctionBid.aggregate([
       {
+        $project: {
+          hour: { $hour: { $ifNull: ["$bidTime", "$createdAt"] } }
+        }
+      },
+      { $match: { hour: { $ne: null } } },
+      {
         $group: {
-          _id: { $hour: "$createdAt" },
+          _id: "$hour",
           bidCount: { $sum: 1 }
         }
       },

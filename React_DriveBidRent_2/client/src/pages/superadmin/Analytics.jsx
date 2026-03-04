@@ -35,6 +35,13 @@ const Analytics = () => {
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center text-red-700 mt-8">{error}</div>;
 
+  const peakHoursData = (data.peakHours || [])
+    .filter(item => item && item._id !== null && item._id !== undefined)
+    .map(item => ({
+      ...item,
+      hourLabel: `${String(item._id).padStart(2, '0')}:00`
+    }));
+
   return (
     <div className="min-h-screen py-8 relative" style={{ zIndex: 1 }}>
       <section className="max-w-7xl mx-auto px-6">
@@ -172,16 +179,22 @@ const Analytics = () => {
           <div className="premium-chart-header">
             <h2 className="premium-chart-title">Peak Bidding Hours</h2>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data.peakHours}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="_id" label={{ value: 'Hour of Day (24h)', position: 'insideBottom', offset: -5 }} />
-              <YAxis label={{ value: 'Bid Count', angle: -90, position: 'insideLeft' }} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="bidCount" fill="#10b981" name="Bids" />
-            </BarChart>
-          </ResponsiveContainer>
+          {peakHoursData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={peakHoursData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="hourLabel" label={{ value: 'Hour of Day (24h)', position: 'insideBottom', offset: -5 }} />
+                <YAxis label={{ value: 'Bid Count', angle: -90, position: 'insideLeft' }} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="bidCount" fill="#10b981" name="Bids" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <p>No peak bidding hour data available</p>
+            </div>
+          )}
         </div>
 
       </section>

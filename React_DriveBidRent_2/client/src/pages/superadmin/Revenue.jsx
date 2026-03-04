@@ -38,6 +38,14 @@ const Revenue = () => {
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center text-red-700 mt-8">{error}</div>;
 
+  const formatCurrencyShort = (value) => {
+    const num = Number(value || 0);
+    if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
+    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+    if (num >= 1000) return `₹${(num / 1000).toFixed(0)}K`;
+    return `₹${num.toFixed(0)}`;
+  };
+
   return (
     <div className="min-h-screen py-8 relative" style={{ zIndex: 1 }}>
       <section className="max-w-7xl mx-auto px-6">
@@ -203,16 +211,59 @@ const Revenue = () => {
           <div className="premium-chart-header">
             <h2 className="premium-chart-title">Revenue by Vehicle Type</h2>
           </div>
+          <p className="text-gray-600 mb-4 font-medium">Auction revenue split by car category</p>
           {data.revenueByVehicleType && data.revenueByVehicleType.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.revenueByVehicleType}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="_id" />
-                <YAxis />
-                <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                <Legend />
-                <Bar dataKey="revenue" fill="#8b5cf6" name="Revenue" />
-                <Bar dataKey="count" fill="#ec4899" name="Count" />
+            <ResponsiveContainer width="100%" height={340}>
+              <BarChart data={data.revenueByVehicleType} margin={{ top: 12, right: 20, left: 6, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7c3aed" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                  <linearGradient id="countGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ec4899" />
+                    <stop offset="100%" stopColor="#f472b6" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" stroke="#d1d5db" />
+                <XAxis
+                  dataKey="_id"
+                  tick={{ fill: '#4b5563', fontSize: 14, fontWeight: 600 }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#cbd5e1' }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  tickFormatter={formatCurrencyShort}
+                  tick={{ fill: '#7c3aed', fontSize: 12, fontWeight: 600 }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#cbd5e1' }}
+                  width={78}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  allowDecimals={false}
+                  tick={{ fill: '#db2777', fontSize: 12, fontWeight: 600 }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#cbd5e1' }}
+                  width={42}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.08)'
+                  }}
+                  formatter={(value, name) =>
+                    name === 'Revenue'
+                      ? `₹${Number(value || 0).toLocaleString('en-IN')}`
+                      : Number(value || 0).toLocaleString('en-IN')
+                  }
+                />
+                <Legend wrapperStyle={{ paddingTop: 12, fontWeight: 600 }} />
+                <Bar yAxisId="left" dataKey="revenue" fill="url(#revenueGradient)" name="Revenue" barSize={42} radius={[10, 10, 0, 0]} />
+                <Bar yAxisId="right" dataKey="count" fill="url(#countGradient)" name="Count" barSize={22} radius={[10, 10, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
