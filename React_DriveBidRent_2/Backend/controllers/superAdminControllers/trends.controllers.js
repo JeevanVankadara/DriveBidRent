@@ -91,6 +91,16 @@ const getTrends = async (req, res) => {
     const recentRevenueTotal = (recentAuctionRevenue[0]?.total || 0) + (recentRentalRevenue[0]?.total || 0);
     const previousRevenueTotal = (previousAuctionRevenue[0]?.total || 0) + (previousRentalRevenue[0]?.total || 0);
     
+    console.log('💰 [Trends Revenue Debug]');
+    console.log('Recent (last 30 days):');
+    console.log('  - Auction Revenue:', recentAuctionRevenue[0]?.total || 0);
+    console.log('  - Rental Revenue:', recentRentalRevenue[0]?.total || 0);
+    console.log('  - Total:', recentRevenueTotal);
+    console.log('Previous (30-60 days ago):');
+    console.log('  - Auction Revenue:', previousAuctionRevenue[0]?.total || 0);
+    console.log('  - Rental Revenue:', previousRentalRevenue[0]?.total || 0);
+    console.log('  - Total:', previousRevenueTotal);
+    
     const revenueGrowth = previousRevenueTotal > 0 
       ? (((recentRevenueTotal - previousRevenueTotal) / previousRevenueTotal) * 100).toFixed(2)
       : 100;
@@ -157,15 +167,15 @@ const getTrends = async (req, res) => {
       { 
         $match: { 
           status: "approved",
-          auctionEndTime: { $lt: new Date() },
-          createdAt: { $gte: thirtyDaysAgo }
+          auction_stopped: true,
+          auctionDate: { $gte: thirtyDaysAgo }
         } 
       },
       {
         $project: {
           duration: {
             $divide: [
-              { $subtract: ["$auctionEndTime", "$createdAt"] },
+              { $subtract: ["$updatedAt", "$auctionDate"] },
               1000 * 60 * 60 * 24 // Convert to days
             ]
           }
@@ -182,7 +192,8 @@ const getTrends = async (req, res) => {
     // Conversion rate (auctions to purchases)
     const completedAuctionsRecent = await AuctionRequest.countDocuments({
       status: "approved",
-      auctionEndTime: { $lt: new Date(), $gte: thirtyDaysAgo }
+      auction_stopped: true,
+      auctionDate: { $gte: thirtyDaysAgo }
     });
 
     const purchasesRecent = await Purchase.countDocuments({
@@ -192,6 +203,15 @@ const getTrends = async (req, res) => {
     const conversionRate = completedAuctionsRecent > 0
       ? ((purchasesRecent / completedAuctionsRecent) * 100).toFixed(2)
       : 0;
+
+    console.log('📊 [Trends Metrics Debug]');
+    console.log('Conversion Rate:');
+    console.log('  - Completed Auctions (last 30 days):', completedAuctionsRecent);
+    console.log('  - Purchases (last 30 days):', purchasesRecent);
+    console.log('  - Conversion Rate:', conversionRate + '%');
+    console.log('Avg Auction Duration:');
+    console.log('  - Number of completed auctions:', avgAuctionDuration.length > 0 ? 'found' : 'none');
+    console.log('  - Average Duration:', avgAuctionDuration[0]?.avgDuration?.toFixed(2) || 0, 'days');
 
     res.json({
       success: true,

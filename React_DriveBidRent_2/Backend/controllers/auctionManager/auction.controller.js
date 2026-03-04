@@ -94,6 +94,7 @@ export const stopAuction = async (req, res) => {
         vehicleImage: auction.vehicleImage,
         year: auction.year,
         mileage: auction.mileage,
+        carType: auction.carType,
         purchasePrice: currentBid.bidAmount,
         sellerName: `${seller.firstName} ${seller.lastName}`,
         paymentStatus: 'pending'

@@ -33,6 +33,10 @@ const purchaseSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  carType: {
+    type: String,
+    enum: ['Sedan', 'SUV', 'Hatchback', 'Pickup', 'Wagon']
+  },
   purchasePrice: {
     type: Number,
     required: true

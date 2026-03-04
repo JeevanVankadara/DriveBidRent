@@ -228,26 +228,54 @@ const getRevenueDetails = async (req, res) => {
       };
     }));
 
-    // Revenue by vehicle type
-    const purchasesForType = await Purchase.find({
-      paymentStatus: "completed",
-      purchaseDate: { $gte: startDate }
-    })
-      .select('auctionId purchasePrice')
-      .populate('auctionId', 'carType')
-      .lean();
+    // Revenue by vehicle type - Using aggregation for better reliability
+    console.log('🔍 [Revenue] Fetching revenue by vehicle type...');
+    const revenueByVehicleType = await Purchase.aggregate([
+      {
+        $match: {
+          paymentStatus: "completed",
+          purchaseDate: { $gte: startDate }
+        }
+      },
+      {
+        $lookup: {
+          from: 'auctionrequests',
+          localField: 'auctionId',
+          foreignField: '_id',
+          as: 'auction'
+        }
+      },
+      {
+        $unwind: {
+          path: '$auction',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          vehicleType: { $ifNull: ['$carType', { $ifNull: ['$auction.carType', 'Unknown'] }] }
+        }
+      },
+      {
+        $group: {
+          _id: '$vehicleType',
+          revenue: { $sum: '$purchasePrice' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { revenue: -1 }
+      },
+      {
+        $project: {
+          _id: 1,
+          revenue: 1,
+          count: 1
+        }
+      }
+    ]);
 
-    const vehicleTypeMap = new Map();
-    purchasesForType.forEach((purchase) => {
-      const vehicleType = purchase.auctionId?.carType || 'Unknown';
-      const existing = vehicleTypeMap.get(vehicleType) || { _id: vehicleType, revenue: 0, count: 0 };
-      existing.revenue += purchase.purchasePrice || 0;
-      existing.count += 1;
-      vehicleTypeMap.set(vehicleType, existing);
-    });
-
-    const revenueByVehicleType = Array.from(vehicleTypeMap.values())
-      .sort((a, b) => b.revenue - a.revenue);
+    console.log('📊 [Revenue] Vehicle Type Revenue:', JSON.stringify(revenueByVehicleType, null, 2));
 
     // Platform fees collected (assuming 5% platform fee on total revenue)
     const platformFeePercentage = 0.05;
