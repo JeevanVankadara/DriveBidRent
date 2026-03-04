@@ -24,10 +24,11 @@ const getDashboard = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$totalCost" } } }
     ]);
 
-    // Active auctions count
+    // Active auctions count (live auctions)
     const activeAuctions = await AuctionRequest.countDocuments({
       status: "approved",
-      auctionEndTime: { $gt: new Date() }
+      started_auction: "yes",
+      auction_stopped: { $ne: true }
     });
 
     // Total bids
