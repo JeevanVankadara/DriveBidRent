@@ -303,8 +303,14 @@ const UserActivities = () => {
                             <div className="space-y-2">
                               {userDetails.detailedActivity.rentals.slice(0, 5).map((rental) => (
                                 <div key={rental._id} className="bg-white p-3 rounded">
-                                  <p className="text-sm font-semibold">{rental.rentalId?.vehicleName || 'Unknown Vehicle'}</p>
-                                  <p className="text-xs text-gray-600">Status: {rental.status}</p>
+                                  <p className="text-sm font-semibold">{rental.vehicleName || 'Unknown Vehicle'}</p>
+                                  <p className="text-xs text-gray-600">Status: {rental.status || 'unavailable'}</p>
+                                  <div className="flex justify-between items-center mt-1">
+                                    <span className="text-xs text-gray-500">₹{rental.costPerDay}/day</span>
+                                    {rental.driverAvailable && (
+                                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Driver Available</span>
+                                    )}
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -343,7 +349,7 @@ const UserActivities = () => {
                                   <p className="font-semibold">{rental.vehicleName}</p>
                                   <div className="flex justify-between text-sm mt-1">
                                     <span className="text-gray-600">Status: {rental.status}</span>
-                                    <span className="font-bold text-orange-600">₹{rental.pricePerDay?.toLocaleString()}/day</span>
+                                    <span className="font-bold text-orange-600">₹{rental.costPerDay?.toLocaleString()}/day</span>
                                   </div>
                                 </div>
                               ))}

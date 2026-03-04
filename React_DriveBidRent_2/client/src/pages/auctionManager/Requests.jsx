@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
+import './AuctionManagerDashboard.css';
 
 export default function Requests() {
   const [requests, setRequests] = useState([]);
@@ -50,76 +51,96 @@ export default function Requests() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 font-montserrat">
-      <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Vehicle Requests</h2>
-      
-      {requests.length > 0 ? (
-        requests.map((req) => (
-          <div
-            key={req._id}
-            className="flex bg-white rounded-xl mb-6 p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition transform hover:-translate-y-1"
-          >
-            <div className="w-80 h-48 overflow-hidden rounded-lg mr-8">
-              <img src={req.vehicleImage} alt={req.vehicleName} className="w-full h-full object-cover" />
-            </div>
-            
-            <div className="flex-1 flex flex-col justify-center">
-              <h3 className="text-2xl font-bold text-gray-800">{req.vehicleName}</h3>
-              <p className="text-lg font-bold text-orange-600 mt-1">
-                Condition: {req.condition.charAt(0).toUpperCase() + req.condition.slice(1)}
-              </p>
-              <p className="text-gray-600 mt-2">
-                Seller: {req.sellerId.firstName} {req.sellerId.lastName}
-              </p>
-              <p className="text-gray-600">Location: {req.sellerId.city}</p>
-              
-              {/* Documentation Status Indicators */}
-              {req.vehicleDocumentation && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {req.vehicleDocumentation.registrationNumber && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      ✓ Reg: {req.vehicleDocumentation.registrationNumber}
-                    </span>
-                  )}
-                  {req.vehicleDocumentation.vinNumber && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      ✓ VIN Available
-                    </span>
-                  )}
-                  {req.vehicleDocumentation.insuranceStatus === 'Valid' && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      ✓ Insured
-                    </span>
-                  )}
-                  {req.vehicleDocumentation.pollutionCertificate === 'Valid' && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      ✓ PUC Valid
-                    </span>
-                  )}
-                  {req.vehicleDocumentation.accidentHistory && (
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
-                      ⚠ Accident History
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-end">
-              <Link
-                to={`/auctionmanager/assign-mechanic/${req._id}`}
-                className="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition"
-              >
-                Assign Mechanic
-              </Link>
-            </div>
-          </div>
-        ))
-      ) : (
-        <div className="text-center py-16 text-gray-600 text-lg">
-          No vehicle requests available
+    <div className="pt-8 pb-20 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="manager-page-header">
+          <h1 className="manager-page-title">Vehicle Requests</h1>
+          <p className="manager-page-subtitle">Review and assign mechanics to vehicle inspection requests</p>
         </div>
-      )}
+        
+        {requests.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {requests.map((req) => (
+              <div
+                key={req._id}
+                className="manager-vehicle-card flex-row"
+                style={{flexDirection: 'row', height: 'auto'}}
+              >
+                <div className="w-1/3 min-w-[200px] overflow-hidden">
+                  <img src={req.vehicleImage} alt={req.vehicleName} className="manager-vehicle-image h-full" />
+                </div>
+            
+                <div className="flex-1 p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="manager-vehicle-title text-2xl mb-3">{req.vehicleName}</h3>
+                    <div className="manager-vehicle-info space-y-2">
+                      <div className="manager-vehicle-info-item">
+                        <span className="manager-vehicle-info-label">Condition:</span>
+                        <span className="manager-badge manager-badge-warning px-3 py-1 text-xs">
+                          {req.condition.charAt(0).toUpperCase() + req.condition.slice(1)}
+                        </span>
+                      </div>
+                      <div className="manager-vehicle-info-item">
+                        <span className="manager-vehicle-info-label">Seller:</span>
+                        <span className="manager-vehicle-info-value">
+                          {req.sellerId.firstName} {req.sellerId.lastName}
+                        </span>
+                      </div>
+                      <div className="manager-vehicle-info-item">
+                        <span className="manager-vehicle-info-label">Location:</span>
+                        <span className="manager-vehicle-info-value">{req.sellerId.city}</span>
+                      </div>
+                    </div>
+              
+                    {/* Documentation Status Indicators */}
+                    {req.vehicleDocumentation && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {req.vehicleDocumentation.registrationNumber && (
+                          <span className="px-2 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-full font-medium">
+                            ✓ Reg
+                          </span>
+                        )}
+                        {req.vehicleDocumentation.vinNumber && (
+                          <span className="px-2 py-1 bg-green-50 border border-green-200 text-green-700 text-xs rounded-full font-medium">
+                            ✓ VIN
+                          </span>
+                        )}
+                        {req.vehicleDocumentation.insuranceStatus === 'Valid' && (
+                          <span className="px-2 py-1 bg-green-50 border border-green-200 text-green-700 text-xs rounded-full font-medium">
+                            ✓ Insured
+                          </span>
+                        )}
+                        {req.vehicleDocumentation.pollutionCertificate === 'Valid' && (
+                          <span className="px-2 py-1 bg-green-50 border border-green-200 text-green-700 text-xs rounded-full font-medium">
+                            ✓ PUC
+                          </span>
+                        )}
+                        {req.vehicleDocumentation.accidentHistory && (
+                          <span className="px-2 py-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs rounded-full font-medium">
+                            ⚠ Accident
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Link
+                    to={`/auctionmanager/assign-mechanic/${req._id}`}
+                    className="manager-btn-primary text-center block mt-4"
+                  >
+                    Assign Mechanic
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="manager-empty-state">
+            <div className="manager-empty-icon">📋</div>
+            <p className="manager-empty-text">No vehicle requests available</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

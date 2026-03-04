@@ -2,12 +2,13 @@
 import { Outlet } from 'react-router-dom';
 import MechanicNavbar from './components/MechanicNavbar';
 import MechanicFooter from '../components/Footer';
+import './MechanicDashboard.css';
 
 export default function MechanicLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-white to-orange-50">
+    <div className="mechanic-layout min-h-screen flex flex-col">
       <MechanicNavbar />
-      <main className="flex-grow pt-16">
+      <main className="flex-grow pt-20">
         <Outlet />   {/* All mechanic pages load here with their own spinners */}
       </main>
       <MechanicFooter />

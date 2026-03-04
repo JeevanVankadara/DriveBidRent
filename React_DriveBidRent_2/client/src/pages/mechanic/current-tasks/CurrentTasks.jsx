@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getCurrentTasks } from '../../../services/mechanic.services';
 import CurrentTaskCard from '../components/CurrentTaskCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import '../MechanicDashboard.css';
 
 export default function CurrentTasks() {
   const [tasks, setTasks] = useState([]);
@@ -24,19 +25,49 @@ export default function CurrentTasks() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-6 px-4">
+    <div className="mechanic-layout min-h-screen py-8 px-4" style={{ position: 'relative', zIndex: 1 }}>
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-center text-orange-600 mb-6">Current Tasks</h1>
+        {/* Premium Page Header */}
+        <div className="mechanic-page-header">
+          <h1 className="mechanic-page-title">Current Tasks</h1>
+          <p className="mechanic-page-subtitle">Active vehicle inspection assignments</p>
+        </div>
 
-        {tasks.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-base text-gray-600">No vehicles assigned at the moment</p>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="mechanic-stat-card animate-fade-in-up">
+            <div className="mechanic-stat-icon">🔧</div>
+            <h2 className="mechanic-stat-label">Active Tasks</h2>
+            <p className="mechanic-stat-value">{tasks.length}</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {tasks.map(v => <CurrentTaskCard key={v._id} vehicle={v} />)}
+          <div className="mechanic-stat-card animate-fade-in-up">
+            <div className="mechanic-stat-icon">⏳</div>
+            <h2 className="mechanic-stat-label">Status</h2>
+            <p className="mechanic-stat-value" style={{ fontSize: '1.5rem' }}>{tasks.length > 0 ? 'In Progress' : 'No Tasks'}</p>
           </div>
-        )}
+          <div className="mechanic-stat-card animate-fade-in-up">
+            <div className="mechanic-stat-icon">📋</div>
+            <h2 className="mechanic-stat-label">Pending</h2>
+            <p className="mechanic-stat-value">{tasks.length}</p>
+          </div>
+        </div>
+
+        {/* Tasks Grid */}
+        <div className="mechanic-section animate-fade-in-up">
+          <div className="mechanic-section-header">
+            <h2 className="mechanic-section-title">All Current Assignments</h2>
+          </div>
+          {tasks.length === 0 ? (
+            <div className="mechanic-empty-state">
+              <div className="mechanic-empty-icon">🔍</div>
+              <p className="mechanic-empty-text">No vehicles assigned at the moment</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tasks.map(v => <CurrentTaskCard key={v._id} vehicle={v} />)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

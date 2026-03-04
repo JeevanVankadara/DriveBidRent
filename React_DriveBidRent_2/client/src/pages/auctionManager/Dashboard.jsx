@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
+import './AuctionManagerDashboard.css';
 
 export default function Dashboard() {
   const [data, setData] = useState({ pending: [], assigned: [], approved: [] });
@@ -49,154 +50,188 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 pt-12 pb-20">
-      <div className="max-w-7xl mx-auto px-4 space-y-20">
+    <div className="min-h-screen pt-8 pb-20 px-4">
+      <div className="max-w-7xl mx-auto">
+
+        {/* Page Header */}
+        <div className="manager-page-header">
+          <h1 className="manager-page-title">Auction Manager</h1>
+          <p className="manager-page-subtitle">Manage vehicle requests, inspections, and live auctions</p>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-fade-in-up">
+          <div className="manager-stat-card">
+            <div className="manager-stat-icon">📋</div>
+            <div className="manager-stat-label">Pending Requests</div>
+            <div className="manager-stat-value">{data.pending.length}</div>
+          </div>
+          <div className="manager-stat-card">
+            <div className="manager-stat-icon">🔧</div>
+            <div className="manager-stat-label">Under Inspection</div>
+            <div className="manager-stat-value">{data.assigned.length}</div>
+          </div>
+          <div className="manager-stat-card">
+            <div className="manager-stat-icon">🎯</div>
+            <div className="manager-stat-label">Live Auctions</div>
+            <div className="manager-stat-value">{data.approved.length}</div>
+          </div>
+        </div>
 
         {/* ==================== REQUESTS ==================== */}
-        <section>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center text-orange-600 mb-12">
-            Requests
-          </h2>
+        <section className="manager-section animate-fade-in-up mb-12">
+          <div className="manager-section-header">
+            <h2 className="manager-section-title">Pending Requests</h2>
+            {data.pending.length > 0 && (
+              <Link to="/auctionmanager/requests" className="manager-btn-secondary px-6 py-2 rounded-lg text-sm">
+                View All
+              </Link>
+            )}
+          </div>
 
           {data.pending.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-3xl shadow-lg">
-              <p className="text-2xl font-semibold text-gray-700">All caught up!</p>
-              <p className="text-gray-500 mt-2">No pending vehicle requests at the moment.</p>
+            <div className="manager-empty-state">
+              <div className="manager-empty-icon">📋</div>
+              <p className="manager-empty-text">All caught up! No pending vehicle requests.</p>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {data.pending.map((req) => (
-                  <div
-                    key={req._id}
-                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 border-2 border-orange-300 overflow-hidden flex flex-col h-full"
-                  >
-                    <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.pending.map((req) => (
+                <div key={req._id} className="manager-vehicle-card">
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={req.vehicleImage || '/images/placeholder.jpg'}
+                      alt={req.vehicleName}
+                      className="manager-vehicle-image"
+                    />
+                    <span className="manager-badge manager-badge-pending absolute top-4 left-4">
+                      PENDING
+                    </span>
+                  </div>
+
+                  <div className="manager-vehicle-content">
+                    <h3 className="manager-vehicle-title">{req.vehicleName}</h3>
+                    <div className="manager-vehicle-info">
+                      <div className="manager-vehicle-info-item">
+                        <span className="manager-vehicle-info-label">Seller:</span>
+                        <span className="manager-vehicle-info-value">
+                          {req.sellerId?.firstName} {req.sellerId?.lastName}
+                        </span>
+                      </div>
+                      <div className="manager-vehicle-info-item">
+                        <span className="manager-vehicle-info-label">Location:</span>
+                        <span className="manager-vehicle-info-value">{req.sellerId?.city || 'Not specified'}</span>
+                      </div>
+                      
+                      {/* Documentation Quick View */}
+                      {req.vehicleDocumentation && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs font-semibold text-gray-600 mb-2">Documents:</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {req.vehicleDocumentation.registrationNumber && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                ✓ RC
+                              </span>
+                            )}
+                            {req.vehicleDocumentation.vinNumber && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                                ✓ VIN
+                              </span>
+                            )}
+                            {req.vehicleDocumentation.insuranceStatus === 'Valid' && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                                ✓ Insurance
+                              </span>
+                            )}
+                            {req.vehicleDocumentation.pollutionCertificate === 'Valid' && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                                ✓ PUC
+                              </span>
+                            )}
+                            {req.vehicleDocumentation.accidentHistory && (
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
+                                ⚠ Accident
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <Link
+                      to={`/auctionmanager/assign-mechanic/${req._id}`}
+                      className="manager-btn-primary w-full text-center block"
+                    >
+                      Assign Mechanic
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ==================== PENDING INSPECTIONS ==================== */}
+        <section className="manager-section animate-fade-in-up mb-12">
+          <div className="manager-section-header">
+            <h2 className="manager-section-title">Pending Inspections</h2>
+            {data.assigned.length > 0 && (
+              <Link to="/auctionmanager/pending" className="manager-btn-secondary px-6 py-2 rounded-lg text-sm">
+                View All
+              </Link>
+            )}
+          </div>
+
+          {data.assigned.length === 0 ? (
+            <div className="manager-empty-state">
+              <div className="manager-empty-icon">🔧</div>
+              <p className="manager-empty-text">No vehicles awaiting inspection report</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.assigned.map((car) => {
+                const hasReview = !!(car.mechanicReview && (car.mechanicReview.mechanicalCondition || car.mechanicReview.bodyCondition));
+                return (
+                  <div key={car._id} className="manager-vehicle-card">
+                    <div className="relative overflow-hidden">
                       <img
-                        src={req.vehicleImage || '/images/placeholder.jpg'}
-                        alt={req.vehicleName}
-                        className="w-full h-56 object-cover"
+                        src={car.vehicleImage}
+                        alt={car.vehicleName}
+                        className="manager-vehicle-image"
                       />
-                      <span className="absolute top-4 left-4 bg-orange-600 text-white font-bold px-5 py-2 rounded-full text-sm shadow-lg">
-                        PENDING
+                      <span className={`manager-badge absolute top-4 left-4 ${hasReview ? 'manager-badge-success' : 'manager-badge-warning'}`}>
+                        {hasReview ? 'REVIEW COMPLETE' : 'AWAITING REPORT'}
                       </span>
                     </div>
 
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">{req.vehicleName}</h3>
-                      <div className="space-y-3 text-gray-700 flex-grow">
-                        <p className="text-sm">
-                          <span className="font-semibold">Seller:</span> {req.sellerId?.firstName} {req.sellerId?.lastName}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-semibold">Location:</span> {req.sellerId?.city || 'Not specified'}
-                        </p>
-                        
-                        {/* Documentation Quick View */}
-                        {req.vehicleDocumentation && (
-                          <div className="mt-2 pt-2 border-t border-orange-200">
-                            <p className="text-xs font-semibold text-gray-600 mb-2">Documentation:</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {req.vehicleDocumentation.registrationNumber && (
-                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
-                                  ✓ RC
-                                </span>
-                              )}
-                              {req.vehicleDocumentation.vinNumber && (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
-                                  ✓ VIN
-                                </span>
-                              )}
-                              {req.vehicleDocumentation.insuranceStatus === 'Valid' && (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
-                                  ✓ Insurance
-                                </span>
-                              )}
-                              {req.vehicleDocumentation.pollutionCertificate === 'Valid' && (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
-                                  ✓ PUC
-                                </span>
-                              )}
-                              {req.vehicleDocumentation.accidentHistory && (
-                                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">
-                                  ⚠ Accident
-                                </span>
-                              )}
+                    <div className="manager-vehicle-content">
+                      <h3 className="manager-vehicle-title">{car.vehicleName}</h3>
+                      <div className="manager-vehicle-info">
+                        <div className="manager-vehicle-info-item">
+                          <span className="manager-vehicle-info-label">Seller:</span>
+                          <span className="manager-vehicle-info-value">
+                            {car.sellerId?.firstName} {car.sellerId?.lastName}
+                          </span>
+                        </div>
+                        <div className="manager-vehicle-info-item">
+                          <span className="manager-vehicle-info-label">Location:</span>
+                          <span className="manager-vehicle-info-value">{car.sellerId?.city || 'Not specified'}</span>
+                        </div>
+                        {hasReview && (
+                          <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <strong className="block text-xs text-green-800 font-semibold mb-1">Mechanic's Review:</strong>
+                            <div className="text-xs text-green-700 line-clamp-2">
+                              {car.mechanicReview?.mechanicalCondition || car.mechanicReview?.bodyCondition || 'Review submitted'}
                             </div>
                           </div>
                         )}
                       </div>
 
                       <Link
-                        to={`/auctionmanager/assign-mechanic/${req._id}`}
-                        className="mt-6 w-full text-center bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl transition transform hover:scale-105 shadow-md"
-                      >
-                        Assign Mechanic
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center mt-12">
-                <Link to="/auctionmanager/requests" className="text-orange-600 font-bold text-xl hover:text-orange-700 underline">
-                  View All Requests →
-                </Link>
-              </div>
-            </>
-          )}
-        </section>
-
-        {/* ==================== PENDING INSPECTIONS ==================== */}
-        <section className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl p-10">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center text-amber-700 mb-12">
-            Pending Inspections
-          </h2>
-
-          {data.assigned.length === 0 ? (
-            <p className="text-center text-xl text-gray-600 py-10">No vehicles awaiting inspection report</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {data.assigned.map((car) => {
-                const hasReview = !!(car.mechanicReview && (car.mechanicReview.mechanicalCondition || car.mechanicReview.bodyCondition));
-                return (
-                  <div
-                    key={car._id}
-                    className={`bg-white rounded-2xl ${hasReview ? 'shadow-md' : 'shadow-lg hover:shadow-2xl'} transition-all duration-300 transform hover:-translate-y-3 ${hasReview ? 'border-2 border-green-300' : 'border-2 border-amber-300'} overflow-hidden flex flex-col h-full`}
-                  >
-                    <div className="relative">
-                      <img
-                        src={car.vehicleImage}
-                        alt={car.vehicleName}
-                        className="w-full h-56 object-cover"
-                      />
-                      <span className={`absolute top-4 left-4 text-white font-bold px-5 py-2 rounded-full text-sm shadow-lg ${hasReview ? 'bg-green-600' : 'bg-amber-600'}`}>
-                        {hasReview ? 'Inspection Done' : 'Awaiting Report'}
-                      </span>
-                    </div>
-
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">{car.vehicleName}</h3>
-                      <div className="space-y-3 text-gray-700 flex-grow">
-                        <p className="text-sm">
-                          <span className="font-semibold">Seller:</span> {car.sellerId?.firstName} {car.sellerId?.lastName}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-semibold">Location:</span> {car.sellerId?.city || 'Not specified'}
-                        </p>
-                        {hasReview && (
-                          <div className="mt-3 p-3 bg-green-50 rounded-md text-sm text-green-800">
-                            <strong className="block">Mechanic's Summary:</strong>
-                            <div className="truncate">{car.mechanicReview?.mechanicalCondition || car.mechanicReview?.bodyCondition || 'Review submitted'}</div>
-                          </div>
-                        )}
-                      </div>
-
-                      <Link
                         to={`/auctionmanager/pending-car-details/${car._id}`}
-                        className={`${hasReview ? 'mt-6 w-full text-center bg-green-600 hover:bg-green-700' : 'mt-6 w-full text-center bg-amber-600 hover:bg-amber-700'} text-white font-bold py-3.5 rounded-xl transition transform hover:scale-105 shadow-md`}
+                        className={`${hasReview ? 'manager-btn-success' : 'manager-btn-primary'} w-full text-center block`}
                       >
-                        View Details
+                        {hasReview ? 'Review & Approve' : 'View Details'}
                       </Link>
                     </div>
                   </div>
@@ -207,71 +242,67 @@ export default function Dashboard() {
         </section>
 
         {/* ==================== LIVE AUCTIONS ==================== */}
-        <section>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center text-green-600 mb-12">
-            Live Auctions
-          </h2>
+        <section className="manager-section animate-fade-in-up">
+          <div className="manager-section-header">
+            <h2 className="manager-section-title">Live Auctions</h2>
+            {data.approved.length > 0 && (
+              <Link to="/auctionmanager/approved" className="manager-btn-success px-6 py-2 rounded-lg text-sm">
+                View All
+              </Link>
+            )}
+          </div>
 
           {data.approved.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-3xl shadow-lg">
-              <p className="text-2xl font-semibold text-gray-700">No active auctions</p>
-              <p className="text-gray-500 mt-2">Approved vehicles will appear here when auctions go live</p>
+            <div className="manager-empty-state">
+              <div className="manager-empty-icon">🎯</div>
+              <p className="manager-empty-text">No active auctions. Approved vehicles will appear here when auctions go live.</p>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {data.approved.map((car) => (
-                  <div
-                    key={car._id}
-                    className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-4 border-2 border-green-300"
-                  >
-                    <div className="relative">
-                      <img
-                        src={car.vehicleImage}
-                        alt={car.vehicleName}
-                        className="w-full h-60 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      <span className="absolute bottom-4 left-4 bg-green-600 text-white font-bold px-6 py-2 rounded-r-full shadow-lg">
-                        LIVE
-                      </span>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.approved.map((car) => (
+                <div key={car._id} className="manager-vehicle-card">
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={car.vehicleImage}
+                      alt={car.vehicleName}
+                      className="manager-vehicle-image"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <span className="manager-badge manager-badge-success absolute top-4 left-4 animate-pulse">
+                      🔴 LIVE
+                    </span>
+                  </div>
 
-                    <div className="p-6">
-                      <h3 className="text-2xl font-bold text-gray-800 mb-4">{car.vehicleName}</h3>
+                  <div className="manager-vehicle-content">
+                    <h3 className="manager-vehicle-title">{car.vehicleName}</h3>
 
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-gray-50 rounded-lg p-4 text-center">
-                          <p className="text-gray-600 text-sm">Year</p>
-                          <p className="text-xl font-bold text-gray-800">{car.year}</p>
+                    <div className="manager-vehicle-info mb-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Year</p>
+                          <p className="text-lg font-bold text-gray-800">{car.year}</p>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-4 text-center">
-                          <p className="text-gray-600 text-sm">Mileage</p>
-                          <p className="text-xl font-bold text-gray-800">{car.mileage.toLocaleString()} km</p>
-                        </div>
-                        <div className="bg-green-50 rounded-lg p-4 text-center col-span-2">
-                          <p className="text-gray-600 text-sm">Starting Bid</p>
-                          <p className="text-2xl font-bold text-green-600">₹{car.startingBid.toLocaleString()}</p>
+                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Mileage</p>
+                          <p className="text-lg font-bold text-gray-800">{car.mileage.toLocaleString()} km</p>
                         </div>
                       </div>
-
-                      <Link
-                        to={`/auctionmanager/view-bids/${car._id}`}
-                        className="w-full block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg"
-                      >
-                        View Live Bids
-                      </Link>
+                      <div className="bg-green-50 rounded-lg p-3 text-center mt-3 border border-green-200">
+                        <p className="text-xs text-gray-600 mb-1">Starting Bid</p>
+                        <p className="text-xl font-bold text-green-600">₹{car.startingBid.toLocaleString()}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
 
-              <div className="text-center mt-12">
-                <Link to="/auctionmanager/approved" className="text-green-600 font-bold text-xl hover:text-green-700 underline">
-                  See All Live Auctions →
-                </Link>
-              </div>
-            </>
+                    <Link
+                      to={`/auctionmanager/view-bids/${car._id}`}
+                      className="manager-btn-success w-full text-center block"
+                    >
+                      View Live Bids
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </section>
 

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Component } from 'react';
 import Navbar from './components/Navbar';
 import Footer from '../components/Footer';
+import './AuctionManagerDashboard.css';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -43,9 +44,9 @@ class ErrorBoundary extends Component {
 export default function AuctionManagerLayout() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen flex flex-col">
+      <div className="manager-layout min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 pt-16 bg-gray-50">
+        <main className="flex-1 pt-20 relative z-10">
           <Outlet />
         </main>
         <Footer />

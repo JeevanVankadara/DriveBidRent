@@ -149,7 +149,10 @@ router.post('/submit-review/:id', mechanicMiddleware, async (req, res) => {
     const { mechanicalCondition, bodyCondition, recommendations, conditionRating } = req.body;
     await AuctionRequest.findByIdAndUpdate(req.params.id, {
       mechanicReview: { mechanicalCondition, bodyCondition, recommendations, conditionRating },
-      reviewStatus: 'completed'
+      reviewStatus: 'completed',
+      'vehicleDocumentation.documentsVerified': true,
+      'vehicleDocumentation.verificationDate': new Date(),
+      'vehicleDocumentation.verifiedBy': req.user._id
     });
     res.json({ success: true, message: 'Review submitted', redirect: '/mechanic/dashboard' });
   } catch (err) {

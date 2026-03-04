@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useWishlist from '../../hooks/useWishlist';
+import './BuyerDashboard.css';
 
 
 export default function Wishlist() {
@@ -30,23 +31,22 @@ export default function Wishlist() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="relative h-72 md:h-80 lg:h-96 bg-cover bg-center text-white" style={{ backgroundImage: "url('/images/wishlist-hero.jpg')", backgroundColor: '#403a2e' }}>
-        <div className="absolute inset-0 bg-black/55" />
-        <div className="relative z-10 px-6 text-center flex items-center justify-center h-full">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight break-words">Your <span className="text-orange-500 font-black">Wishlist</span></h1>
-            <p className="mt-3 text-lg md:text-xl font-medium text-gray-100">All your favorite auctions and rentals in one place.</p>
-          </div>
+    <div className="relative" style={{ zIndex: 1 }}>
+      <section className="buyer-hero">
+        <div className="buyer-hero-content">
+          <h1 className="buyer-hero-title">Your <span className="font-black">Wishlist</span></h1>
+          <p className="buyer-hero-subtitle">All your favorite auctions and rentals in one place.</p>
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-transparent" />
       </section>
 
       <section className="py-16 max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-orange-500 mb-8 text-left">Wishlist - Auctions</h2>
+        <h2 className="text-4xl font-bold buyer-gradient-text mb-8 text-left">Wishlist - Auctions</h2>
 
         {auctions.length === 0 ? (
-          <p className="text-center text-xl text-gray-600 py-10">No auctions in your wishlist yet.</p>
+          <div className="buyer-empty-state">
+            <div className="buyer-empty-icon">❤️</div>
+            <p className="buyer-empty-text">No auctions in your wishlist yet.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {auctions.map((auction, idx) => {
@@ -99,10 +99,13 @@ export default function Wishlist() {
 
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-orange-500 mb-8 text-left">Wishlist - Rentals</h2>
+          <h2 className="text-4xl font-bold buyer-gradient-text mb-8 text-left">Wishlist - Rentals</h2>
 
           {rentals.length === 0 ? (
-            <p className="text-center text-xl text-gray-600 py-10">No rentals in your wishlist yet.</p>
+            <div className="buyer-empty-state">
+              <div className="buyer-empty-icon">🚗</div>
+              <p className="buyer-empty-text">No rentals in your wishlist yet.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {rentals.map((rental, idx) => {

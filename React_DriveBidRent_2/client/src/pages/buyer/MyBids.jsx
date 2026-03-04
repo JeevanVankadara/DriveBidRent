@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMyBids } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
+import './BuyerDashboard.css';
 
 export default function MyBids() {
   const [auctionsWithBids, setAuctionsWithBids] = useState([]);
@@ -77,8 +78,8 @@ export default function MyBids() {
       <div className="max-w-7xl mx-auto px-5 py-16">
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-600 p-4 rounded-lg mb-8">
-            {error}
+          <div className="buyer-section animate-fade-in-up" style={{ backgroundColor: '#fee2e2', border: '2px solid #dc2626', marginBottom: '2rem' }}>
+            <p className="text-red-600 text-center font-semibold">{error}</p>
           </div>
         )}
 
@@ -87,14 +88,14 @@ export default function MyBids() {
             {auctionsWithBids.map((auctionBid) => (
               <div
                 key={auctionBid.auction?._id}
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row overflow-hidden border border-gray-200"
+                className="buyer-card animate-fade-in-up flex flex-col md:flex-row overflow-hidden"
               >
                 {/* IMAGE */}
-                <div className="md:w-80 w-full h-56 md:h-auto">
+                <div className="md:w-80 w-full h-56 md:h-auto overflow-hidden">
                   <img
                     src={auctionBid.auction?.vehicleImage}
                     alt={auctionBid.auction?.vehicleName}
-                    className="w-full h-full object-cover"
+                    className="buyer-card-image w-full h-full"
                     onError={(e) =>
                       (e.target.src =
                         "https://placehold.co/400x300/f3f4f6/6b7280?text=No+Image")
@@ -103,21 +104,21 @@ export default function MyBids() {
                 </div>
 
                 {/* CONTENT */}
-                <div className="flex-1 p-6 flex flex-col justify-between">
+                <div className="flex-1 p-6 flex flex-col justify-between buyer-card-content">
                   {/* HEADER */}
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-800">
+                      <h3 className="buyer-card-title">
                         {auctionBid.auction?.vehicleName}
                       </h3>
-                      <p className="text-gray-500 text-sm">
+                      <p className="buyer-card-text">
                         Seller: {auctionBid.seller?.firstName}{" "}
                         {auctionBid.seller?.lastName}
                       </p>
                     </div>
 
                     <span
-                      className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusStyle(
+                      className={`buyer-badge ${getStatusStyle(
                         auctionBid.bidStatus
                       )}`}
                     >
@@ -165,7 +166,7 @@ export default function MyBids() {
                     {auctionBid.bidStatus !== "ended" && (
                       <Link
                         to={`/buyer/auctions/${auctionBid.auction?._id}`}
-                        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                        className="buyer-btn-secondary px-6 py-3 rounded-lg font-semibold"
                       >
                         View Auction
                       </Link>
@@ -174,7 +175,7 @@ export default function MyBids() {
                     {auctionBid.bidStatus === "active" && (
                       <Link
                         to={`/buyer/auctions/${auctionBid.auction?._id}`}
-                        className="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition"
+                        className="buyer-btn-primary px-6 py-3 rounded-lg font-semibold"
                       >
                         Place New Bid
                       </Link>
@@ -186,14 +187,15 @@ export default function MyBids() {
           </div>
         ) : (
           // NO BIDS STATE
-          <div className="text-center bg-white p-10 rounded-xl shadow-md">
-            <h3 className="text-3xl font-bold text-gray-800 mb-3">No Bids Yet</h3>
+          <div className="buyer-empty-state">
+            <div className="buyer-empty-icon">🚗</div>
+            <p className="buyer-empty-text mb-4">No Bids Yet</p>
             <p className="text-gray-600 mb-6">
-              You haven’t participated in any auctions yet.
+              You haven't participated in any auctions yet.
             </p>
             <Link
               to="/buyer/auctions"
-              className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="buyer-btn-primary px-8 py-4 rounded-lg font-semibold inline-block"
             >
               Explore Available Auctions →
             </Link>

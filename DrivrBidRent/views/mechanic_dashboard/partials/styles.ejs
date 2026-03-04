@@ -1,45 +1,134 @@
 <style>
-  /* ===== HEADER STYLES ===== */
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #ff6b00;
-    color: white;
+  /* ==========================================
+     ULTRA PREMIUM MECHANIC DASHBOARD STYLES
+     Orange & White Dominant with Premium Look
+     ========================================== */
+  
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap");
+
+  /* Root Variables - Premium Orange Theme */
+  :root {
+    /* Primary Orange Palette */
+    --orange-50: #fff7ed;
+    --orange-100: #ffedd5;
+    --orange-200: #fed7aa;
+    --orange-300: #fdba74;
+    --orange-400: #fb923c;
+    --orange-500: #f97316;
+    --orange-600: #ea580c;
+    --orange-700: #c2410c;
+    --orange-800: #9a3412;
+    --orange-900: #7c2d12;
+    
+    /* Advanced Orange Gradients */
+    --orange-gradient-primary: linear-gradient(135deg, #ff8a3d 0%, #ff6b35 50%, #ff4500 100%);
+    --orange-gradient-soft: linear-gradient(135deg, #ffe8d9 0%, #ffd4b3 100%);
+    --orange-gradient-vibrant: linear-gradient(135deg, #ff7425 0%, #ff5500 50%, #ff3300 100%);
+    --orange-gradient-sunset: linear-gradient(135deg, #ff9a56 0%, #ff6b3d 50%, #ff4522 100%);
+    --orange-glow: rgba(255, 107, 0, 0.35);
+    --orange-glow-strong: rgba(255, 107, 0, 0.5);
+    
+    /* Complementary Accent Colors */
+    --accent-blue: #3b82f6;
+    --accent-blue-light: #60a5fa;
+    --accent-purple: #8b5cf6;
+    --accent-teal: #14b8a6;
+    --accent-green: #10b981;
+    --accent-pink: #ec4899;
+    
+    /* Neutrals - Enhanced */
+    --white-pure: #ffffff;
+    --white-soft: #fefefe;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Advanced Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-orange: 0 10px 30px -5px rgba(255, 107, 0, 0.3);
+    --shadow-orange-lg: 0 20px 40px -10px rgba(255, 107, 0, 0.4);
+    --shadow-orange-xl: 0 30px 60px -15px rgba(255, 107, 0, 0.5);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
-  .logo .logo-text {
-    font-size: 24px;
-    font-weight: bold;
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.3s;
-  }
-
-  .logo .logo-text:hover {
-    color: #ffcc00;
-  }
-
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 20px;
+  * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
   }
 
-  nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
+  /* ===== PREMIUM BODY BACKGROUND ===== */
+  body {
+    font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background: 
+      radial-gradient(circle at 10% 20%, rgba(255, 140, 61, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.03) 0%, transparent 60%),
+      linear-gradient(135deg, #ffffff 0%, #fff9f5 30%, #fff5ed 60%, #ffffff 100%);
+    background-attachment: fixed;
+    color: var(--gray-900);
+    font-weight: 500;
+    position: relative;
+    overflow-x: hidden;
   }
 
-  nav ul li a:hover {
-    color: #ffcc00;
-    transform: scale(1.05);
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+      repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(255, 107, 0, 0.015) 60px, rgba(255, 107, 0, 0.015) 120px),
+      repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(59, 130, 246, 0.01) 60px, rgba(59, 130, 246, 0.01) 120px);
+    pointer-events: none;
+    z-index: 0;
+    animation: backgroundShift 60s linear infinite;
   }
 
+  @keyframes backgroundShift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+  }
 
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    animation: floatGlow 20s ease-in-out infinite;
+  }
+
+  @keyframes floatGlow {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+    25% { transform: translate(-100px, 100px) scale(1.1); opacity: 0.5; }
+    50% { transform: translate(-50px, -50px) scale(0.9); opacity: 0.6; }
+    75% { transform: translate(50px, 50px) scale(1.05); opacity: 0.55; }
+  }
 </style>

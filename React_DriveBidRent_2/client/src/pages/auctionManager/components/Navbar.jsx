@@ -22,12 +22,12 @@ export default function Navbar() {
   const isActive = (path) => currentPath.includes(path);
 
   return (
-    <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
+    <nav className="manager-navbar fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           <Link 
             to="/auctionmanager/dashboard" 
-            className="text-2xl font-bold text-orange-600"
+            className="manager-logo"
           >
             DriveBidRent
           </Link>
@@ -35,50 +35,40 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               to="/auctionmanager/dashboard" 
-              className={`font-medium transition ${
-                isActive('/dashboard') 
-                  ? 'text-orange-600' 
-                  : 'text-gray-700 hover:text-orange-600'
+              className={`manager-nav-link ${
+                isActive('/dashboard') ? 'active' : ''
               }`}
             >
               Dashboard
             </Link>
             <Link 
               to="/auctionmanager/requests" 
-              className={`font-medium transition ${
-                isActive('/requests') 
-                  ? 'text-orange-600' 
-                  : 'text-gray-700 hover:text-orange-600'
+              className={`manager-nav-link ${
+                isActive('/requests') ? 'active' : ''
               }`}
             >
               Requests
             </Link>
             <Link 
               to="/auctionmanager/pending" 
-              className={`font-medium transition ${
-                isActive('/pending') 
-                  ? 'text-orange-600' 
-                  : 'text-gray-700 hover:text-orange-600'
+              className={`manager-nav-link ${
+                isActive('/pending') ? 'active' : ''
               }`}
             >
               Pending Cars
             </Link>
             <Link 
               to="/auctionmanager/approved" 
-              className={`font-medium transition ${
-                isActive('/approved') 
-                  ? 'text-orange-600' 
-                  : 'text-gray-700 hover:text-orange-600'
+              className={`manager-nav-link ${
+                isActive('/approved') ? 'active' : ''
               }`}
             >
               Approved Cars
             </Link>
             <Link 
               to="/auctionmanager/chats" 
-              className={`font-medium transition ${
-                isActive('/chats') 
-                  ? 'text-orange-600' 
-                  : 'text-gray-700 hover:text-orange-600'
+              className={`manager-nav-link ${
+                isActive('/chats') ? 'active' : ''
               }`}
             >
               Chats
@@ -88,13 +78,13 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             <Link
               to="/auctionmanager/profile"
-              className="text-orange-600 font-medium hover:text-orange-700 transition"
+              className="manager-nav-link"
             >
               Profile
             </Link>
             <button
               onClick={handleLogout}
-              className="bg-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-700 transition"
+              className="manager-btn-primary px-6 py-2 rounded-lg text-sm"
             >
               Logout
             </button>

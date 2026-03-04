@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { changePassword } from '../../../services/mechanic.services';
 import useProfile from '../../../hooks/useProfile';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import '../MechanicDashboard.css';
 
 export default function Profile() {
   const { profile: user, loading } = useProfile();
@@ -85,51 +86,115 @@ export default function Profile() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8 px-4">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-orange-600 mb-6">My Profile</h2>
+    <div className="mechanic-layout min-h-screen py-8 px-4" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="max-w-6xl mx-auto">
+        {/* Premium Page Header */}
+        <div className="mechanic-page-header">
+          <h1 className="mechanic-page-title">My Profile</h1>
+          <p className="mechanic-page-subtitle">Manage your account and security settings</p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-orange-600 pb-2">Personal Information</h3>
-            <div className="space-y-3 text-sm">
-              <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
-              <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Phone:</strong> {user?.phone || '—'}</p>
-              <p><strong>Shop:</strong> {user?.shopName || '—'}</p>
-              <p><strong>Experience:</strong> {user?.experienceYears} years</p>
-              <p><strong>Services:</strong> {user?.repairCars && user?.repairBikes ? 'Cars & Bikes' : user?.repairCars ? 'Cars' : 'Bikes'}</p>
-              <p><strong>Status:</strong> <span className={`font-bold ${user?.approved_status === 'Yes' ? 'text-green-600' : 'text-amber-600'}`}>
-                {user?.approved_status === 'Yes' ? 'Approved' : 'Pending Approval'}
-              </span></p>
+        {/* Profile Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="mechanic-stat-card animate-fade-in-up">
+            <div className="mechanic-stat-icon">👤</div>
+            <h2 className="mechanic-stat-label">Status</h2>
+            <p className="mechanic-stat-value" style={{ fontSize: '1.5rem', background: user?.approved_status === 'Yes' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              {user?.approved_status === 'Yes' ? 'Approved' : 'Pending'}
+            </p>
+          </div>
+          <div className="mechanic-stat-card animate-fade-in-up">
+            <div className="mechanic-stat-icon">🔧</div>
+            <h2 className="mechanic-stat-label">Experience</h2>
+            <p className="mechanic-stat-value">{user?.experienceYears} <span style={{ fontSize: '1.25rem' }}>Years</span></p>
+          </div>
+          <div className="mechanic-stat-card animate-fade-in-up">
+            <div className="mechanic-stat-icon">🛠️</div>
+            <h2 className="mechanic-stat-label">Services</h2>
+            <p className="mechanic-stat-value" style={{ fontSize: '1.25rem' }}>{user?.repairCars && user?.repairBikes ? 'Cars & Bikes' : user?.repairCars ? 'Cars' : 'Bikes'}</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Personal Information Card */}
+          <div className="mechanic-section animate-fade-in-up">
+            <div className="mechanic-section-header">
+              <h3 className="mechanic-section-title" style={{ fontSize: '1.5rem' }}>Personal Information</h3>
+            </div>
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-lg">
+                <span className="font-semibold text-gray-700">Name:</span>
+                <span className="text-gray-900 font-bold">{user?.firstName} {user?.lastName}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-lg">
+                <span className="font-semibold text-gray-700">Email:</span>
+                <span className="text-gray-900 font-bold">{user?.email}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-lg">
+                <span className="font-semibold text-gray-700">Phone:</span>
+                <span className="text-gray-900 font-bold">{user?.phone || '—'}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-lg">
+                <span className="font-semibold text-gray-700">Shop:</span>
+                <span className="text-gray-900 font-bold">{user?.shopName || '—'}</span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-orange-600 pb-2">Change Password</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input type="password" placeholder="Current Password" required value={form.oldPassword} onChange={e => handleOldPasswordChange(e.target.value)}
-                className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
+          {/* Change Password Card */}
+          <div className="mechanic-section animate-fade-in-up">
+            <div className="mechanic-section-header">
+              <h3 className="mechanic-section-title" style={{ fontSize: '1.5rem' }}>Change Password</h3>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <input type="password" placeholder="New Password" required value={form.newPassword} onChange={e => handleNewPasswordChange(e.target.value)}
-                  className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
+                <label className="block text-sm font-bold text-gray-700 mb-2">Current Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Enter current password" 
+                  required 
+                  value={form.oldPassword} 
+                  onChange={e => handleOldPasswordChange(e.target.value)}
+                  className="w-full p-3 text-sm border-2 border-gray-200 rounded-xl focus:border-orange-500 outline-none transition-all backdrop-blur-sm bg-white/80" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">New Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Enter new password" 
+                  required 
+                  value={form.newPassword} 
+                  onChange={e => handleNewPasswordChange(e.target.value)}
+                  className="w-full p-3 text-sm border-2 border-gray-200 rounded-xl focus:border-orange-500 outline-none transition-all backdrop-blur-sm bg-white/80" 
+                />
                 {passwordStrength && (
-                  <div className={`text-sm mt-2 ${passwordStrength.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`text-xs mt-2 px-3 py-2 rounded-lg ${passwordStrength.includes('✅') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                     {passwordStrength}
                   </div>
                 )}
               </div>
               <div>
-                <input type="password" placeholder="Confirm New Password" required value={form.confirmPassword} onChange={e => handleConfirmPasswordChange(e.target.value)}
-                  className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-orange-600 outline-none" />
+                <label className="block text-sm font-bold text-gray-700 mb-2">Confirm New Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Confirm new password" 
+                  required 
+                  value={form.confirmPassword} 
+                  onChange={e => handleConfirmPasswordChange(e.target.value)}
+                  className="w-full p-3 text-sm border-2 border-gray-200 rounded-xl focus:border-orange-500 outline-none transition-all backdrop-blur-sm bg-white/80" 
+                />
                 {passwordMatch && (
-                  <div className={`text-sm mt-2 ${passwordMatch.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`text-xs mt-2 px-3 py-2 rounded-lg ${passwordMatch.includes('✅') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                     {passwordMatch}
                   </div>
                 )}
               </div>
-              <button type="submit" disabled={submitting}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 text-sm rounded-lg transition disabled:opacity-60">
+              <button 
+                type="submit" 
+                disabled={submitting}
+                className="mechanic-btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+              >
                 {submitting ? 'Updating...' : 'Update Password'}
               </button>
             </form>

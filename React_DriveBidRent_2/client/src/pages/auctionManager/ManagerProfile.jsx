@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
+import './AuctionManagerDashboard.css';
 
 export default function ManagerProfile() {
   const [user, setUser] = useState({});
@@ -170,107 +171,137 @@ export default function ManagerProfile() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 font-montserrat">
-      <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">Auction Manager Profile</h2>
-
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-1 bg-white p-8 rounded-xl shadow-lg border border-orange-600">
-          <h3 className="text-2xl font-bold text-orange-600 mb-6 border-b-2 border-orange-600 pb-3">Personal Details</h3>
-          <form onSubmit={handlePhoneUpdate} className="space-y-6">
-            <div>
-              <strong className="block text-gray-700 mb-1">Full Name:</strong>
-              <span className="text-lg">{user.firstName} {user.lastName}</span>
-            </div>
-            <div>
-              <strong className="block text-gray-700 mb-1">Email:</strong>
-              <div className="bg-gray-100 p-3 rounded-lg text-gray-600 flex items-center justify-between">
-                <span>{user.email}</span>
-                <span className="text-xs text-gray-500 italic">(Cannot be changed)</span>
-              </div>
-            </div>
-            <div>
-              <strong className="block text-gray-700 mb-1">Role:</strong>
-              <div className="bg-gray-100 p-3 rounded-lg text-gray-700 font-semibold">AUCTION MANAGER</div>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Phone Number:</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
-                pattern="[0-9]{10}"
-                maxLength="10"
-                placeholder="Enter 10-digit phone number"
-                required
-              />
-              <small className="text-gray-600 block mt-1">10 digits only</small>
-            </div>
-            <button
-              type="submit"
-              disabled={updating}
-              className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-lg font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {updating ? 'Updating...' : 'Update Phone'}
-            </button>
-          </form>
+    <div className="pt-8 pb-20 px-4">
+      <div className="max-w-6xl mx-auto">
+        
+        <div className="manager-page-header">
+          <h1 className="manager-page-title">Manager Profile</h1>
+          <p className="manager-page-subtitle">Manage your personal details and security settings</p>
         </div>
 
-        <div className="flex-1 bg-white p-8 rounded-xl shadow-lg border border-orange-600">
-          <h3 className="text-2xl font-bold text-orange-600 mb-6 border-b-2 border-orange-600 pb-3">Change Password</h3>
-          <form onSubmit={handlePasswordChange} className="space-y-6">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Current Password:</label>
-              <input
-                type="password"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
-                placeholder="Enter your current password"
-                required
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Personal Details Section */}
+          <div className="manager-section">
+            <div className="manager-section-header">
+              <h3 className="manager-section-title text-2xl">Personal Details</h3>
             </div>
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">New Password:</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => handleNewPasswordChange(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
-                minLength="8"
-                required
-              />
-              <small className="text-gray-600 block mt-1">Must be at least 8 characters, include uppercase, number, special character</small>
-              {passwordStrength && (
-                <div className={`text-sm mt-2 ${passwordStrength.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
-                  {passwordStrength}
+            
+            <form onSubmit={handlePhoneUpdate} className="space-y-6">
+              <div className="manager-form-group">
+                <label className="manager-form-label">Full Name</label>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <span className="text-lg font-semibold text-gray-800">
+                    {user.firstName} {user.lastName}
+                  </span>
                 </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Confirm New Password:</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => handleConfirmPasswordChange(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
-                placeholder="Re-enter new password"
-                required
-              />
-              {passwordMatch && (
-                <div className={`text-sm mt-2 ${passwordMatch.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
-                  {passwordMatch}
+              </div>
+              
+              <div className="manager-form-group">
+                <label className="manager-form-label">Email Address</label>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between">
+                  <span className="text-gray-700">{user.email}</span>
+                  <span className="text-xs text-gray-500 italic">(Cannot be changed)</span>
                 </div>
-              )}
+              </div>
+              
+              <div className="manager-form-group">
+                <label className="manager-form-label">Role</label>
+                <div className="manager-badge manager-badge-primary inline-block px-6 py-3 text-base">
+                  AUCTION MANAGER
+                </div>
+              </div>
+              
+              <div className="manager-form-group">
+                <label className="manager-form-label">Phone Number</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="manager-form-input"
+                  pattern="[0-9]{10}"
+                  maxLength="10"
+                  placeholder="Enter 10-digit phone number"
+                  required
+                />
+                <small className="text-gray-600 block mt-1 text-sm">10 digits only</small>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={updating}
+                className="manager-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updating ? 'Updating...' : 'Update Phone'}
+              </button>
+            </form>
+          </div>
+
+          {/* Change Password Section */}
+          <div className="manager-section">
+            <div className="manager-section-header">
+              <h3 className="manager-section-title text-2xl">Change Password</h3>
             </div>
-            <button
-              type="submit"
-              disabled={updating}
-              className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-lg font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {updating ? 'Changing...' : 'Change Password'}
-            </button>
-          </form>
+            
+            <form onSubmit={handlePasswordChange} className="space-y-6">
+              <div className="manager-form-group">
+                <label className="manager-form-label">Current Password</label>
+                <input
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="manager-form-input"
+                  placeholder="Enter your current password"
+                  required
+                />
+              </div>
+              
+              <div className="manager-form-group">
+                <label className="manager-form-label">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => handleNewPasswordChange(e.target.value)}
+                  className="manager-form-input"
+                  minLength="8"
+                  placeholder="Enter new password"
+                  required
+                />
+                <small className="text-gray-600 block mt-1 text-sm">
+                  Must be at least 8 characters, include uppercase, number, special character
+                </small>
+                {passwordStrength && (
+                  <div className={`text-sm mt-2 font-semibold ${passwordStrength.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordStrength}
+                  </div>
+                )}
+              </div>
+              
+              <div className="manager-form-group">
+                <label className="manager-form-label">Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => handleConfirmPasswordChange(e.target.value)}
+                  className="manager-form-input"
+                  placeholder="Re-enter new password"
+                  required
+                />
+                {passwordMatch && (
+                  <div className={`text-sm mt-2 font-semibold ${passwordMatch.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordMatch}
+                  </div>
+                )}
+              </div>
+              
+              <button
+                type="submit"
+                disabled={updating}
+                className="manager-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updating ? 'Changing...' : 'Change Password'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

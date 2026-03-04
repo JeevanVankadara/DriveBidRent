@@ -11,6 +11,7 @@ import {
 import CarCard from "./components/CarCard";
 import HeroSlider from "./components/HeroSlider";
 import LoadingSpinner from "../components/LoadingSpinner";
+import './BuyerDashboard.css';
 
 const Dashboard = () => {
   const [featuredAuctions, setFeaturedAuctions] = useState([]);
@@ -63,7 +64,7 @@ const Dashboard = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="relative" style={{ zIndex: 1 }}>
       {/* Hero */}
       <HeroSlider />
 
@@ -110,7 +111,7 @@ const Dashboard = () => {
         <div className="text-center mt-12">
           <Link
             to="/buyer/auctions"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-full text-base font-bold transition-all shadow-md hover:shadow-lg"
+            className="buyer-btn-primary inline-flex items-center gap-2 px-10 py-4 rounded-full text-base shadow-md hover:shadow-lg"
           >
             Browse All Auctions
           </Link>
@@ -166,7 +167,7 @@ const Dashboard = () => {
           <div className="text-center mt-12">
             <Link
               to="/buyer/rentals"
-              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-full text-base font-bold transition-all shadow-md hover:shadow-lg"
+              className="buyer-btn-primary inline-flex items-center gap-2 px-10 py-4 rounded-full text-base shadow-md hover:shadow-lg"
             >
               Browse All Rentals
             </Link>
