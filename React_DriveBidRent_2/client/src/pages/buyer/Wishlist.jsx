@@ -1,20 +1,66 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  Heart, 
+  Gavel, 
+  Clock, 
+  Users, 
+  Zap,
+  ArrowUpRight
+} from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CarCard from './components/CarCard';
 import useWishlist from '../../hooks/useWishlist';
 import './BuyerDashboard.css';
 
+/**
+ * Empty State Component for a clean, professional look when no items exist.
+ */
+const EmptyState = ({ message, icon: Icon, type }) => (
+  <div className="flex flex-col items-center justify-center py-14 px-6 rounded-3xl bg-gray-50/50 border border-gray-100 animate-fadeIn">
+    <div className={`w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-sm mb-6 ${type === 'auction' ? 'text-orange-300' : 'text-indigo-300'}`}>
+      <Icon size={32} strokeWidth={1.5} />
+    </div>
+    <h3 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">Collection Empty</h3>
+    <p className="text-gray-500 text-center font-normal max-w-sm leading-relaxed">{message}</p>
+  </div>
+);
+
+/**
+ * Animated wrapper for each card with exit animation support.
+ */
+const AnimatedCard = ({ children, isRemoving }) => (
+  <div 
+    className={`transition-all duration-500 ease-in-out ${
+      isRemoving 
+        ? 'opacity-0 scale-90 -translate-y-4' 
+        : 'opacity-100 scale-100 translate-y-0'
+    }`}
+  >
+    {children}
+  </div>
+);
 
 export default function Wishlist() {
   const { auctions, rentals, loading, removeFromWishlist, loadWishlist } = useWishlist();
+  const [removingIds, setRemovingIds] = useState(new Set());
 
   useEffect(() => {
     loadWishlist();
   }, [loadWishlist]);
 
-  function removeFromWishlistHandler(id, type) {
-    removeFromWishlist(id, type);
-  }
+  const removeFromWishlistHandler = useCallback((id, type) => {
+    setRemovingIds(prev => new Set(prev).add(id));
+    
+    setTimeout(() => {
+      removeFromWishlist(id, type);
+      setRemovingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 450);
+  }, [removeFromWishlist]);
 
   function isAuctionEnded(auction) {
     if (!auction) return false;
@@ -28,131 +74,144 @@ export default function Wishlist() {
     return false;
   }
 
+  const visibleAuctionCount = (auctions?.length || 0) - [...removingIds].filter(id => auctions?.some(a => (a._id || a.id) === id)).length;
+  const visibleRentalCount = (rentals?.length || 0) - [...removingIds].filter(id => rentals?.some(r => (r._id || r.id) === id)).length;
+
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="relative" style={{ zIndex: 1 }}>
-      <section className="buyer-hero">
-        <div className="buyer-hero-content">
-          <h1 className="buyer-hero-title">Your <span className="font-black">Wishlist</span></h1>
-          <p className="buyer-hero-subtitle">All your favorite auctions and rentals in one place.</p>
+    <div className="bg-white min-h-screen font-sans selection:bg-orange-100 selection:text-orange-900">
+      
+      {/* HERO SECTION */}
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-20 pb-14 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiLz48L2c+PC9nPjwvc3ZnPg==')] pointer-events-none" />
+        
+        <div className="relative max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
+                Your <span className="text-orange-400">Wishlist</span>
+              </h1>
+              <p className="text-gray-400 max-w-lg text-base font-normal leading-relaxed">
+                Track your favorite auctions and rentals. Everything you've saved, all in one place.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+                <span className="text-3xl font-bold text-white tabular-nums transition-all duration-500">{visibleAuctionCount}</span>
+                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Auctions</span>
+              </div>
+              <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+                <span className="text-3xl font-bold text-white tabular-nums transition-all duration-500">{visibleRentalCount}</span>
+                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Rentals</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-16 max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold buyer-gradient-text mb-8 text-left">Wishlist - Auctions</h2>
-
-        {auctions.length === 0 ? (
-          <div className="buyer-empty-state">
-            <div className="buyer-empty-icon">❤️</div>
-            <p className="buyer-empty-text">No auctions in your wishlist yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {auctions.map((auction, idx) => {
-              const id = auction?._id || auction?.id || `auction-${idx}`;
-              const ended = isAuctionEnded(auction);
-              const auctionDateObj = auction?.auctionDate ? new Date(auction.auctionDate) : null;
-              const currentPrice = Number(auction?.currentHighestBid ?? auction?.startingBid ?? 0);
-              const finalPrice = auction?.finalPurchasePrice ?? null;
-
-              return (
-                <div key={id} className="relative bg-white border border-orange-500 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col">
-                  <button onClick={() => removeFromWishlistHandler(id, 'auction')} className="absolute top-4 right-4 z-10 text-3xl text-orange-500 hover:text-red-600 transition" aria-label="Remove from wishlist">♥</button>
-
-                  {ended && (
-                    <span className="absolute top-4 left-4 z-10 bg-red-600 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md">Auction Ended</span>
-                  )}
-
-                  <img src={auction?.vehicleImage || '/images/default-car.png'} alt={auction?.vehicleName || 'Vehicle Image'} className="w-full h-48 object-cover" />
-
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-bold text-orange-500 mb-3">{auction?.vehicleName || 'Untitled'}</h3>
-
-                    <p className="text-gray-600 text-sm mb-4">Auction Date: <strong>{auctionDateObj && !isNaN(auctionDateObj) ? auctionDateObj.toLocaleDateString() : 'Unknown'}</strong></p>
-
-                    <div className="bg-gray-50 p-5 rounded-lg space-y-2 text-sm flex-grow">
-                      <p><strong>Year:</strong> {auction?.year ?? '—'}</p>
-                      <p><strong>Mileage:</strong> {auction?.mileage != null ? `${auction.mileage.toLocaleString()} km` : '—'}</p>
-                      <p><strong>Condition:</strong> {auction?.condition ? (auction.condition.charAt(0).toUpperCase() + auction.condition.slice(1)) : '—'}</p>
-                      <p><strong>Starting Price:</strong> ₹{auction?.startingBid != null ? auction.startingBid.toLocaleString() : '—'}</p>
-                      {auction?.sellerId && (<p><strong>Seller:</strong> {auction.sellerId.firstName} {auction.sellerId.lastName}</p>)}
-                    </div>
-
-                    <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-300">
-                      <p className="text-sm font-semibold text-orange-700">{ended ? 'Final Price' : 'Current Highest Bid'}</p>
-                      <p className="text-2xl font-black text-orange-600">₹{(ended && finalPrice ? Number(finalPrice) : currentPrice).toLocaleString()}</p>
-                    </div>
-
-                    <div className="mt-6">
-                      {!ended && (
-                        <Link to={`/buyer/auctions/${id}`} className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-md">More Details</Link>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold buyer-gradient-text mb-8 text-left">Wishlist - Rentals</h2>
-
-          {rentals.length === 0 ? (
-            <div className="buyer-empty-state">
-              <div className="buyer-empty-icon">🚗</div>
-              <p className="buyer-empty-text">No rentals in your wishlist yet.</p>
+      <main className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-12 py-14">
+        
+        {/* AUCTIONS SECTION */}
+        <section className="mb-14">
+          <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500 shadow-sm">
+                <Gavel size={20} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                  Tracked <span className="text-orange-500 italic">Auctions</span>
+                </h2>
+              </div>
             </div>
+            <Link 
+              to="/buyer/auctions" 
+              className="group hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-orange-500 transition-all bg-white border border-gray-200 hover:border-orange-200 px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-300"
+            >
+              Browse Catalog
+              <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+          </div>
+
+          {!auctions || auctions.length === 0 ? (
+            <EmptyState 
+              message="No auctions in your vault. Secure your next acquisition today." 
+              icon={Zap} 
+              type="auction"
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {rentals.map((rental, idx) => {
-                const id = rental?._id || rental?.id || `rental-${idx}`;
-                return (
-                  <div key={id} className="bg-white border border-orange-500 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col">
-                    <button onClick={() => removeFromWishlistHandler(id, 'rental')} className="absolute top-4 right-4 z-10 text-3xl text-orange-500 hover:text-red-600 transition" aria-label="Remove from wishlist">♥</button>
-
-                    <img src={rental?.vehicleImage || '/images/default-car.png'} alt={rental?.vehicleName || 'Vehicle Image'} className="w-full h-48 object-cover" />
-
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h3 className="text-2xl font-bold text-orange-500 mb-3">{rental?.vehicleName || 'Untitled'}</h3>
-                      <p className="text-gray-600 text-sm mb-4">Cost/day: <strong>₹{rental?.costPerDay ?? '—'}</strong></p>
-
-                      <div className="bg-gray-50 p-5 rounded-lg space-y-2 text-sm flex-grow">
-                        {rental?.sellerId?.city && (<p><strong>City:</strong> {rental.sellerId.city}</p>)}
-                        <p><strong>Year:</strong> {rental?.year ?? '—'}</p>
-                        <p><strong>AC:</strong> {rental?.AC === 'available' ? 'Yes' : 'No'}</p>
-                        <p><strong>Capacity:</strong> {rental?.capacity ?? '—'} passengers</p>
-                        <p><strong>Driver:</strong> {rental?.driverAvailable ? 'Yes' : 'No'}</p>
-                        {rental?.sellerId && (<p><strong>Seller:</strong> {rental.sellerId.firstName} {rental.sellerId.lastName}</p>)}
-                      </div>
-
-                      <div className="mt-6 space-y-3">
-                        <Link
-                          to={`/buyer/rentals/${id}`}
-                          state={{ from: '/buyer/wishlist' }}
-                          className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg font-medium hover:bg-orange-600 transition shadow-md"
-                        >
-                          More Details
-                        </Link>
-                        <Link
-                          to={`/buyer/rentals/${id}`}
-                          state={{ from: '/buyer/wishlist', openRentModal: true }}
-                          className="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-medium hover:bg-green-700 transition shadow-md"
-                        >
-                          Rent It
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-orange-50/40 via-white to-gray-50/30 shadow-lg shadow-orange-100/20 border border-orange-100/40">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+                {auctions.map((auction, idx) => {
+                  const id = auction?._id || auction?.id || `auction-${idx}`;
+                  return (
+                    <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
+                      <CarCard
+                        item={auction}
+                        type="auction"
+                        isInWishlist={true}
+                        onToggleWishlist={() => removeFromWishlistHandler(id, 'auction')}
+                      />
+                    </AnimatedCard>
+                  );
+                })}
+              </div>
             </div>
           )}
-        </div>
-      </section>
+        </section>
+
+        {/* RENTALS SECTION */}
+        <section className="pb-10">
+          <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 shadow-sm">
+                <Users size={20} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                  Rental <span className="text-indigo-600 italic">Selection</span>
+                </h2>
+              </div>
+            </div>
+            <Link 
+              to="/buyer/rentals" 
+              className="group hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-indigo-600 transition-all bg-white border border-gray-200 hover:border-indigo-200 px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-300"
+            >
+              Discover Fleet
+              <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+          </div>
+
+          {!rentals || rentals.length === 0 ? (
+            <EmptyState 
+              message="The fleet is waiting. Save vehicles to compare and book your journey." 
+              icon={Clock} 
+              type="rental"
+            />
+          ) : (
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-50/40 via-white to-gray-50/30 shadow-lg shadow-indigo-100/20 border border-indigo-100/40">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+                {rentals.map((rental, idx) => {
+                  const id = rental?._id || rental?.id || `rental-${idx}`;
+                  return (
+                    <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
+                      <CarCard
+                        item={rental}
+                        type="rental"
+                        returnPath="/buyer/wishlist"
+                        isInWishlist={true}
+                        onToggleWishlist={() => removeFromWishlistHandler(id, 'rental')}
+                      />
+                    </AnimatedCard>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+      </main>
     </div>
   );
 }

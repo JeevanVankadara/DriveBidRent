@@ -1,4 +1,3 @@
-// client/src/pages/buyer/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -6,12 +5,11 @@ import {
   getWishlist,
   addToWishlist,
   removeFromWishlist,
-  getUnreadNotificationCount,
 } from "../../services/buyer.services";
 import CarCard from "./components/CarCard";
 import HeroSlider from "./components/HeroSlider";
 import LoadingSpinner from "../components/LoadingSpinner";
-import './BuyerDashboard.css';
+import { ChevronRight, LayoutGrid } from "lucide-react";
 
 const Dashboard = () => {
   const [featuredAuctions, setFeaturedAuctions] = useState([]);
@@ -26,10 +24,11 @@ const Dashboard = () => {
         const [dash, wl] = await Promise.all([
           getDashboardData(),
           getWishlist(),
-          getUnreadNotificationCount(),
         ]);
+        
         setFeaturedAuctions(dash.featuredAuctions || []);
         setFeaturedRentals(dash.featuredRentals || []);
+        
         const auctionIds = (wl.auctions || []).map((a) => a._id || a);
         const rentalIds = (wl.rentals || []).map((r) => r._id || r);
         setWishlist({ auctions: auctionIds, rentals: rentalIds });
@@ -41,7 +40,7 @@ const Dashboard = () => {
     };
 
     loadData(true);
-    const intervalId = setInterval(() => loadData(false), 2000);
+    const intervalId = setInterval(() => loadData(false), 5000);
     return () => clearInterval(intervalId);
   }, []);
 
@@ -51,10 +50,16 @@ const Dashboard = () => {
     try {
       if (isLiked) {
         await removeFromWishlist(id, type);
-        setWishlist((prev) => ({ ...prev, [key]: prev[key].filter((x) => x !== id) }));
+        setWishlist((prev) => ({ 
+          ...prev, 
+          [key]: prev[key].filter((x) => x !== id) 
+        }));
       } else {
         await addToWishlist(id, type);
-        setWishlist((prev) => ({ ...prev, [key]: [...prev[key], id] }));
+        setWishlist((prev) => ({ 
+          ...prev, 
+          [key]: [...prev[key], id] 
+        }));
       }
     } catch (err) {
       console.error("Wishlist toggle failed:", err);
@@ -64,93 +69,73 @@ const Dashboard = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="relative" style={{ zIndex: 1 }}>
-      {/* Hero */}
+    <div className="bg-white min-h-screen">
       <HeroSlider />
 
-      {/* Featured Auctions */}
-      <section className="py-14 sm:py-18 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="h-1 w-8 rounded-full bg-orange-500 inline-block" />
-              <span className="text-orange-500 font-bold text-xs tracking-widest uppercase">Live Now</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900">
-              Featured <span className="text-orange-500">Auctions</span>
-            </h2>
-          </div>
-          <Link
-            to="/buyer/auctions"
-            className="group inline-flex items-center gap-1.5 text-orange-500 hover:text-orange-600 font-semibold text-sm border border-orange-200 hover:border-orange-400 px-4 py-2 rounded-full transition-all"
-          >
-            View all
-            <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-        </div>
-
-        {featuredAuctions.length === 0 ? (
-          <EmptyState message="No auctions available right now." />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featuredAuctions.map((auction) => (
-              <CarCard
-                key={auction._id}
-                item={auction}
-                type="auction"
-                isInWishlist={wishlist.auctions.includes(auction._id)}
-                onToggleWishlist={() => handleWishlistToggle(auction._id, "auction")}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="text-center mt-12">
-          <Link
-            to="/buyer/auctions"
-            className="buyer-btn-primary inline-flex items-center gap-2 px-10 py-4 rounded-full text-base shadow-md hover:shadow-lg"
-          >
-            Browse All Auctions
-          </Link>
-        </div>
-      </section>
-
-      {/* Section divider */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
-      </div>
-
-      {/* Featured Rentals */}
-      <section className="py-14 sm:py-18 lg:py-20 bg-orange-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-10">
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pb-20 pt-12">
+        
+        <section className="py-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="h-1 w-8 rounded-full bg-orange-500 inline-block" />
-                <span className="text-orange-500 font-bold text-xs tracking-widest uppercase">Available Today</span>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                <span className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-ping" />
+                Live Opportunities
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900">
-                Featured <span className="text-orange-500">Rentals</span>
+              <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">
+                Featured <span className="text-orange-500 italic">Auctions</span>
+              </h2>
+            </div>
+            <Link
+              to="/buyer/auctions"
+              className="group flex items-center gap-2 text-gray-900 font-black text-sm uppercase tracking-wider hover:text-orange-600 transition-all border-b-2 border-transparent hover:border-orange-500 pb-1"
+            >
+              View all listings
+              <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+
+          {featuredAuctions.length === 0 ? (
+            <EmptyState message="No auctions available right now." />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-6 rounded-3xl bg-gradient-to-br from-orange-50/30 via-white to-gray-50/50 shadow-xl shadow-gray-100/50 border border-gray-100/50">
+              {featuredAuctions.map((auction) => (
+                <CarCard
+                  key={auction._id}
+                  item={auction}
+                  type="auction"
+                  isInWishlist={wishlist.auctions.includes(auction._id)}
+                  onToggleWishlist={() => handleWishlistToggle(auction._id, "auction")}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <div className="max-w-4xl mx-auto h-px bg-gradient-to-r from-transparent via-gray-100 to-transparent my-2" />
+
+        <section className="py-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-2">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                Available Rentals
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">
+                Elite <span className="text-orange-500 italic">Rentals</span>
               </h2>
             </div>
             <Link
               to="/buyer/rentals"
-              className="group inline-flex items-center gap-1.5 text-orange-500 hover:text-orange-600 font-semibold text-sm border border-orange-200 hover:border-orange-400 px-4 py-2 rounded-full transition-all"
+              className="group flex items-center gap-2 text-gray-900 font-black text-sm uppercase tracking-wider hover:text-orange-600 transition-all border-b-2 border-transparent hover:border-orange-500 pb-1"
             >
-              View all
-              <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              See all rentals
+              <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
           {featuredRentals.length === 0 ? (
             <EmptyState message="No rentals available right now." />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-6 rounded-3xl bg-gradient-to-br from-blue-50/30 via-white to-gray-50/50 shadow-xl shadow-gray-100/50 border border-gray-100/50">
               {featuredRentals.slice(0, 8).map((rental) => (
                 <CarCard
                   key={rental._id}
@@ -163,29 +148,19 @@ const Dashboard = () => {
               ))}
             </div>
           )}
-
-          <div className="text-center mt-12">
-            <Link
-              to="/buyer/rentals"
-              className="buyer-btn-primary inline-flex items-center gap-2 px-10 py-4 rounded-full text-base shadow-md hover:shadow-lg"
-            >
-              Browse All Rentals
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </div>
   );
 };
 
 const EmptyState = ({ message }) => (
-  <div className="flex flex-col items-center justify-center py-16 text-center">
-    <div className="w-16 h-16 rounded-full bg-orange-50 border-2 border-orange-100 flex items-center justify-center mb-4">
-      <svg className="w-7 h-7 text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
+  <div className="flex flex-col items-center justify-center py-24 px-6 rounded-[3rem] bg-gray-50 border-2 border-dashed border-gray-200">
+    <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-sm mb-6">
+      <LayoutGrid className="text-gray-200 w-10 h-10" />
     </div>
-    <p className="text-gray-400 text-lg">{message}</p>
+    <h3 className="text-2xl font-black text-gray-900 mb-2">Inventory Empty</h3>
+    <p className="text-gray-400 text-center max-w-xs font-medium">{message}</p>
   </div>
 );
 
