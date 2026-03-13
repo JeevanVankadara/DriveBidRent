@@ -1,46 +1,200 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Heart, 
   Gavel, 
   Clock, 
   Users, 
   Zap,
-  ArrowUpRight
+  ArrowUpRight,
+  Heart
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CarCard from './components/CarCard';
 import useWishlist from '../../hooks/useWishlist';
 import './BuyerDashboard.css';
 
-/**
- * Empty State Component for a clean, professional look when no items exist.
- */
+/* ─── Animated Counter ─────────────────────────────────────────────────── */
+function AnimatedCounter({ value }) {
+  const [display, setDisplay] = useState(value);
+  const [animating, setAnimating] = useState(false);
+  const prevRef = useRef(value);
+
+  useEffect(() => {
+    if (value === prevRef.current) return;
+    const from = prevRef.current;
+    const to = value;
+    prevRef.current = value;
+
+    const duration = 600;
+    const steps = Math.abs(from - to);
+    if (steps === 0) return;
+
+    const stepDuration = duration / steps;
+    const direction = to > from ? 1 : -1;
+    let current = from;
+    setAnimating(true);
+
+    const interval = setInterval(() => {
+      current += direction;
+      setDisplay(current);
+      if (current === to) {
+        clearInterval(interval);
+        setTimeout(() => setAnimating(false), 150);
+      }
+    }, stepDuration);
+
+    return () => clearInterval(interval);
+  }, [value]);
+
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        transition: 'transform 0.15s cubic-bezier(0.34,1.56,0.64,1), color 0.3s ease',
+        transform: animating ? 'scale(1.25)' : 'scale(1)',
+        color: animating ? '#f97316' : 'inherit',
+      }}
+    >
+      {display}
+    </span>
+  );
+}
+
+/* ─── Empty State ───────────────────────────────────────────────────────── */
 const EmptyState = ({ message, icon: Icon, type }) => (
-  <div className="flex flex-col items-center justify-center py-14 px-6 rounded-3xl bg-gray-50/50 border border-gray-100 animate-fadeIn">
-    <div className={`w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-sm mb-6 ${type === 'auction' ? 'text-orange-300' : 'text-indigo-300'}`}>
-      <Icon size={32} strokeWidth={1.5} />
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '64px 24px',
+    borderRadius: '24px',
+    background: type === 'auction'
+      ? 'linear-gradient(135deg, #fff7ed 0%, #ffffff 60%, #fef3c7 100%)'
+      : 'linear-gradient(135deg, #eef2ff 0%, #ffffff 60%, #e0e7ff 100%)',
+    border: `1px solid ${type === 'auction' ? '#fed7aa' : '#c7d2fe'}`,
+    animation: 'fadeSlideUp 0.5s ease forwards',
+  }}>
+    <div style={{
+      width: 72,
+      height: 72,
+      borderRadius: '50%',
+      background: '#fff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+      marginBottom: 20,
+      color: type === 'auction' ? '#fb923c' : '#818cf8',
+    }}>
+      <Icon size={28} strokeWidth={1.5} />
     </div>
-    <h3 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">Collection Empty</h3>
-    <p className="text-gray-500 text-center font-normal max-w-sm leading-relaxed">{message}</p>
+    <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 8, letterSpacing: '-0.3px' }}>
+      Nothing here yet
+    </h3>
+    <p style={{ color: '#6b7280', textAlign: 'center', maxWidth: 300, lineHeight: 1.6, fontSize: 14 }}>
+      {message}
+    </p>
   </div>
 );
 
-/**
- * Animated wrapper for each card with exit animation support.
- */
+/* ─── Animated Card Wrapper ─────────────────────────────────────────────── */
 const AnimatedCard = ({ children, isRemoving }) => (
-  <div 
-    className={`transition-all duration-500 ease-in-out ${
-      isRemoving 
-        ? 'opacity-0 scale-90 -translate-y-4' 
-        : 'opacity-100 scale-100 translate-y-0'
-    }`}
-  >
+  <div style={{
+    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+    opacity: isRemoving ? 0 : 1,
+    transform: isRemoving ? 'scale(0.88) translateY(-12px)' : 'scale(1) translateY(0)',
+    filter: isRemoving ? 'blur(4px)' : 'blur(0px)',
+    pointerEvents: isRemoving ? 'none' : 'auto',
+  }}>
     {children}
   </div>
 );
 
+/* ─── Section Header ────────────────────────────────────────────────────── */
+const SectionHeader = ({ icon: Icon, title, accent, accentColor, linkTo, linkLabel, linkHoverColor }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    paddingBottom: 20,
+    borderBottom: '1px solid #f1f5f9',
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: Icon ? 16 : 0 }}>
+      {Icon && (
+        <div style={{
+          width: 48,
+          height: 48,
+          borderRadius: 16,
+          background: accentColor === 'orange' ? '#fff7ed' : '#eef2ff',
+          border: `1px solid ${accentColor === 'orange' ? '#fed7aa' : '#c7d2fe'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: accentColor === 'orange' ? '#f97316' : '#6366f1',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        }}>
+          <Icon size={20} />
+        </div>
+      )}
+      <h2 style={{
+        fontSize: 32,
+        fontWeight: 800,
+        color: '#0f172a',
+        letterSpacing: '-0.8px',
+        lineHeight: 1.1,
+        fontFamily: "'Georgia', serif",
+      }}>
+        {title}{' '}
+        <span style={{
+          color: accentColor === 'orange' ? '#f97316' : '#6366f1',
+          fontStyle: 'italic',
+        }}>
+          {accent}
+        </span>
+      </h2>
+    </div>
+
+    <Link
+      to={linkTo}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        fontSize: 11,
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.12em',
+        color: '#64748b',
+        textDecoration: 'none',
+        background: '#fff',
+        border: '1px solid #e2e8f0',
+        padding: '10px 20px',
+        borderRadius: 12,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        transition: 'all 0.25s ease',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.color = accentColor === 'orange' ? '#f97316' : '#6366f1';
+        e.currentTarget.style.borderColor = accentColor === 'orange' ? '#fed7aa' : '#c7d2fe';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.1)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.color = '#64748b';
+        e.currentTarget.style.borderColor = '#e2e8f0';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+      }}
+    >
+      {linkLabel}
+      <ArrowUpRight size={14} />
+    </Link>
+  </div>
+);
+
+/* ─── Main Component ────────────────────────────────────────────────────── */
 export default function Wishlist() {
   const { auctions, rentals, loading, removeFromWishlist, loadWishlist } = useWishlist();
   const [removingIds, setRemovingIds] = useState(new Set());
@@ -51,7 +205,6 @@ export default function Wishlist() {
 
   const removeFromWishlistHandler = useCallback((id, type) => {
     setRemovingIds(prev => new Set(prev).add(id));
-    
     setTimeout(() => {
       removeFromWishlist(id, type);
       setRemovingIds(prev => {
@@ -59,159 +212,284 @@ export default function Wishlist() {
         next.delete(id);
         return next;
       });
-    }, 450);
+    }, 480);
   }, [removeFromWishlist]);
 
-  function isAuctionEnded(auction) {
-    if (!auction) return false;
-    if (auction.started_auction === 'ended') return true;
-    if (auction.auction_stopped === true) return true;
-    const endDate = auction.endDate || auction.auctionEnd || auction.auction_end;
-    if (endDate) {
-      const d = new Date(endDate);
-      if (!isNaN(d) && d.getTime() < Date.now()) return true;
-    }
-    return false;
-  }
-
-  const visibleAuctionCount = (auctions?.length || 0) - [...removingIds].filter(id => auctions?.some(a => (a._id || a.id) === id)).length;
-  const visibleRentalCount = (rentals?.length || 0) - [...removingIds].filter(id => rentals?.some(r => (r._id || r.id) === id)).length;
+  const visibleAuctionCount = (auctions?.length || 0) -
+    [...removingIds].filter(id => auctions?.some(a => (a._id || a.id) === id)).length;
+  const visibleRentalCount = (rentals?.length || 0) -
+    [...removingIds].filter(id => rentals?.some(r => (r._id || r.id) === id)).length;
 
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="bg-white min-h-screen font-sans selection:bg-orange-100 selection:text-orange-900">
-      
-      {/* HERO SECTION */}
-      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-20 pb-14 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiLz48L2c+PC9nPjwvc3ZnPg==')] pointer-events-none" />
-        
-        <div className="relative max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
-                Your <span className="text-orange-400">Wishlist</span>
-              </h1>
-              <p className="text-gray-400 max-w-lg text-base font-normal leading-relaxed">
-                Track your favorite auctions and rentals. Everything you've saved, all in one place.
-              </p>
-            </div>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-            <div className="flex gap-3">
-              <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
-                <span className="text-3xl font-bold text-white tabular-nums transition-all duration-500">{visibleAuctionCount}</span>
-                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Auctions</span>
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes heroReveal {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatDot {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+          50%       { transform: translateY(-18px) scale(1.2); opacity: 0.9; }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -400px 0; }
+          100% { background-position: 400px 0; }
+        }
+        @keyframes pillPop {
+          0%   { transform: scale(0.9); opacity: 0; }
+          60%  { transform: scale(1.05); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        .wl-root * { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
+        
+        .wl-card-grid {
+          display: grid;
+          grid-template-columns: repeat(1, 1fr);
+          gap: 24px;
+        }
+        @media (min-width: 768px) {
+          .wl-card-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1280px) {
+          .wl-card-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 640px) {
+          .wl-discover-link { display: none !important; }
+        }
+
+        .wl-section-box {
+          border-radius: 28px;
+          padding: 28px;
+          transition: box-shadow 0.3s ease;
+        }
+        .wl-section-box:hover {
+          box-shadow: 0 20px 60px rgba(0,0,0,0.07);
+        }
+
+        .stat-pill {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          backdrop-filter: blur(10px);
+          animation: pillPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+          transition: background 0.25s ease;
+        }
+        .stat-pill:hover { background: rgba(255,255,255,0.12); }
+      `}</style>
+
+      <div className="wl-root" style={{ background: '#f8fafc', minHeight: '100vh' }}>
+
+        {/* ── HERO ──────────────────────────────────────────────────── */}
+        <section style={{
+          position: 'relative',
+          background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
+          paddingTop: 80,
+          paddingBottom: 60,
+          overflow: 'hidden',
+        }}>
+          {/* Decorative floating orbs */}
+          {[
+            { top: '20%', left: '5%', size: 180, color: 'rgba(249,115,22,0.08)', delay: '0s' },
+            { top: '60%', left: '70%', size: 240, color: 'rgba(99,102,241,0.07)', delay: '1.2s' },
+            { top: '10%', left: '85%', size: 120, color: 'rgba(249,115,22,0.05)', delay: '0.6s' },
+          ].map((orb, i) => (
+            <div key={i} style={{
+              position: 'absolute',
+              top: orb.top,
+              left: orb.left,
+              width: orb.size,
+              height: orb.size,
+              borderRadius: '50%',
+              background: orb.color,
+              filter: 'blur(40px)',
+              animation: `floatDot ${4 + i}s ease-in-out infinite`,
+              animationDelay: orb.delay,
+              pointerEvents: 'none',
+            }} />
+          ))}
+
+          {/* Subtle dot grid */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }} />
+
+          <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 32, flexWrap: 'wrap' }}>
+              
+              {/* Title block */}
+              <div style={{ animation: 'heroReveal 0.6s ease forwards' }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.2)',
+                  padding: '6px 14px', borderRadius: 100, marginBottom: 16,
+                }}>
+                  <Heart size={12} style={{ color: '#fb923c' }} fill="#fb923c" />
+
+                </div>
+
+                <h1 style={{
+                  fontSize: 'clamp(36px, 5vw, 56px)',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  letterSpacing: '-1.5px',
+                  lineHeight: 1.05,
+                  marginBottom: 12,
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                }}>
+                  Your{' '}
+                  <span style={{
+                    color: '#f97316',
+                    fontStyle: 'italic',
+                    position: 'relative',
+                  }}>
+                    Wishlist
+                  </span>
+                </h1>
+                <p style={{ color: '#94a3b8', fontSize: 15, maxWidth: 420, lineHeight: 1.7, fontWeight: 400 }}>
+                  Track your favorite auctions and rentals. Everything you've saved, all in one place.
+                </p>
               </div>
-              <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
-                <span className="text-3xl font-bold text-white tabular-nums transition-all duration-500">{visibleRentalCount}</span>
-                <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Rentals</span>
+
+              {/* Stat pills */}
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div className="stat-pill" style={{ animationDelay: '0.15s' }}>
+                  <div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1, fontFamily: "'Playfair Display', serif" }}>
+                      <AnimatedCounter value={visibleAuctionCount} />
+                    </div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>
+                      Auctions
+                    </div>
+                  </div>
+                  <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+                  <Gavel size={18} style={{ color: '#f97316', opacity: 0.8 }} />
+                </div>
+
+                <div className="stat-pill" style={{ animationDelay: '0.25s' }}>
+                  <div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1, fontFamily: "'Playfair Display', serif" }}>
+                      <AnimatedCounter value={visibleRentalCount} />
+                    </div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>
+                      Rentals
+                    </div>
+                  </div>
+                  <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+                  <Users size={18} style={{ color: '#818cf8', opacity: 0.8 }} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <main className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-12 py-14">
-        
-        {/* AUCTIONS SECTION */}
-        <section className="mb-14">
-          <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500 shadow-sm">
-                <Gavel size={20} />
-              </div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-                  Tracked <span className="text-orange-500 italic">Auctions</span>
-                </h2>
-              </div>
-            </div>
-            <Link 
-              to="/buyer/auctions" 
-              className="group hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-orange-500 transition-all bg-white border border-gray-200 hover:border-orange-200 px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-300"
-            >
-              Browse Catalog
-              <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </Link>
-          </div>
-
-          {!auctions || auctions.length === 0 ? (
-            <EmptyState 
-              message="No auctions in your vault. Secure your next acquisition today." 
-              icon={Zap} 
-              type="auction"
-            />
-          ) : (
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-orange-50/40 via-white to-gray-50/30 shadow-lg shadow-orange-100/20 border border-orange-100/40">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-                {auctions.map((auction, idx) => {
-                  const id = auction?._id || auction?.id || `auction-${idx}`;
-                  return (
-                    <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
-                      <CarCard
-                        item={auction}
-                        type="auction"
-                        isInWishlist={true}
-                        onToggleWishlist={() => removeFromWishlistHandler(id, 'auction')}
-                      />
-                    </AnimatedCard>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </section>
 
-        {/* RENTALS SECTION */}
-        <section className="pb-10">
-          <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 shadow-sm">
-                <Users size={20} />
-              </div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-                  Rental <span className="text-indigo-600 italic">Selection</span>
-                </h2>
-              </div>
-            </div>
-            <Link 
-              to="/buyer/rentals" 
-              className="group hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-indigo-600 transition-all bg-white border border-gray-200 hover:border-indigo-200 px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-300"
-            >
-              Discover Fleet
-              <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </Link>
-          </div>
+        {/* ── MAIN CONTENT ──────────────────────────────────────────── */}
+        <main style={{ maxWidth: 1440, margin: '0 auto', padding: '56px 48px', }}>
 
-          {!rentals || rentals.length === 0 ? (
-            <EmptyState 
-              message="The fleet is waiting. Save vehicles to compare and book your journey." 
-              icon={Clock} 
-              type="rental"
+          {/* AUCTIONS */}
+          <section style={{ marginBottom: 56 }}>
+            <SectionHeader
+              title="Tracked"
+              accent="Auctions"
+              accentColor="orange"
+              linkTo="/buyer/auctions"
+              linkLabel="Discover more Cars"
             />
-          ) : (
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-50/40 via-white to-gray-50/30 shadow-lg shadow-indigo-100/20 border border-indigo-100/40">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-                {rentals.map((rental, idx) => {
-                  const id = rental?._id || rental?.id || `rental-${idx}`;
-                  return (
-                    <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
-                      <CarCard
-                        item={rental}
-                        type="rental"
-                        returnPath="/buyer/wishlist"
-                        isInWishlist={true}
-                        onToggleWishlist={() => removeFromWishlistHandler(id, 'rental')}
-                      />
-                    </AnimatedCard>
-                  );
-                })}
+
+            {!auctions || auctions.length === 0 ? (
+              <EmptyState
+                message="No auctions saved yet."
+                icon={Clock}
+                type="auction"
+              />
+            ) : (
+              <div
+                className="wl-section-box"
+                style={{
+                  background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 50%, #fffbf5 100%)',
+                  border: '1px solid #fed7aa',
+                  boxShadow: '0 8px 32px rgba(249,115,22,0.08)',
+                }}
+              >
+                <div className="wl-card-grid">
+                  {auctions.map((auction, idx) => {
+                    const id = auction?._id || auction?.id || `auction-${idx}`;
+                    return (
+                      <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
+                        <CarCard
+                          item={auction}
+                          type="auction"
+                          isInWishlist={true}
+                          onToggleWishlist={() => removeFromWishlistHandler(id, 'auction')}
+                        />
+                      </AnimatedCard>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
+            )}
+          </section>
+
+          {/* RENTALS */}
+          <section style={{ paddingBottom: 40 }}>
+            <SectionHeader
+              title="Rental"
+              accent="Selection"  
+              accentColor="indigo"
+              linkTo="/buyer/rentals"
+              linkLabel="Discover Rentals"
+            />
+
+            {!rentals || rentals.length === 0 ? (
+              <EmptyState
+                message="No rentals Saved Yet. "
+                icon={Clock}
+                type="rental"
+              />
+            ) : (
+              <div
+                className="wl-section-box"
+                style={{
+                  background: 'linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #f5f3ff 100%)',
+                  border: '1px solid #c7d2fe',
+                  boxShadow: '0 8px 32px rgba(99,102,241,0.08)',
+                }}
+              >
+                <div className="wl-card-grid">
+                  {rentals.map((rental, idx) => {
+                    const id = rental?._id || rental?.id || `rental-${idx}`;
+                    return (
+                      <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
+                        <CarCard
+                          item={rental}
+                          type="rental"
+                          returnPath="/buyer/wishlist"
+                          isInWishlist={true}
+                          onToggleWishlist={() => removeFromWishlistHandler(id, 'rental')}
+                        />
+                      </AnimatedCard>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
+    </>
   );
 }

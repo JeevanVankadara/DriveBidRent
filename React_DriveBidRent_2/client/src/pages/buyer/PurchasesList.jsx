@@ -1,7 +1,7 @@
 // client/src/pages/buyer/PurchasesList.jsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { ShoppingBag, Car, History, CreditCard } from 'lucide-react';
 
 import {
   getPurchases,
@@ -9,6 +9,9 @@ import {
   completeAuctionPayment
 } from '../../services/buyer.services';
 import PaymentModal from './components/modals/PaymentModal';
+import AuctionPurchaseCard from './components/AuctionPurchaseCard';
+import CurrentRentalCard from './components/CurrentRentalCard';
+import PastRentalCard from './components/PastRentalCard';
 
 export default function PurchasesList() {
   const [auctionPurchases, setAuctionPurchases] = useState([]);
@@ -19,42 +22,11 @@ export default function PurchasesList() {
   const [selectedPurchase, setSelectedPurchase] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
 
-  useEffect(() => {
-    fetchPurchases();
-  }, []);
+  useEffect(() => { fetchPurchases(); }, []);
 
   const fetchPurchases = async () => {
     try {
       const data = await getPurchases();
-      
-      // DEBUG: Log fetched data
-      console.log('=== DEBUG: Full purchases data ===', data);
-      console.log('=== Past Rentals ===', data.pastRentals);
-      
-      // Detailed rental inspection
-      if (data.pastRentals && data.pastRentals.length > 0) {
-        console.log('=== DETAILED PAST RENTALS INFO ===');
-        data.pastRentals.forEach((rental, idx) => {
-          console.log(`Rental ${idx}:`, {
-            _id: rental._id,
-            investor_id: rental.investor_id,
-            vehicleName: rental.vehicleName,
-            pickupDate: rental.pickupDate,
-            dropDate: rental.dropDate
-          });
-        });
-      }
-      
-      // Check for duplicates
-      const pastRentalIds = data.pastRentals?.map(r => r._id || r.investor_id) || [];
-      const uniqueIds = new Set(pastRentalIds);
-      if (pastRentalIds.length !== uniqueIds.size) {
-        console.warn('⚠️ DUPLICATE IDS DETECTED IN FRONTEND:');
-        const duplicates = pastRentalIds.filter((id, idx) => pastRentalIds.indexOf(id) !== idx);
-        console.warn('Duplicate IDs:', duplicates);
-        console.warn('All IDs:', pastRentalIds);
-      }
-      
       setAuctionPurchases(data.auctionPurchases || []);
       setRentals(data.rentals || []);
       setPastRentals(data.pastRentals || []);
@@ -72,7 +44,6 @@ export default function PurchasesList() {
       setSelectedPurchase(purchase);
       setShowPaymentModal(true);
     } catch (error) {
-      console.error('Error fetching payment details:', error);
       alert('Failed to load payment details');
     }
   };
@@ -87,7 +58,7 @@ export default function PurchasesList() {
       } else {
         alert(result.message || 'Payment failed');
       }
-    } catch (error) {
+    } catch {
       alert('Payment failed. Please try again.');
     }
   };
@@ -95,242 +66,346 @@ export default function PurchasesList() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <style>{`
+        @keyframes heroReveal {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatOrb {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50%       { transform: translateY(-20px) scale(1.08); }
+        }
 
-      {/* Hero Section */}
-      <section
-        className="relative h-96 md:h-[400px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center text-white"
-      >
-        <div className="absolute inset-0 bg-black/90" />
-        <div className="relative z-10 px-6">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-            My <span className="text-orange-500 font-black">Purchases</span>
-          </h1>
-          <p className="mt-4 text-xl md:text-2xl font-medium text-gray-100">
-            Track and manage all your vehicle transactions
-          </p>
-        </div>
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-transparent" />
-      </section>
+        .pl-root { font-family: 'Montserrat', sans-serif; min-height: 100vh; background: #faf8f5; }
 
-      {/* Auction Purchases */}
-      <section className="py-16 max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Auction Purchases</h2>
+        /* ── HERO ── */
+        .pl-hero {
+          position: relative;
+          background: linear-gradient(135deg, #0f1a2e 0%, #1a2d4a 55%, #0f1a2e 100%);
+          padding: 80px 0 64px;
+          overflow: hidden;
+        }
+        .pl-hero-inner {
+          max-width: 1440px;
+          margin: 0 auto;
+          padding: 0 48px;
+          position: relative;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 32px;
+        }
+        .pl-hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(193,127,58,0.15);
+          border: 1px solid rgba(193,127,58,0.3);
+          padding: 6px 14px;
+          border-radius: 100px;
+          margin-bottom: 16px;
+        }
+        .pl-hero-badge span {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #e8a855;
+        }
+        .pl-hero-title {
+          font-family: 'Montserrat', sans-serif;
+          font-size: clamp(36px, 5vw, 58px);
+          font-weight: 800;
+          color: #fff;
+          letter-spacing: -1.5px;
+          line-height: 1.05;
+          margin-bottom: 12px;
+        }
+        .pl-hero-title em { color: #c17f3a; font-style: italic; }
+        .pl-hero-sub { color: #94a3b8; font-size: 15px; max-width: 420px; line-height: 1.7; }
 
-        {auctionPurchases.length === 0 ? (
-          <p className="text-center text-xl text-gray-600 py-10">
-            You haven't purchased any vehicles from auctions yet.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {auctionPurchases.map((purchase) => (
-              <div
-                key={purchase._id}
-                className="relative bg-white border border-orange-500 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col"
-              >
-                {/* Status Tag */}
-                <span className={`absolute top-6 left-6 z-10 px-6 py-2 rounded-full text-white font-bold text-sm shadow-md ${purchase.paymentStatus === 'pending' ? 'bg-blue-600' : 'bg-green-600'
-                  }`}>
-                  {purchase.paymentStatus === 'pending' ? 'Pending Payment' : 'Payment Done'}
-                </span>
+        /* stat pills */
+        .pl-stats { display: flex; flex-wrap: wrap; gap: 12px; }
+        .pl-stat {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 16px 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.09);
+          backdrop-filter: blur(10px);
+          min-width: 120px;
+          transition: background 0.25s;
+        }
+        .pl-stat:hover { background: rgba(255,255,255,0.09); }
+        .pl-stat-num {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 30px;
+          font-weight: 800;
+          color: #fff;
+          line-height: 1;
+        }
+        .pl-stat-label {
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #64748b;
+        }
 
-                {/* Image */}
-                <div className="relative">
-                  <img
-                    src={purchase.vehicleImage}
-                    alt={purchase.vehicleName}
-                    className="w-full h-56 object-contain bg-gray-100"
-                  />
+        /* ── MAIN ── */
+        .pl-main {
+          max-width: 1440px;
+          margin: 0 auto;
+          padding: 56px 48px;
+          display: flex;
+          flex-direction: column;
+          gap: 56px;
+        }
+
+        /* section header */
+        .pl-sec-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 28px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #ede9e3;
+        }
+        .pl-sec-head-left { display: flex; align-items: center; gap: 14px; }
+        .pl-sec-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .pl-sec-title {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 28px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          color: #0f1a2e;
+          line-height: 1;
+        }
+        .pl-sec-title em { font-style: italic; }
+        .pl-sec-count {
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #94a3b8;
+          background: #f5f1ec;
+          padding: 4px 12px;
+          border-radius: 100px;
+        }
+
+        /* card grid */
+        .pl-grid {
+          display: grid;
+          grid-template-columns: repeat(1, 1fr);
+          gap: 24px;
+        }
+        @media (min-width: 768px)  { .pl-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1280px) { .pl-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        /* section wrapper tint */
+        .pl-sec-box {
+          border-radius: 28px;
+          padding: 28px;
+        }
+        .pl-sec-box-amber {
+          background: linear-gradient(135deg, #fffbf5 0%, #fff 60%, #fdf6ec 100%);
+          border: 1px solid #f0dfc0;
+          box-shadow: 0 6px 28px rgba(193,127,58,0.07);
+        }
+        .pl-sec-box-blue {
+          background: linear-gradient(135deg, #f0f7ff 0%, #fff 60%, #eef4ff 100%);
+          border: 1px solid #bfdbfe;
+          box-shadow: 0 6px 28px rgba(37,99,235,0.06);
+        }
+        .pl-sec-box-green {
+          background: linear-gradient(135deg, #f0fdf4 0%, #fff 60%, #dcfce7 100%);
+          border: 1px solid #bbf7d0;
+          box-shadow: 0 6px 28px rgba(22,163,74,0.06);
+        }
+
+        /* empty state */
+        .pl-empty {
+          border-radius: 20px;
+          padding: 48px 24px;
+          text-align: center;
+          background: #fff;
+          border: 1px dashed #ddd8d0;
+          color: #94a3b8;
+          font-size: 14px;
+          font-weight: 500;
+        }
+      `}</style>
+
+      <div className="pl-root">
+
+        {/* ── HERO ─────────────────────────────── */}
+        <section className="pl-hero">
+          {/* floating orbs */}
+          {[
+            { t: '18%', l: '4%',  s: 200, c: 'rgba(193,127,58,0.12)', d: '0s',   dur: 5 },
+            { t: '65%', l: '70%', s: 240, c: 'rgba(37,99,235,0.10)',  d: '1.4s', dur: 6 },
+            { t: '8%',  l: '82%', s: 130, c: 'rgba(193,127,58,0.07)', d: '0.7s', dur: 4 },
+          ].map((o, i) => (
+            <div key={i} style={{
+              position: 'absolute', top: o.t, left: o.l,
+              width: o.s, height: o.s, borderRadius: '50%',
+              background: o.c, filter: 'blur(44px)',
+              animation: `floatOrb ${o.dur}s ease-in-out infinite`,
+              animationDelay: o.d, pointerEvents: 'none',
+            }} />
+          ))}
+          {/* dot grid */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }} />
+
+          <div className="pl-hero-inner">
+            <div style={{ animation: 'heroReveal 0.6s ease forwards' }}>
+              <div className="pl-hero-badge">
+                <ShoppingBag size={12} color="#e8a855" />
+                <span>Transaction Center</span>
+              </div>
+              <h1 className="pl-hero-title">
+                My <em>Purchases</em>
+              </h1>
+              <p className="pl-hero-sub">
+                View bought cars, active rentals, and completed rentals in one place.
+              </p>
+            </div>
+
+            <div className="pl-stats">
+              <div className="pl-stat">
+                <div className="pl-stat-num">{auctionPurchases.length}</div>
+                <div className="pl-stat-label">Bought</div>
+              </div>
+              <div className="pl-stat">
+                <div className="pl-stat-num">{rentals.length}</div>
+                <div className="pl-stat-label">Current Rentals</div>
+              </div>
+              <div className="pl-stat">
+                <div className="pl-stat-num">{pastRentals.length}</div>
+                <div className="pl-stat-label">Past Rentals</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── MAIN ─────────────────────────────── */}
+        <main className="pl-main">
+
+          {/* AUCTION PURCHASES */}
+          <section>
+            <div className="pl-sec-head">
+              <div className="pl-sec-head-left">
+                <div className="pl-sec-icon" style={{ background: '#fef3c7', border: '1px solid #fde68a' }}>
+                  <CreditCard size={18} color="#c17f3a" />
                 </div>
+                <h2 className="pl-sec-title">Auction <em style={{ color: '#c17f3a' }}>Purchases</em></h2>
+              </div>
+              <span className="pl-sec-count">{auctionPurchases.length} cars</span>
+            </div>
 
-                {/* Content */}
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold text-orange-500 mb-3">
-                    {purchase.vehicleName}
-                  </h3>
-
-                  <p className="text-gray-600 text-sm mb-4">
-                    Purchased on: <strong>{new Date(purchase.purchaseDate).toLocaleDateString()}</strong>
-                  </p>
-
-                  <div className="bg-gray-50 p-5 rounded-lg space-y-3 text-sm flex-grow">
-                    <p><strong>Year:</strong> {purchase.year}</p>
-                    <p><strong>Mileage:</strong> {purchase.mileage?.toLocaleString()} km</p>
-                    <p><strong>Purchase Price:</strong> ₹{purchase.purchasePrice?.toLocaleString()}</p>
-                    <p><strong>Seller:</strong> {purchase.sellerName}</p>
-                  </div>
-
-                  {/* Buttons - Always Visible & Properly Spaced */}
-                  <div className="mt-6 space-y-3">
-                    {/* More Details - Always Shown */}
-                    <Link
-                      to={`/buyer/purchases/${purchase._id}`}
-                      className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg font-medium hover:bg-orange-600 transition shadow-md"
-                    >
-                      More Details
-                    </Link>
-
-                    {/* Pay Now - Only if Pending */}
-                    {purchase.paymentStatus === 'pending' && (
-                      <button
-                        onClick={() => handlePayNow(purchase)}
-                        className="block w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition shadow-md"
-                      >
-                        Pay Now
-                      </button>
-                    )}
-                  </div>
+            {auctionPurchases.length === 0 ? (
+              <div className="pl-empty">You have not purchased any vehicles from auctions yet.</div>
+            ) : (
+              <div className="pl-sec-box pl-sec-box-amber">
+                <div className="pl-grid">
+                  {auctionPurchases.map(purchase => (
+                    <AuctionPurchaseCard key={purchase._id} purchase={purchase} onPayNow={handlePayNow} />
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </section>
+            )}
+          </section>
 
-      {/* Current Rentals */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Current Rentals</h2>
-
-          {rentals.length === 0 ? (
-            <p className="text-center text-xl text-gray-600 py-10">
-              You don't have any active rentals.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {rentals.map((rental, index) => {
-                const rentalId = rental._id || rental.investor_id;
-                // Create a unique key combining ID, dates, and index to prevent duplicates
-                const uniqueKey = `active-${rentalId}-${rental.pickupDate}-${rental.dropDate}-${index}`;
-                return (
-                  <div
-                    key={uniqueKey}
-                    className="bg-white border border-orange-500 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col"
-                  >
-                    <div className="relative">
-                      <span className="absolute top-6 left-6 z-10 bg-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-md">
-                        Active
-                      </span>
-                      <img
-                        src={rental.vehicleImage}
-                        alt={rental.vehicleName}
-                        className="w-full h-56 object-contain bg-gray-100"
-                      />
-                    </div>
-
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h3 className="text-2xl font-bold text-orange-500 mb-3">
-                        {rental.vehicleName}
-                      </h3>
-
-                      <p className="text-gray-600 text-sm mb-4">
-                        Period: <strong>
-                          {new Date(rental.pickupDate).toLocaleDateString()} - {new Date(rental.dropDate).toLocaleDateString()}
-                        </strong>
-                      </p>
-
-                      <div className="bg-gray-50 p-5 rounded-lg space-y-3 text-sm flex-grow">
-                        <p><strong>Daily Rate:</strong> ₹{rental.costPerDay}</p>
-                        <p><strong>Total Cost:</strong> ₹{rental.totalCost}</p>
-                        <p><strong>Seller:</strong> {rental.sellerName}</p>
-                        <p><strong>Contact:</strong> {rental.sellerPhone}</p>
-                      </div>
-
-                      {/* More Details Button - Always Visible */}
-                      <div className="mt-6">
-                        <Link
-                          to={`/buyer/rentals/${rentalId}`}
-                          state={{ from: '/buyer/purchases' }}
-                          className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg font-medium hover:bg-orange-600 transition shadow-md"
-                        >
-                          More Details
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Past Rentals */}
-      <section className="py-16 max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Past Rentals</h2>
-
-        {pastRentals.length === 0 ? (
-          <p className="text-center text-xl text-gray-600 py-10">
-            You don't have any past rentals.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {pastRentals.map((rental, index) => {
-              const rentalId = rental._id || rental.investor_id;
-              // Create a unique key combining ID, dates, and index to prevent duplicates
-              const uniqueKey = `completed-${rentalId}-${rental.pickupDate}-${rental.dropDate}-${index}`;
-              return (
-                <div
-                  key={uniqueKey}
-                  className="bg-white border border-gray-400 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 flex flex-col opacity-90"
-                >
-                  <div className="relative">
-                    <span className="absolute top-6 left-6 z-10 bg-gray-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-md">
-                      Completed
-                    </span>
-                    <img
-                      src={rental.vehicleImage}
-                      alt={rental.vehicleName}
-                      className="w-full h-56 object-contain bg-gray-100"
-                    />
-                  </div>
-
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-bold text-gray-700 mb-3">
-                      {rental.vehicleName}
-                    </h3>
-
-                    <p className="text-gray-600 text-sm mb-4">
-                      Period: <strong>
-                        {new Date(rental.pickupDate).toLocaleDateString()} - {new Date(rental.dropDate).toLocaleDateString()}
-                      </strong>
-                    </p>
-
-                    <div className="bg-gray-50 p-5 rounded-lg space-y-3 text-sm flex-grow">
-                      <p><strong>Daily Rate:</strong> ₹{rental.costPerDay}</p>
-                      <p><strong>Total Cost:</strong> ₹{rental.totalCost}</p>
-                      <p><strong>Seller:</strong> {rental.sellerName}</p>
-                      <p><strong>Contact:</strong> {rental.sellerPhone}</p>
-                    </div>
-
-                    {/* More Details Button - Always Visible */}
-                    <div className="mt-6">
-                      <Link
-                        to={`/buyer/rentals/${rentalId}`}
-                        state={{ from: '/buyer/purchases' }}
-                        className="block w-full bg-gray-500 text-white text-center py-3 rounded-lg font-medium hover:bg-gray-600 transition shadow-md"
-                      >
-                        More Details
-                      </Link>
-                    </div>
-                  </div>
+          {/* CURRENT RENTALS */}
+          <section>
+            <div className="pl-sec-head">
+              <div className="pl-sec-head-left">
+                <div className="pl-sec-icon" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                  <Car size={18} color="#2563eb" />
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                <h2 className="pl-sec-title">Current <em style={{ color: '#2563eb' }}>Rentals</em></h2>
+              </div>
+              <span className="pl-sec-count">{rentals.length} cars</span>
+            </div>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        onProcessPayment={handlePayment}
-        totalCost={paymentDetails?.totalAmount || 0}
-        selectedPaymentMethod="upi"
-        onPaymentMethodSelect={() => { }}
+            {rentals.length === 0 ? (
+              <div className="pl-empty">You do not have any active rentals.</div>
+            ) : (
+              <div className="pl-sec-box pl-sec-box-blue">
+                <div className="pl-grid">
+                  {rentals.map((rental, index) => {
+                    const rentalId = rental._id || rental.investor_id;
+                    return (
+                      <CurrentRentalCard
+                        key={`active-${rentalId}-${index}`}
+                        rental={rental}
+                        rentalId={rentalId}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
 
-      />
-    </div>
+          {/* PAST RENTALS */}
+          <section>
+            <div className="pl-sec-head">
+              <div className="pl-sec-head-left">
+                <div className="pl-sec-icon" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                  <History size={18} color="#16a34a" />
+                </div>
+                <h2 className="pl-sec-title">Past <em style={{ color: '#16a34a' }}>Rentals</em></h2>
+              </div>
+              <span className="pl-sec-count">{pastRentals.length} cars</span>
+            </div>
+
+            {pastRentals.length === 0 ? (
+              <div className="pl-empty">You do not have any past rentals.</div>
+            ) : (
+              <div className="pl-sec-box pl-sec-box-green">
+                <div className="pl-grid">
+                  {pastRentals.map((rental, index) => {
+                    const rentalId = rental._id || rental.investor_id;
+                    return (
+                      <PastRentalCard
+                        key={`completed-${rentalId}-${index}`}
+                        rental={rental}
+                        rentalId={rentalId}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+        </main>
+
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onProcessPayment={handlePayment}
+          totalCost={paymentDetails?.totalAmount || 0}
+          selectedPaymentMethod="upi"
+          onPaymentMethodSelect={() => {}}
+        />
+      </div>
+    </>
   );
 }

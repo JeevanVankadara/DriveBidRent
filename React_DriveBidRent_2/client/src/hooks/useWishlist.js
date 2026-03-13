@@ -15,7 +15,7 @@ export default function useWishlist() {
   }, [dispatch]);
 
   const removeFromWishlist = useCallback((id, type) => {
-    dispatch(removeWishlistItem({ id, type })).then(() => dispatch(fetchWishlist()));
+    dispatch(removeWishlistItem({ id, type }));
   }, [dispatch]);
 
   return {

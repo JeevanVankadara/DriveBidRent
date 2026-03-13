@@ -88,9 +88,9 @@ const wishlistSlice = createSlice({
       .addCase(removeWishlistItem.fulfilled, (state, action) => {
         const { id, type } = action.payload;
         if (type === 'auction') {
-          state.auctions = state.auctions.filter(item => item._id !== id);
+          state.auctions = state.auctions.filter(item => (item._id || item.id) !== id);
         } else if (type === 'rental') {
-          state.rentals = state.rentals.filter(item => item._id !== id);
+          state.rentals = state.rentals.filter(item => (item._id || item.id) !== id);
         }
       })
       .addCase(removeWishlistItem.rejected, (state, action) => {

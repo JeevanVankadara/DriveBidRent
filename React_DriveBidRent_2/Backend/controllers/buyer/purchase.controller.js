@@ -27,6 +27,8 @@ export const getPurchase = async (req, res) => {
         pickupDate: rentalRequest.pickupDate,
         dropDate: rentalRequest.dropDate,
         totalCost: rentalCost.totalCost,
+        rentalStatus: rentalRequest.status,
+        isAvailableForRentAgain: rentalRequest.status === 'available',
         sellerName: `${seller.firstName} ${seller.lastName}`,
         sellerPhone: seller.phone
       };
