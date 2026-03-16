@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
-import './AuctionManagerDashboard.css';
 
 export default function ApprovedCars() {
   const [cars, setCars] = useState([]);
@@ -168,15 +167,15 @@ export default function ApprovedCars() {
   }
 
   return (
-    <div className="pt-8 pb-20 px-4">
+    <div className="min-h-screen bg-gray-50 pt-12 pb-24 px-4 font-montserrat">
       <div className="max-w-7xl mx-auto">
-        <div className="manager-page-header">
-          <h1 className="manager-page-title">Approved Cars</h1>
-          <p className="manager-page-subtitle">Manage and monitor approved vehicles and live auctions</p>
+        <div className="mb-10 pl-4 border-l-4 border-amber-500">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Approved Cars</h1>
+          <p className="text-gray-600 font-medium">Manage and monitor approved vehicles and live auctions</p>
         </div>
         
         {/* Search and Filter Controls */}
-        <div className="manager-section mb-8">
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
               <input
@@ -184,83 +183,77 @@ export default function ApprovedCars() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by car, seller or location..."
-                className="manager-form-input flex-1"
+                className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
               />
               <button
                 onClick={() => setSearch('')}
-                className="manager-btn-secondary px-4 py-2"
+                className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition duration-200 whitespace-nowrap"
               >
                 Clear
               </button>
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="manager-form-label mb-0 whitespace-nowrap">Filter:</label>
+              <label className="text-gray-700 font-bold whitespace-nowrap">Filter Status:</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="manager-form-select flex-1"
+                className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all appearance-none cursor-pointer"
               >
-                <option value="all">All (Grouped)</option>
-                <option value="reauction">Re-auction ({reauctionCars.length})</option>
-                <option value="not-started">Yet to start</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="ended">Ended</option>
+                <option value="all">All Statuses</option>
+                <option value="reauction">Re-auction Required ({reauctionCars.length})</option>
+                <option value="not-started">Yet to Start ({notStartedCars.length})</option>
+                <option value="ongoing">Live Auctions ({ongoingCars.length})</option>
+                <option value="ended">Completed ({endedCars.length})</option>
               </select>
             </div>
           </div>
         </div>
 
       {statusFilter === 'all' ? (
-        // combined list ordered: yet-to-start, ongoing, ended
-        <section className="manager-section">
-          <h3 className="manager-section-title text-2xl mb-6">All Approved Cars ({filteredCars.length})</h3>
+        <section>
+          <h3 className="text-2xl font-black text-gray-800 mb-6 px-2">All Approved Cars ({filteredCars.length})</h3>
           {filteredCars.length === 0 ? (
-            <div className="manager-empty-state">
-              <div className="manager-empty-icon">🎯</div>
-              <p className="manager-empty-text">No cars found</p>
+            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm">
+              <p className="text-lg font-bold text-gray-500">No cars found matching your search criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredCars.map(car => (
-                <div key={car._id} className="manager-vehicle-card flex-row" style={{flexDirection: 'row', height: 'auto'}}>
-                  <div className="w-1/3 min-w-[200px] overflow-hidden">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="manager-vehicle-image h-full" />
+                <div key={car._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
+                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute top-4 left-4">
+                      <span className={`px-3 py-1 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm ${getCarTag(car).color.replace('text-', 'text-white bg-').split(' ')[0]}-500/90`}>
+                        {getCarTag(car).text}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <h3 className="manager-vehicle-title text-xl mb-0">{car.vehicleName}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCarTag(car).color}`}>
-                          {getCarTag(car).text}
-                        </span>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-2xl font-extrabold text-gray-900 mb-4 truncate">{car.vehicleName}</h3>
+                    <div className="grid grid-cols-2 gap-y-4 mb-6">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Seller</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{car.sellerId?.firstName} {car.sellerId?.lastName}</p>
                       </div>
-                      <div className="manager-vehicle-info space-y-2">
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Condition:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Seller:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Location:</span>
-                          <span className="manager-vehicle-info-value">{car.sellerId?.city || ''}</span>
-                        </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Location</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{car.sellerId?.city || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Condition</p>
+                        <p className="text-sm font-medium text-gray-900 capitalize">{car.condition}</p>
                       </div>
                     </div>
-                    {getCarStatus(car) === 'reauction' ? (
-                      <button onClick={() => reAuctionCar(car._id)} className="manager-btn-danger text-center block mt-4">Re-Auction</button>
-                    ) : getCarStatus(car) === 'not-started' ? (
-                      <button onClick={() => startAuction(car._id)} className="manager-btn-primary text-center block mt-4">Start Auction</button>
-                    ) : (
-                      <Link to={`/auctionmanager/view-bids/${car._id}`} className="manager-btn-success text-center block mt-4">View Bids</Link>
-                    )}
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      {getCarStatus(car) === 'reauction' ? (
+                        <button onClick={() => reAuctionCar(car._id)} className="w-full py-3 bg-red-100 hover:bg-red-600 text-red-700 hover:text-white font-bold rounded-xl transition duration-300">Re-Auction</button>
+                      ) : getCarStatus(car) === 'not-started' ? (
+                        <button onClick={() => startAuction(car._id)} className="w-full py-3 bg-blue-100 hover:bg-blue-600 text-blue-700 hover:text-white font-bold rounded-xl transition duration-300">Start Auction</button>
+                      ) : (
+                        <Link to={`/auctionmanager/view-bids/${car._id}`} className="w-full inline-flex justify-center items-center py-3 bg-gray-900 hover:bg-amber-500 text-white font-bold rounded-xl transition duration-300">View Dashboard</Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -268,48 +261,26 @@ export default function ApprovedCars() {
           )}
         </section>
       ) : (
-        <section className="manager-section">
-          <h3 className="manager-section-title text-2xl mb-6">
-            {statusFilter === 'reauction' ? `Re-auction Required (${reauctionCars.length})` : statusFilter === 'not-started' ? `Yet to Start (${notStartedCars.length})` : statusFilter === 'ongoing' ? `Ongoing (${ongoingCars.length})` : `Ended (${endedCars.length})`}
+        <section>
+          <h3 className="text-2xl font-black text-gray-800 mb-6 px-2">
+            {statusFilter === 'reauction' ? `Re-auction Required (${reauctionCars.length})` : statusFilter === 'not-started' ? `Yet to Start (${notStartedCars.length})` : statusFilter === 'ongoing' ? `Live Auctions (${ongoingCars.length})` : `Completed (${endedCars.length})`}
           </h3>
+          
           {statusFilter === 'reauction' && (reauctionCars.length === 0 ? (
-            <div className="manager-empty-state">
-              <div className="manager-empty-icon">🔄</div>
-              <p className="manager-empty-text">No cars in this category</p>
-            </div>
+            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm"><p className="text-lg font-bold text-gray-500">No cars in this category.</p></div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {reauctionCars.map(car => (
-                <div key={car._id} className="manager-vehicle-card flex-row border-2 border-red-300" style={{flexDirection: 'row', height: 'auto'}}>
-                  <div className="w-1/3 min-w-[200px] overflow-hidden">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="manager-vehicle-image h-full" />
+                <div key={car._id} className="bg-white rounded-3xl shadow-sm border-2 border-red-200 overflow-hidden flex flex-col h-full group">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
+                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-red-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm">PAYMENT EXPIRED</span></div>
                   </div>
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <h3 className="manager-vehicle-title text-xl mb-0">{car.vehicleName}</h3>
-                        <span className="manager-badge manager-badge-error text-xs">⚠ PAYMENT EXPIRED</span>
-                      </div>
-                      <div className="manager-vehicle-info space-y-2 text-sm">
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Condition:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Seller:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Location:</span>
-                          <span className="manager-vehicle-info-value">{car.sellerId?.city || ''}</span>
-                        </div>
-                      </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-extrabold text-gray-900 mb-4 truncate">{car.vehicleName}</h3>
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <button onClick={() => reAuctionCar(car._id)} className="w-full py-3 bg-red-100 hover:bg-red-600 text-red-700 hover:text-white font-bold rounded-xl transition duration-300">Initiate Re-Auction</button>
                     </div>
-                    <button onClick={() => reAuctionCar(car._id)} className="manager-btn-danger text-center block mt-4">Re-Auction</button>
                   </div>
                 </div>
               ))}
@@ -317,43 +288,20 @@ export default function ApprovedCars() {
           ))}
 
           {statusFilter === 'not-started' && (notStartedCars.length === 0 ? (
-            <div className="manager-empty-state">
-              <div className="manager-empty-icon">🚀</div>
-              <p className="manager-empty-text">No cars in this category</p>
-            </div>
+            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm"><p className="text-lg font-bold text-gray-500">No cars in this category.</p></div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {notStartedCars.map(car => (
-                <div key={car._id} className="manager-vehicle-card flex-row" style={{flexDirection: 'row', height: 'auto'}}>
-                  <div className="w-1/3 min-w-[200px] overflow-hidden">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="manager-vehicle-image h-full" />
+                <div key={car._id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full group">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
+                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-blue-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm">READY TO START</span></div>
                   </div>
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <h3 className="manager-vehicle-title text-xl mb-0">{car.vehicleName}</h3>
-                        <span className="manager-badge manager-badge-warning text-xs">PENDING START</span>
-                      </div>
-                      <div className="manager-vehicle-info space-y-2 text-sm">
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Condition:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Seller:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Location:</span>
-                          <span className="manager-vehicle-info-value">{car.sellerId?.city || ''}</span>
-                        </div>
-                      </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-extrabold text-gray-900 mb-4 truncate">{car.vehicleName}</h3>
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <button onClick={() => startAuction(car._id)} className="w-full py-3 bg-blue-100 hover:bg-blue-600 text-blue-700 hover:text-white font-bold rounded-xl transition duration-300">Launch Auction</button>
                     </div>
-                    <button onClick={() => startAuction(car._id)} className="manager-btn-primary text-center block mt-4">Start Auction</button>
                   </div>
                 </div>
               ))}
@@ -361,41 +309,20 @@ export default function ApprovedCars() {
           ))}
 
           {statusFilter === 'ongoing' && (ongoingCars.length === 0 ? (
-            <div className="manager-empty-state">
-              <div className="manager-empty-icon">🎯</div>
-              <p className="manager-empty-text">No cars in this category</p>
-            </div>
+            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm"><p className="text-lg font-bold text-gray-500">No cars in this category.</p></div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {ongoingCars.map(car => (
-                <div key={car._id} className="manager-vehicle-card flex-row" style={{flexDirection: 'row', height: 'auto'}}>
-                  <div className="w-1/3 min-w-[200px] overflow-hidden relative">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="manager-vehicle-image h-full" />
-                    <span className="manager-badge manager-badge-success absolute top-3 left-3 text-xs animate-pulse">🔴 LIVE</span>
+                <div key={car._id} className="bg-white rounded-3xl shadow-sm border border-amber-200 overflow-hidden flex flex-col h-full group">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
+                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-green-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>LIVE NOW</span></div>
                   </div>
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <h3 className="manager-vehicle-title text-xl mb-3">{car.vehicleName}</h3>
-                      <div className="manager-vehicle-info space-y-2 text-sm">
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Condition:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Seller:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Location:</span>
-                          <span className="manager-vehicle-info-value">{car.sellerId?.city || ''}</span>
-                        </div>
-                      </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-extrabold text-gray-900 mb-4 truncate">{car.vehicleName}</h3>
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <Link to={`/auctionmanager/view-bids/${car._id}`} className="w-full inline-flex justify-center items-center py-3 bg-gray-900 hover:bg-amber-500 text-white font-bold rounded-xl transition duration-300">Monitor Bids</Link>
                     </div>
-                    <Link to={`/auctionmanager/view-bids/${car._id}`} className="manager-btn-success text-center block mt-4">View Bids</Link>
                   </div>
                 </div>
               ))}
@@ -403,43 +330,20 @@ export default function ApprovedCars() {
           ))}
 
           {statusFilter === 'ended' && (endedCars.length === 0 ? (
-            <div className="manager-empty-state">
-              <div className="manager-empty-icon">✓</div>
-              <p className="manager-empty-text">No cars in this category</p>
-            </div>
+            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm"><p className="text-lg font-bold text-gray-500">No cars in this category.</p></div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {endedCars.map(car => (
-                <div key={car._id} className="manager-vehicle-card flex-row" style={{flexDirection: 'row', height: 'auto'}}>
-                  <div className="w-1/3 min-w-[200px] overflow-hidden">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="manager-vehicle-image h-full" />
+                <div key={car._id} className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full group">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
+                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-gray-800/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm">COMPLETED</span></div>
                   </div>
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <h3 className="manager-vehicle-title text-xl mb-0">{car.vehicleName}</h3>
-                        <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">COMPLETED</span>
-                      </div>
-                      <div className="manager-vehicle-info space-y-2 text-sm">
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Condition:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.condition ? (car.condition.charAt(0).toUpperCase() + car.condition.slice(1)) : ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Seller:</span>
-                          <span className="manager-vehicle-info-value">
-                            {car.sellerId?.firstName || ''} {car.sellerId?.lastName || ''}
-                          </span>
-                        </div>
-                        <div className="manager-vehicle-info-item">
-                          <span className="manager-vehicle-info-label">Location:</span>
-                          <span className="manager-vehicle-info-value">{car.sellerId?.city || ''}</span>
-                        </div>
-                      </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-extrabold text-gray-900 mb-4 truncate">{car.vehicleName}</h3>
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <Link to={`/auctionmanager/view-bids/${car._id}`} className="w-full inline-flex justify-center items-center py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl transition duration-300">View Results</Link>
                     </div>
-                    <Link to={`/auctionmanager/view-bids/${car._id}`} className="manager-btn-secondary text-center block mt-4">View Results</Link>
                   </div>
                 </div>
               ))}

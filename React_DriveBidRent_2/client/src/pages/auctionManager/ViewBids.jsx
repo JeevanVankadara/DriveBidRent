@@ -12,6 +12,7 @@ export default function ViewBids() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ending, setEnding] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,82 +99,209 @@ export default function ViewBids() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 font-montserrat">
-      <h2 className="text-4xl font-bold text-center text-orange-600 mb-8">View Bids</h2>
-      
-  <div className="bg-white rounded-xl p-6 shadow-lg mb-8 border border-gray-200">
-        <div className="flex items-center mb-6">
-          <div className="w-64 h-48 overflow-hidden rounded-lg mr-6">
-            <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h3 className="text-2xl font-bold text-gray-800">{car.vehicleName}</h3>
-            <p className="text-lg text-orange-600 font-bold mt-1">
-              Condition: {car.condition.charAt(0).toUpperCase() + car.condition.slice(1)}
-            </p>
-            <p className="text-gray-600 mt-2">Starting Bid: ₹{car.startingBid}</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 pt-8 pb-20 px-4 font-montserrat">
+      <div className="max-w-7xl mx-auto">
         
-        <div className="flex items-center gap-4">
+        {/* Page Header */}
+        <div className="mb-8 pl-4 border-l-4 border-amber-500 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Live Auction Dashboard</h1>
+            <p className="text-gray-600">Monitor live bids and manage auction status for {car.vehicleName}.</p>
+          </div>
           <button
             onClick={() => navigate('/auctionmanager/approved')}
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-600 transition"
+            className="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-5 py-2.5 rounded-xl transition duration-200 shadow-sm whitespace-nowrap"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg>
             Back to Cars
           </button>
-
-          {/* Show Stop Auction only when auction is not already stopped */}
-          {!(car && car.auction_stopped === true) && (
-            <button
-              onClick={endAuction}
-              disabled={ending}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {ending ? 'Ending Auction...' : 'Stop Auction'}
-            </button>
-          )}
         </div>
-      </div>
-      <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">Bids on {car.vehicleName}</h3>
 
-        {/* Current bid */}
-        {currentBid ? (
-          <div className="current-bid bg-gray-50 p-6 rounded-md border-l-4 border-orange-500 mb-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-3xl font-extrabold text-orange-600">₹{currentBid.bidAmount}</div>
-                <div className="mt-2 text-gray-700 font-semibold">
-                  Bidder: {currentBid.buyerId?.firstName || ''} {currentBid.buyerId?.lastName || ''} ({currentBid.buyerId?.email || ''})
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* LEFT COLUMN: Vehicle Info & Image Gallery & Past Bids */}
+          <div className="lg:w-2/3 space-y-8">
+            
+            {/* Image Gallery & Main Specs */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="w-full h-80 md:h-[450px] bg-gray-100 relative">
+                <img
+                  src={(car.vehicleImages && car.vehicleImages.length > 0) ? car.vehicleImages[activeImageIndex] : car.vehicleImage}
+                  alt={car.vehicleName}
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/600x400?text=Vehicle+Image';
+                  }}
+                />
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <span className={`px-4 py-1.5 backdrop-blur-md text-white text-sm font-bold rounded-full shadow-lg ${car.auction_stopped ? 'bg-red-600/90' : 'bg-green-600/90'}`}>
+                    {car.auction_stopped ? 'AUCTION ENDED' : 'LIVE AUCTION'}
+                  </span>
                 </div>
               </div>
-              <div className="text-sm text-gray-500">
-                Time: {new Date(currentBid.bidTime).toLocaleString()}
+              
+              <div className="p-6 md:p-8">
+                <div className="flex justify-between items-start mb-6">
+                   <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800">{car.vehicleName}</h2>
+                </div>
+                
+                {car.vehicleImages && car.vehicleImages.length > 1 && (
+                  <div className="flex gap-4 overflow-x-auto pb-4 mb-6 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {car.vehicleImages.map((img, idx) => (
+                      <div 
+                        key={idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`relative w-24 h-16 md:w-32 md:h-20 flex-shrink-0 cursor-pointer rounded-xl overflow-hidden shadow-sm transition-all duration-300 ${
+                          activeImageIndex === idx ? 'ring-4 ring-amber-500 scale-105 opacity-100 z-10' : 'opacity-60 hover:opacity-100 ring-1 ring-gray-200'
+                        }`}
+                      >
+                        <img src={img} alt={`${car.vehicleName} preview ${idx + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                  <div className="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100 flex flex-col items-center justify-center">
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Starting Bid</p>
+                    <p className="font-bold text-xl text-gray-900">₹{car.startingBid?.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100 flex flex-col items-center justify-center">
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Condition</p>
+                    <p className="font-bold text-xl text-gray-900 capitalize">{car.condition || 'N/A'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100 flex flex-col items-center justify-center">
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Year</p>
+                    <p className="font-bold text-xl text-gray-900">{car.year || 'N/A'}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="current-bid bg-gray-50 p-6 rounded-md border-l-4 border-gray-200 mb-6 text-center text-gray-500 italic">
-            {car && car.started_auction === 'yes' ? 'No one bided on this car till now.' : 'No bids placed yet'}
-          </div>
-        )}
 
-        {/* Past bids */}
-        {pastBids && pastBids.length > 0 && (
-          <>
-            <div className="text-lg font-semibold text-gray-800 mb-4">Bid History (Last {pastBids.length})</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {pastBids.map((bid) => (
-                <div key={bid._id} className="past-bid-card bg-gray-50 p-4 rounded-md border-l-4 border-blue-500">
-                  <div className="text-xl font-bold text-blue-600 mb-2">₹{bid.bidAmount}</div>
-                  <div className="text-sm text-gray-700 font-semibold">Bidder: {bid.buyerId?.firstName || ''} {bid.buyerId?.lastName || ''} ({bid.buyerId?.email || ''})</div>
-                  <div className="text-sm text-gray-500 mt-2">Time: {new Date(bid.bidTime).toLocaleString()}</div>
+            {/* Past Bids History */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mt-8">
+              <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                 </div>
+                 Bid History
+                 <span className="ml-auto text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{pastBids.length} total bids</span>
+              </h3>
+
+              {pastBids && pastBids.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pastBids.map((bid, index) => (
+                    <div key={bid._id} className="relative bg-gray-50 p-5 rounded-2xl border border-gray-100 hover:shadow-md transition duration-200">
+                      {index === 0 && (
+                        <div className="absolute -top-3 -right-3 bg-blue-500 text-white text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm">
+                          Previous Highest
+                        </div>
+                      )}
+                      <div className="text-2xl font-black text-blue-600 mb-1">₹{bid.bidAmount?.toLocaleString()}</div>
+                      <div className="text-sm font-bold text-gray-800 tracking-tight">{bid.buyerId?.firstName || 'Unknown'} {bid.buyerId?.lastName || ''}</div>
+                      <div className="text-xs text-gray-500 mt-0.5 truncate">{bid.buyerId?.email || 'N/A'}</div>
+                      <div className="text-xs text-gray-400 mt-3 font-medium border-t border-gray-200 pt-3">
+                        {new Date(bid.bidTime).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                   <p className="text-lg font-bold text-gray-600 mb-1">No past bids to show</p>
+                   <p className="text-sm text-gray-400">Past bid history will appear here once bids are placed.</p>
+                </div>
+              )}
             </div>
-          </>
-        )}
+            
+          </div>
+
+          {/* RIGHT COLUMN: Action Sticky Panel */}
+          <div className="lg:w-1/3 mt-8 lg:mt-0 relative">
+            <div className="sticky top-6 space-y-6 lg:pb-12">
+              
+              {/* CURRENT BID HIGHLIGHT BOX */}
+              <div className="bg-[#0f172a] rounded-3xl p-8 relative overflow-hidden shadow-2xl border border-gray-800">
+                <div className="absolute -right-12 -top-12 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                  Highest Current Bid
+                </p>
+                
+                {currentBid ? (
+                  <div className="relative z-10 mt-4">
+                    <p className="text-5xl md:text-6xl font-black text-white mb-6 drop-shadow-md">₹{currentBid.bidAmount?.toLocaleString()}</p>
+                    
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+                      <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Leading Bidder</p>
+                      <p className="text-white font-bold text-lg truncate flex items-center gap-2">
+                         <div className="w-6 h-6 rounded-full bg-amber-500 text-amber-950 flex items-center justify-center text-xs font-black">
+                           {currentBid.buyerId?.firstName?.charAt(0) || 'U'}
+                         </div>
+                         {currentBid.buyerId?.firstName || 'Unknown'} {currentBid.buyerId?.lastName || ''}
+                      </p>
+                      <p className="text-gray-300 text-sm mt-1 truncate">{currentBid.buyerId?.email || 'N/A'}</p>
+                      <div className="w-full h-px bg-white/10 my-3"></div>
+                      <p className="text-gray-400 text-xs flex justify-between items-center">
+                         <span>Placed on:</span>
+                         <span className="text-white font-medium">{new Date(currentBid.bidTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative z-10 py-8">
+                     <p className="text-4xl font-black text-gray-500">₹0</p>
+                     <p className="text-gray-400 mt-4">No bids placed yet.</p>
+                     <p className="text-sm text-gray-500 mt-1">Waiting for the first bidder.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Box */}
+              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+                <h3 className="text-xl font-black text-gray-900 mb-6">Auction Controls</h3>
+                
+                {car.auction_stopped ? (
+                  <div className="bg-gray-50 text-gray-700 p-6 rounded-2xl border border-gray-200 text-center shadow-inner">
+                    <div className="bg-gray-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <span className="font-extrabold text-xl block text-gray-800 mb-1">Auction Ended</span>
+                    <span className="text-sm text-gray-500 block">This auction is closed and no longer accepting bids.</span>
+                  </div>
+                ) : (
+                   <div className="space-y-4">
+                     <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                       You can manually stop this live auction at any time. The highest current bid will be considered final upon stopping.
+                     </p>
+                     <button
+                       onClick={endAuction}
+                       disabled={ending}
+                       className="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white hover:border-red-600 py-4 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group flex justify-center items-center gap-2 shadow-sm"
+                     >
+                       {ending ? (
+                         <span className="flex items-center gap-2">
+                           <div className="w-5 h-5 border-2 border-red-600 border-t-transparent group-hover:border-white group-hover:border-t-transparent rounded-full animate-spin"></div>
+                           Ending...
+                         </span>
+                       ) : (
+                         <>
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
+                           Stop Live Auction
+                         </>
+                       )}
+                     </button>
+                   </div>
+                )}
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
       </div>
     </div>
   );

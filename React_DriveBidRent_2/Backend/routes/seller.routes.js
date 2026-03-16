@@ -23,7 +23,7 @@ router.use(sellerMiddleware);
 
 // POST: Add auction with multiple document uploads
 router.post('/add-auction', upload.fields([
-  { name: 'vehicleImage', maxCount: 1 },
+  { name: 'vehicleImage', maxCount: 10 },
   { name: 'registration-certificate', maxCount: 1 },
   { name: 'insurance-document', maxCount: 1 },
   { name: 'fitness-certificate', maxCount: 1 },

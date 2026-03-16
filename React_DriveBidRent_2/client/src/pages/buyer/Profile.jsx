@@ -119,7 +119,7 @@ export default function Profile() {
 
         .pf-root {
           min-height: 100vh;
-          background: #faf8f5;
+          background: linear-gradient(180deg, #fdfcf9 0%, #f8f5f0 100%);
           padding: 48px 24px 80px;
         }
 
@@ -146,19 +146,19 @@ export default function Profile() {
           color: #fff;
           letter-spacing: -1px;
           flex-shrink: 0;
-          box-shadow: 0 6px 24px rgba(193,127,58,0.28);
+          box-shadow: 0 8px 24px rgba(193,127,58,0.30);
         }
         .pf-identity-text {}
         .pf-identity-name {
           font-size: 26px;
           font-weight: 800;
-          color: #0f1a2e;
+          color: #0f172a;
           letter-spacing: -0.5px;
           line-height: 1.15;
         }
         .pf-identity-sub {
           font-size: 13px;
-          color: #94a3b8;
+          color: #64748b;
           font-weight: 500;
           margin-top: 2px;
         }
@@ -191,8 +191,8 @@ export default function Profile() {
         .pf-card {
           background: #fff;
           border-radius: 24px;
-          border: 1px solid #ede9e3;
-          box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+          border: 1px solid #ece5dc;
+          box-shadow: 0 8px 26px rgba(80,66,50,0.08);
           overflow: hidden;
         }
         .pf-card-head {
@@ -200,7 +200,7 @@ export default function Profile() {
           align-items: center;
           gap: 12px;
           padding: 22px 26px 18px;
-          border-bottom: 1px solid #f5f1ec;
+          border-bottom: 1px solid #f2ece3;
         }
         .pf-card-head-icon {
           width: 38px;
@@ -211,12 +211,12 @@ export default function Profile() {
           justify-content: center;
           flex-shrink: 0;
         }
-        .pf-card-head-icon-amber { background: #fef3c7; color: #c17f3a; }
-        .pf-card-head-icon-navy  { background: #e8f0fe; color: #1d4ed8; }
+        .pf-card-head-icon-amber { background: #fff3de; color: #c17f3a; }
+        .pf-card-head-icon-navy  { background: #eaf0fb; color: #1a2d4a; }
         .pf-card-head-title {
           font-size: 16px;
           font-weight: 700;
-          color: #0f1a2e;
+          color: #0f172a;
           letter-spacing: -0.2px;
         }
         .pf-card-body { padding: 24px 26px 28px; }
@@ -254,9 +254,9 @@ export default function Profile() {
           padding: 11px 13px 11px 38px;
           font-size: 13px;
           font-weight: 500;
-          color: #0f1a2e;
+          color: #0f172a;
           background: #faf8f5;
-          border: 1.5px solid #ede9e3;
+          border: 1.5px solid #e6dfd6;
           border-radius: 12px;
           outline: none;
           transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
@@ -265,7 +265,7 @@ export default function Profile() {
         .pf-input:focus {
           border-color: #c17f3a;
           background: #fff;
-          box-shadow: 0 0 0 3px rgba(193,127,58,0.12);
+          box-shadow: 0 0 0 3px rgba(193,127,58,0.13);
         }
         .pf-input:read-only {
           color: #94a3b8;
@@ -364,12 +364,12 @@ export default function Profile() {
         .pf-btn-amber {
           background: linear-gradient(135deg, #c17f3a, #e8a855);
           color: #fff;
-          box-shadow: 0 4px 18px rgba(193,127,58,0.28);
+          box-shadow: 0 6px 18px rgba(193,127,58,0.28);
         }
         .pf-btn-navy {
           background: linear-gradient(135deg, #0f1a2e, #1a2d4a);
           color: #fff;
-          box-shadow: 0 4px 18px rgba(15,26,46,0.22);
+          box-shadow: 0 6px 18px rgba(15,26,46,0.24);
         }
       `}</style>
 

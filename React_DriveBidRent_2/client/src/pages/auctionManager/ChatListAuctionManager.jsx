@@ -83,7 +83,7 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
             <h2 className="text-2xl font-bold text-gray-800">Chats</h2>
             <p className="text-sm text-gray-600 mt-1">Inspection communications</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold">
             {chats.filter(c => c.unreadCount > 0).length}
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
             placeholder="Search mechanics or vehicles..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
           />
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
           <div className="flex flex-col items-center justify-center h-64">
             <div className="relative">
               <div className="w-12 h-12 border-3 border-gray-200 rounded-full"></div>
-              <div className="w-12 h-12 border-3 border-orange-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              <div className="w-12 h-12 border-3 border-amber-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
             </div>
             <p className="mt-4 text-gray-600 font-medium">Loading conversations...</p>
           </div>
@@ -133,7 +133,7 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm('')}
-                className="mt-4 px-4 py-2 text-sm font-medium text-orange-600 hover:text-orange-700"
+                className="mt-4 px-4 py-2 text-sm font-medium text-amber-600 hover:text-amber-700"
               >
                 Clear search
               </button>
@@ -161,7 +161,7 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
                   onClick={() => onSelect(chat._id)}
                   className={`transition-all cursor-pointer group ${
                     isSelected 
-                      ? 'bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-l-orange-500' 
+                      ? 'bg-gradient-to-r from-amber-50 to-amber-100 border-l-4 border-l-amber-500' 
                       : 'hover:bg-gray-50'
                   }`}
                 >
@@ -175,7 +175,7 @@ export default function ChatListAuctionManager({ onSelect, selectedId }) {
                   to={`/auctionmanager/chats/${chat._id}`}
                   className={`block transition-all group ${
                     isSelected 
-                      ? 'bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-l-orange-500' 
+                      ? 'bg-gradient-to-r from-amber-50 to-amber-100 border-l-4 border-l-amber-500' 
                       : 'hover:bg-gray-50'
                   }`}
                 >

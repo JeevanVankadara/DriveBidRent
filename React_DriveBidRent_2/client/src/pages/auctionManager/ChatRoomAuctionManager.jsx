@@ -253,7 +253,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
           <p className="text-gray-600 text-lg mb-8">
             Choose a chat from the sidebar to start communicating with mechanics about vehicle inspections
           </p>
-          <div className="inline-flex items-center justify-center space-x-2 text-orange-600">
+          <div className="inline-flex items-center justify-center space-x-2 text-amber-600">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -270,7 +270,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
         <div className="text-center">
           <div className="relative">
             <div className="w-20 h-20 border-4 border-gray-200 rounded-full"></div>
-            <div className="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+            <div className="w-20 h-20 border-4 border-amber-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
           </div>
           <p className="mt-6 text-gray-600 font-medium">Loading conversation...</p>
           <p className="text-sm text-gray-500 mt-2">Preparing your chat interface</p>
@@ -310,8 +310,8 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
           ) : (
             <>
               <div className="text-center mb-8">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200">
-                  <span className="text-sm font-medium text-orange-700">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200">
+                  <span className="text-sm font-medium text-amber-700">
                     Inspection Chat Started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
@@ -357,7 +357,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
               onSend={handleSend} 
               disabled={expired} 
               placeholder="Type your message here..." 
-              className="border-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="border-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
         </div>

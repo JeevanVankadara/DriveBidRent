@@ -1,5 +1,5 @@
 // client/src/pages/buyer/AuctionDetails.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './AuctionDetails.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAuctionById, placeBid, createOrGetChatForAuction } from '../../services/buyer.services';
@@ -18,6 +18,9 @@ export default function AuctionDetails() {
   const [success, setSuccess] = useState('');
   const [isCurrentBidder, setIsCurrentBidder] = useState(false);
 
+  // Image gallery state
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   useEffect(() => {
     const fetchAuctionDetails = async (isInitial = false) => {
       try {
@@ -34,16 +37,10 @@ export default function AuctionDetails() {
       }
     };
     
-    // Initial fetch with loading state
     fetchAuctionDetails(true);
-    
-    // Set up polling for real-time bid updates every 1 second (without loading state)
     const intervalId = setInterval(() => {
-      if (!error) {
-        fetchAuctionDetails(false);
-      }
+      if (!error) fetchAuctionDetails(false);
     }, 1000);
-    
     return () => clearInterval(intervalId);
   }, [id]);
 
@@ -60,6 +57,28 @@ export default function AuctionDetails() {
     } finally {
       if (isInitial) setLoading(false);
     }
+  };
+
+  // Build images array — prefer vehicleImages, fallback to vehicleImage
+  const getImages = useCallback(() => {
+    if (!auction) return [];
+    if (auction.vehicleImages && auction.vehicleImages.length > 0) {
+      return auction.vehicleImages;
+    }
+    if (auction.vehicleImage) {
+      return [auction.vehicleImage];
+    }
+    return [];
+  }, [auction]);
+
+  const images = getImages();
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
   const handleBidSubmit = async (e) => {
@@ -129,9 +148,7 @@ export default function AuctionDetails() {
     try {
       setChatLoading(true);
       setError('');
-      console.log('Attempting to create chat for auction:', id);
       const chat = await createOrGetChatForAuction(id);
-      console.log('Chat result:', chat);
       if (chat) {
         navigate(`/buyer/chats/${chat._id}`);
       } else {
@@ -146,276 +163,360 @@ export default function AuctionDetails() {
     }
   };
 
+  // Build documents list from vehicleDocumentation
+  const getDocuments = () => {
+    if (!auction?.vehicleDocumentation) return [];
+    const docs = auction.vehicleDocumentation;
+    const list = [];
+
+    if (docs.registrationCertificate) {
+      list.push({ label: 'Registration Certificate (RC)', url: docs.registrationCertificate });
+    }
+    if (docs.insuranceDocument) {
+      list.push({ label: 'Insurance Document', url: docs.insuranceDocument });
+    }
+    if (docs.fitnessCertificate) {
+      list.push({ label: 'Fitness Certificate', url: docs.fitnessCertificate });
+    }
+    if (docs.rcTransferForm29) {
+      list.push({ label: 'RC Transfer Form 29', url: docs.rcTransferForm29 });
+    }
+
+    if (docs.roadTaxReceipt) {
+      list.push({ label: 'Road Tax Receipt', url: docs.roadTaxReceipt });
+    }
+    if (docs.addressProof) {
+      list.push({ label: 'Address Proof', url: docs.addressProof });
+    }
+
+    return list;
+  };
+
   if (loading) return <LoadingSpinner />;
 
   if (!auction) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-2xl text-red-600 font-bold">Auction not found</div>
+      <div className="ad-not-found">
+        <svg className="ad-not-found__icon" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <h2>Auction not found</h2>
+        <p>This auction may have ended or been removed.</p>
       </div>
     );
   }
 
   const minBid = calculateMinBid();
+  const documents = getDocuments();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-8 lg:py-12">
+    <div className="ad-page">
+      {/* ────────── IMAGE GALLERY ────────── */}
+      <section className="ad-gallery">
+        <div className="ad-gallery__main">
+          {/* Main Image */}
+          <div className="ad-gallery__hero">
+            {images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`${auction.vehicleName} - View ${index + 1}`}
+                className={`ad-gallery__hero-img ${index === currentImageIndex ? 'active' : ''}`}
+              />
+            ))}
 
-      {/* Hero Header */}
-      <div className="relative h-64 sm:h-80 md:h-96 lg:h-[420px] bg-cover bg-center bg-no-repeat mb-6 sm:mb-10 lg:mb-16"
-        style={{ backgroundImage: `url(${auction.vehicleImage})`, backgroundColor: '#1a1a1a' }}
-      >
-        <div className="absolute inset-0 bg-black/70" />
-        <div className="relative z-10 flex items-center justify-center h-full px-4 sm:px-6">
-          <div className="text-center max-w-4xl">
-            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black text-white tracking-tight mb-2 sm:mb-4">
-              {auction.vehicleName}
-            </h1>
-            {auction.carType && (
-              <p className="text-lg sm:text-xl md:text-2xl text-blue-300 font-bold mb-2">
-                {auction.carType}
-              </p>
-            )}
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-orange-400 font-bold">
-              Current Bid: ₹{currentBid ? currentBid.bidAmount.toLocaleString() : auction.startingBid.toLocaleString()}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
-
-        {/* Left Column - Auction Info */}
-        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-orange-100">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-6 sm:mb-8">Auction Details</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 text-base sm:text-lg">
-              <div className="space-y-4 sm:space-y-6">
-                <div>
-                  <p className="text-gray-600 font-semibold text-sm sm:text-base">Seller</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">
-                    {auction.seller?.firstName} {auction.seller?.lastName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 font-semibold text-sm sm:text-base">Year</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">{auction.year}</p>
-                </div>
-                {auction.carType && (
-                  <div>
-                    <p className="text-gray-600 font-semibold text-sm sm:text-base">Car Type</p>
-                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">{auction.carType}</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-gray-600 font-semibold text-sm sm:text-base">Condition</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 capitalize">
-                    {auction.condition}
-                  </p>
-                </div>
+            {/* Gradient overlay for name */}
+            <div className="ad-gallery__overlay">
+              <div className="ad-gallery__badge">
+                <span className="ad-gallery__live-dot" />
+                LIVE AUCTION
               </div>
+              <h1 className="ad-gallery__title">{auction.vehicleName}</h1>
+              {auction.carType && (
+                <span className="ad-gallery__type">{auction.carType} · {auction.year}</span>
+              )}
+            </div>
 
-              <div className="space-y-4 sm:space-y-6">
-                <div>
-                  <p className="text-gray-600 font-semibold text-sm sm:text-base">Starting Bid</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">
-                    ₹{auction.startingBid.toLocaleString()}
-                  </p>
+            {/* Navigation Arrows */}
+            {images.length > 1 && (
+              <>
+                <button className="ad-gallery__arrow ad-gallery__arrow--left" onClick={handlePrevImage}>
+                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button className="ad-gallery__arrow ad-gallery__arrow--right" onClick={handleNextImage}>
+                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
+
+            {/* Image Counter */}
+            {images.length > 1 && (
+              <div className="ad-gallery__counter">
+                {currentImageIndex + 1} / {images.length}
+              </div>
+            )}
+          </div>
+
+          {/* Thumbnail Strip */}
+          {images.length > 1 && (
+            <div className="ad-gallery__thumbs">
+              {images.map((img, index) => (
+                <button
+                  key={index}
+                  className={`ad-gallery__thumb ${index === currentImageIndex ? 'active' : ''}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                >
+                  <img src={img} alt={`Thumbnail ${index + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ────────── MAIN CONTENT GRID ────────── */}
+      <div className="ad-content">
+        {/* Left Column */}
+        <div className="ad-content__left">
+
+          {/* Quick Stats Bar */}
+          <div className="ad-stats">
+            <div className="ad-stat">
+              <span className="ad-stat__label">Current Bid</span>
+              <span className="ad-stat__value ad-stat__value--highlight">
+                ₹{currentBid ? currentBid.bidAmount.toLocaleString() : auction.startingBid.toLocaleString()}
+              </span>
+            </div>
+            <div className="ad-stat__divider" />
+            <div className="ad-stat">
+              <span className="ad-stat__label">Starting Bid</span>
+              <span className="ad-stat__value">₹{auction.startingBid.toLocaleString()}</span>
+            </div>
+            <div className="ad-stat__divider" />
+            <div className="ad-stat">
+              <span className="ad-stat__label">Condition</span>
+              <span className="ad-stat__value ad-stat__value--green">{auction.condition}</span>
+            </div>
+            <div className="ad-stat__divider" />
+            <div className="ad-stat">
+              <span className="ad-stat__label">Auction Date</span>
+              <span className="ad-stat__value">
+                {new Date(auction.auctionDate).toLocaleDateString('en-IN', {
+                  day: 'numeric', month: 'short', year: 'numeric'
+                })}
+              </span>
+            </div>
+          </div>
+
+          {/* Vehicle Specifications */}
+          <div className="ad-card">
+            <h2 className="ad-card__title">Vehicle Specifications</h2>
+            <div className="ad-specs">
+              <div className="ad-spec">
+                <span className="ad-spec__label">Year</span>
+                <span className="ad-spec__value">{auction.year}</span>
+              </div>
+              {auction.carType && (
+                <div className="ad-spec">
+                  <span className="ad-spec__label">Car Type</span>
+                  <span className="ad-spec__value">{auction.carType}</span>
                 </div>
-                <div>
-                  <p className="text-gray-600 font-semibold text-sm sm:text-base">Auction Date</p>
-                  <p className="text-base sm:text-lg lg:text-2xl font-bold text-orange-600 break-words">
-                    {new Date(auction.auctionDate).toLocaleDateString('en-IN', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 font-semibold text-sm sm:text-base">Current Highest Bid</p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-black text-orange-600">
-                    {currentBid ? `₹${currentBid.bidAmount.toLocaleString()}` : 'No bids yet'}
-                  </p>
-                </div>
+              )}
+              <div className="ad-spec">
+                <span className="ad-spec__label">Fuel Type</span>
+                <span className="ad-spec__value ad-spec__value--capitalize">{auction.fuelType}</span>
+              </div>
+              <div className="ad-spec">
+                <span className="ad-spec__label">Transmission</span>
+                <span className="ad-spec__value ad-spec__value--capitalize">{auction.transmission}</span>
+              </div>
+              <div className="ad-spec">
+                <span className="ad-spec__label">Mileage</span>
+                <span className="ad-spec__value">{auction.mileage?.toLocaleString()} km</span>
+              </div>
+              <div className="ad-spec">
+                <span className="ad-spec__label">Seller</span>
+                <span className="ad-spec__value">
+                  {auction.seller?.firstName || auction.sellerId?.firstName}{' '}
+                  {auction.seller?.lastName || auction.sellerId?.lastName}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Vehicle Documentation Highlights - For Buyers */}
+          {/* Vehicle Documents */}
+          {documents.length > 0 && (
+            <div className="ad-card">
+              <h2 className="ad-card__title">Vehicle Documents</h2>
+              <p className="ad-card__subtitle">Click to view document in a new tab</p>
+              <div className="ad-documents">
+                {documents.map((doc, index) => (
+                  <a
+                    key={index}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ad-doc-link"
+                  >
+                    <svg className="ad-doc-link__icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="ad-doc-link__label">{doc.label}</span>
+                    <svg className="ad-doc-link__arrow" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Vehicle Verification Report */}
           {auction.vehicleDocumentation && (
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border-2 border-blue-200">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-6 sm:mb-8">
-                Vehicle Verification Report
-              </h2>
+            <div className="ad-card ad-card--verification">
+              <h2 className="ad-card__title">Vehicle Verification Report</h2>
 
               {/* Key Highlights Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                {/* Ownership */}
-                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
-                  <div className="flex items-center mb-2">
-                    <p className="font-bold text-gray-700 text-sm">Ownership</p>
-                  </div>
-                  <p className="text-lg font-bold text-blue-600">{auction.vehicleDocumentation.ownershipType}</p>
+              <div className="ad-highlights">
+                <div className="ad-highlight">
+                  <span className="ad-highlight__label">Ownership</span>
+                  <span className="ad-highlight__value ad-highlight__value--blue">
+                    {auction.vehicleDocumentation.ownershipType}
+                  </span>
                 </div>
 
-                {/* Insurance Status */}
-                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
-                  <div className="flex items-center mb-2">
-                    <p className="font-bold text-gray-700 text-sm">Insurance</p>
-                  </div>
-                  <p className={`text-lg font-bold ${auction.vehicleDocumentation.insuranceStatus === 'Valid' ? 'text-green-600' : 'text-red-600'}`}>
+                <div className="ad-highlight">
+                  <span className="ad-highlight__label">Insurance</span>
+                  <span className={`ad-highlight__value ${auction.vehicleDocumentation.insuranceStatus === 'Valid' ? 'ad-highlight__value--green' : 'ad-highlight__value--red'}`}>
                     {auction.vehicleDocumentation.insuranceStatus}
-                  </p>
+                  </span>
                 </div>
 
-                {/* Accident History */}
-                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
-                  <div className="flex items-center mb-2">
-                    <p className="font-bold text-gray-700 text-sm">Accidents</p>
-                  </div>
-                  <p className={`text-lg font-bold ${auction.vehicleDocumentation.accidentHistory ? 'text-red-600' : 'text-green-600'}`}>
-                    {auction.vehicleDocumentation.accidentHistory ? `${auction.vehicleDocumentation.numberOfAccidents} Reported` : 'No Accidents'}
-                  </p>
+                <div className="ad-highlight">
+                  <span className="ad-highlight__label">Accidents</span>
+                  <span className={`ad-highlight__value ${auction.vehicleDocumentation.accidentHistory ? 'ad-highlight__value--red' : 'ad-highlight__value--green'}`}>
+                    {auction.vehicleDocumentation.accidentHistory
+                      ? `${auction.vehicleDocumentation.numberOfAccidents} Reported`
+                      : 'No Accidents'}
+                  </span>
                 </div>
 
-                {/* Odometer */}
-                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
-                  <div className="flex items-center mb-2">
-                    <p className="font-bold text-gray-700 text-sm">Odometer</p>
-                  </div>
-                  <p className="text-lg font-bold text-indigo-600">{auction.vehicleDocumentation.odometerReading?.toLocaleString()} km</p>
-                  <p className={`text-xs font-semibold mt-1 ${auction.vehicleDocumentation.odometerTampering === 'No Tampering' ? 'text-green-600' : 'text-red-600'}`}>
-                    {auction.vehicleDocumentation.odometerTampering === 'No Tampering' ? '✅ Verified' : '⚠️ ' + auction.vehicleDocumentation.odometerTampering}
-                  </p>
-                </div>
 
-                {/* Loan Status */}
-                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
-                  <div className="flex items-center mb-2">
-                    <p className="font-bold text-gray-700 text-sm">Loan Status</p>
-                  </div>
-                  <p className={`text-sm font-bold ${auction.vehicleDocumentation.hypothecationStatus?.includes('Clear') ? 'text-green-600' : 'text-orange-600'}`}>
+
+                <div className="ad-highlight">
+                  <span className="ad-highlight__label">Loan Status</span>
+                  <span className={`ad-highlight__value ${auction.vehicleDocumentation.hypothecationStatus?.includes('Clear') ? 'ad-highlight__value--green' : 'ad-highlight__value--orange'}`}>
                     {auction.vehicleDocumentation.hypothecationStatus}
-                  </p>
+                  </span>
                 </div>
 
-                {/* Pollution Certificate */}
-                <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100">
-                  <div className="flex items-center mb-2">
-                    <p className="font-bold text-gray-700 text-sm">PUC</p>
-                  </div>
-                  <p className={`text-lg font-bold ${auction.vehicleDocumentation.pollutionCertificate === 'Valid' ? 'text-green-600' : 'text-red-600'}`}>
+                <div className="ad-highlight">
+                  <span className="ad-highlight__label">PUC</span>
+                  <span className={`ad-highlight__value ${auction.vehicleDocumentation.pollutionCertificate === 'Valid' ? 'ad-highlight__value--green' : 'ad-highlight__value--red'}`}>
                     {auction.vehicleDocumentation.pollutionCertificate}
-                  </p>
+                  </span>
                 </div>
               </div>
 
               {/* Important Notices */}
-              <div className="space-y-3">
+              <div className="ad-notices">
                 {auction.vehicleDocumentation.previousInsuranceClaims && (
-                  <div className="bg-orange-100 border-l-4 border-orange-500 p-3 rounded">
-                    <p className="text-sm font-semibold text-orange-800">
-                      ⚠ This vehicle has previous insurance claims
-                    </p>
+                  <div className="ad-notice ad-notice--warning">
+                    This vehicle has previous insurance claims
                   </div>
                 )}
-                
                 {auction.vehicleDocumentation.majorRepairs && (
-                  <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded">
-                    <p className="text-sm font-semibold text-yellow-800">
-                      Vehicle has undergone major repairs
-                    </p>
+                  <div className="ad-notice ad-notice--warning">
+                    Vehicle has undergone major repairs
                   </div>
                 )}
-
                 {!auction.vehicleDocumentation.readyForTransfer && (
-                  <div className="bg-red-100 border-l-4 border-red-500 p-3 rounded">
-                    <p className="text-sm font-semibold text-red-800">
-                      Transfer documentation pending - verify before bidding
-                    </p>
+                  <div className="ad-notice ad-notice--danger">
+                    Transfer documentation pending — verify before bidding
                   </div>
                 )}
-
                 {auction.vehicleDocumentation.stolenVehicleCheck === 'Verified Clean' && (
-                  <div className="bg-green-100 border-l-4 border-green-500 p-3 rounded">
-                    <p className="text-sm font-semibold text-green-800">
-                      ✓ Vehicle verified - Not reported stolen
-                    </p>
+                  <div className="ad-notice ad-notice--success">
+                    Vehicle verified — Not reported stolen
                   </div>
                 )}
               </div>
 
               {/* Registration Info */}
-              <div className="mt-6 bg-white rounded-xl p-4 border border-gray-200">
-                <h4 className="font-bold text-gray-700 mb-3">
-                  Registration Details
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="ad-registration">
+                <h4 className="ad-registration__title">Registration Details</h4>
+                <div className="ad-registration__grid">
                   <div>
-                    <span className="text-gray-600">Registration No:</span>
-                    <p className="font-bold text-blue-600 font-mono">{auction.vehicleDocumentation.registrationNumber}</p>
+                    <span className="ad-registration__label">Registration No</span>
+                    <span className="ad-registration__value ad-registration__value--mono">
+                      {auction.vehicleDocumentation.registrationNumber}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">State:</span>
-                    <p className="font-bold text-gray-800">{auction.vehicleDocumentation.registrationState}</p>
+                    <span className="ad-registration__label">State</span>
+                    <span className="ad-registration__value">{auction.vehicleDocumentation.registrationState}</span>
                   </div>
                   <div>
-                    <span className="text-gray-600">VIN:</span>
-                    <p className="font-mono text-xs text-gray-700">{auction.vehicleDocumentation.vinNumber}</p>
+                    <span className="ad-registration__label">VIN</span>
+                    <span className="ad-registration__value ad-registration__value--mono ad-registration__value--small">
+                      {auction.vehicleDocumentation.vinNumber}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Service Records:</span>
-                    <p className="font-bold text-gray-800">{auction.vehicleDocumentation.serviceHistory}</p>
+                    <span className="ad-registration__label">Service Records</span>
+                    <span className="ad-registration__value">{auction.vehicleDocumentation.serviceHistory}</span>
                   </div>
                 </div>
               </div>
 
               {/* Verification Badge */}
               {auction.vehicleDocumentation.documentsVerified && (
-                <div className="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl p-4 text-center">
-                  <p className="text-lg font-bold">
-                    ✓ DOCUMENTS VERIFIED BY AUCTION MANAGER
-                  </p>
+                <div className="ad-verified-badge">
+                  ✓ DOCUMENTS VERIFIED BY AUCTION MANAGER
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Right Column - Bid Form */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-orange-100 lg:sticky lg:top-24">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-6 sm:mb-8 text-center">Place Your Bid</h2>
+        {/* ────────── Right Column - Bid Form ────────── */}
+        <div className="ad-content__right">
+          <div className="ad-bid-card">
+            <h2 className="ad-bid-card__title">Place Your Bid</h2>
 
             {isCurrentBidder ? (
-              <div className="bg-green-100 border-2 border-green-500 text-green-800 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 rounded-xl sm:rounded-2xl text-center text-lg sm:text-xl lg:text-2xl font-bold">
+              <div className="ad-bid-card__status ad-bid-card__status--winning">
+                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 You have the current highest bid!
               </div>
             ) : auction.auction_stopped ? (
-              <div className="bg-red-100 border-2 border-red-500 text-red-800 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 rounded-xl sm:rounded-2xl text-center text-lg sm:text-xl lg:text-2xl font-bold">
+              <div className="ad-bid-card__status ad-bid-card__status--stopped">
+                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 This auction has been stopped.
               </div>
             ) : (
               <>
-                {error && (
-                  <div className="bg-red-100 border border-red-500 text-red-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl mb-4 sm:mb-6 text-center font-semibold text-sm sm:text-base">
-                    {error}
-                  </div>
-                )}
-                {success && (
-                  <div className="bg-green-100 border border-green-500 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl mb-4 sm:mb-6 text-center font-semibold text-sm sm:text-base">
-                    {success}
-                  </div>
-                )}
+                {error && <div className="ad-bid-card__alert ad-bid-card__alert--error">{error}</div>}
+                {success && <div className="ad-bid-card__alert ad-bid-card__alert--success">{success}</div>}
 
-                <form onSubmit={handleBidSubmit} className="space-y-6 sm:space-y-8">
-                  <div>
-                    <label className="block text-base sm:text-lg font-bold text-gray-700 mb-2 sm:mb-3">
-                      Your Bid Amount (₹)
-                    </label>
+                <div className="ad-bid-card__current">
+                  <span className="ad-bid-card__current-label">Current Highest Bid</span>
+                  <span className="ad-bid-card__current-value">
+                    {currentBid ? `₹${currentBid.bidAmount.toLocaleString()}` : 'No bids yet'}
+                  </span>
+                </div>
+
+                <form onSubmit={handleBidSubmit} className="ad-bid-card__form">
+                  <div className="ad-bid-card__input-group">
+                    <label className="ad-bid-card__label">Your Bid Amount (₹)</label>
                     <input
                       type="number"
                       value={bidAmount}
@@ -424,39 +525,44 @@ export default function AuctionDetails() {
                       min="0"
                       step="1000"
                       placeholder={`Minimum: ₹${minBid.toLocaleString()}`}
-                      className="w-full px-4 sm:px-6 py-3 sm:py-5 text-lg sm:text-xl lg:text-2xl font-bold text-center border-2 border-orange-300 rounded-xl sm:rounded-2xl focus:border-orange-500 focus:ring-2 sm:focus:ring-4 focus:ring-orange-200 transition"
+                      className="ad-bid-card__input"
                     />
-                    <p className="text-center mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600">
-                      Minimum bid: <span className="font-bold text-orange-600">₹{minBid.toLocaleString()}</span>
+                    <p className="ad-bid-card__min-hint">
+                      Minimum bid: <strong>₹{minBid.toLocaleString()}</strong>
                     </p>
                   </div>
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg sm:text-xl lg:text-2xl font-black py-4 sm:py-5 lg:py-6 rounded-xl sm:rounded-2xl hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="ad-bid-card__submit"
                   >
-                    {submitting ? 'Placing Bid...' : 'Place Bid Now'}
+                    {submitting ? (
+                      <>
+                        <span className="ad-bid-card__spinner" />
+                        Placing Bid...
+                      </>
+                    ) : (
+                      'Place Bid Now'
+                    )}
                   </button>
                 </form>
               </>
             )}
 
-            {/* Book Appointment Button */}
-            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+            {/* Contact Seller */}
+            <div className="ad-bid-card__contact">
               <button
                 onClick={handleContactSeller}
                 disabled={chatLoading}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-base sm:text-lg lg:text-xl font-bold py-3 sm:py-4 lg:py-5 rounded-xl sm:rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="ad-bid-card__contact-btn"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 {chatLoading ? 'Loading...' : 'Book an Appointment'}
               </button>
-              <p className="text-center mt-3 text-xs sm:text-sm text-gray-500">
-                Schedule a viewing or chat with the seller
-              </p>
+              <p className="ad-bid-card__contact-hint">Schedule a viewing or chat with the seller</p>
             </div>
           </div>
         </div>

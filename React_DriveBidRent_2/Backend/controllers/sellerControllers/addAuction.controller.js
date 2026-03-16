@@ -36,13 +36,21 @@ export const postAddAuction = async (req, res) => {
       }
     };
 
-    // Upload vehicle image
-    const vehicleImageFile = req.files['vehicleImage'][0];
-    const vehicleImageUrl = await uploadFile(vehicleImageFile, 'drivebidrent/vehicles');
-    
-    if (!vehicleImageUrl) {
-      return res.status(500).json({ success: false, message: 'Failed to upload vehicle image' });
+    // Upload ALL vehicle images (supports multiple)
+    const vehicleImageFiles = req.files['vehicleImage'];
+    const vehicleImageUrls = [];
+    for (const file of vehicleImageFiles) {
+      const url = await uploadFile(file, 'drivebidrent/vehicles');
+      if (url) vehicleImageUrls.push(url);
     }
+    
+    if (vehicleImageUrls.length === 0) {
+      return res.status(500).json({ success: false, message: 'Failed to upload vehicle image(s)' });
+    }
+
+    // First image is the primary (backward compat)
+    const vehicleImageUrl = vehicleImageUrls[0];
+    console.log(`✅ [Add Auction] Uploaded ${vehicleImageUrls.length} vehicle image(s)`);
 
     // Upload all document files
     const registrationCertUrl = req.files['registration-certificate'] 
@@ -114,7 +122,7 @@ export const postAddAuction = async (req, res) => {
       courtCaseDetails: req.body['court-case-details'] || '',
       
       // Odometer & Service
-      odometerReading: parseInt(req.body['odometer-reading']),
+      odometerReading: req.body['odometer-reading'] ? parseInt(req.body['odometer-reading']) : undefined,
       odometerVerified: req.body['odometer-verified'] === 'yes',
       odometerTampering: req.body['odometer-tampering'] || 'Unknown',
       serviceHistory: req.body['service-history'] || 'No Records',
@@ -145,6 +153,7 @@ export const postAddAuction = async (req, res) => {
       // Basic Vehicle Info
       vehicleName: req.body['vehicle-name'],
       vehicleImage: vehicleImageUrl,
+      vehicleImages: vehicleImageUrls,
       carType: req.body['car-type'],
       year: parseInt(req.body['vehicle-year']),
       mileage: parseInt(req.body['vehicle-mileage']),

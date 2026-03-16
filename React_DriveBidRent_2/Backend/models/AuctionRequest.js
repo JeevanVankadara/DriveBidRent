@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const auctionRequestSchema = new mongoose.Schema({
   vehicleName: { type: String, required: true },
   vehicleImage: { type: String, required: true },
+  vehicleImages: [{ type: String }],
   carType: { 
     type: String, 
     required: true,
@@ -137,7 +138,7 @@ const auctionRequestSchema = new mongoose.Schema({
     courtCaseDetails: { type: String },
     
     // Odometer & Service
-    odometerReading: { type: Number, required: true },
+    odometerReading: { type: Number },
     odometerVerified: { type: Boolean, default: false },
     odometerTampering: { 
       type: String,
