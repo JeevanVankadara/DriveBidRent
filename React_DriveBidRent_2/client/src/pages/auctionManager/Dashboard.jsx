@@ -123,7 +123,7 @@ export default function Dashboard() {
                 <div key={req._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-56 overflow-hidden bg-gray-100">
                     <img
-                      src={req.vehicleImage || '/images/placeholder.jpg'}
+                      src={req.mainImage || req.vehicleImage || '/images/placeholder.jpg'}
                       alt={req.vehicleName}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -212,7 +212,7 @@ export default function Dashboard() {
                   <div key={car._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
                     <div className="relative h-56 overflow-hidden bg-gray-100">
                       <img
-                        src={car.vehicleImage}
+                        src={car.mainImage || car.vehicleImage}
                         alt={car.vehicleName}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
@@ -290,7 +290,7 @@ export default function Dashboard() {
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-amber-200 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-56 overflow-hidden bg-gray-100">
                     <img
-                      src={car.vehicleImage}
+                      src={car.mainImage || car.vehicleImage}
                       alt={car.vehicleName}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />

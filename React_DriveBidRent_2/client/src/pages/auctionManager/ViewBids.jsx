@@ -124,42 +124,74 @@ export default function ViewBids() {
             
             {/* Image Gallery & Main Specs */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="w-full h-80 md:h-[450px] bg-gray-100 relative">
-                <img
-                  src={(car.vehicleImages && car.vehicleImages.length > 0) ? car.vehicleImages[activeImageIndex] : car.vehicleImage}
-                  alt={car.vehicleName}
-                  className="w-full h-full object-cover transition-opacity duration-300"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/600x400?text=Vehicle+Image';
-                  }}
-                />
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <span className={`px-4 py-1.5 backdrop-blur-md text-white text-sm font-bold rounded-full shadow-lg ${car.auction_stopped ? 'bg-red-600/90' : 'bg-green-600/90'}`}>
-                    {car.auction_stopped ? 'AUCTION ENDED' : 'LIVE AUCTION'}
+               <div className="w-full h-80 md:h-[450px] bg-gray-100 relative">
+                {(() => {
+                  const imgs = [];
+                  if (car.mainImage) imgs.push(car.mainImage);
+                  else if (car.vehicleImage) imgs.push(car.vehicleImage);
+                  if (car.additionalImages?.length > 0) imgs.push(...car.additionalImages);
+                  else if (car.vehicleImages?.length > 0) {
+                    const additional = car.vehicleImages.filter(i => i !== car.vehicleImage && i !== car.mainImage);
+                    imgs.push(...additional);
+                  }
+                  const safeImages = imgs.length > 0 ? imgs : ['/images/placeholder-car.jpg'];
+                  
+                  return (
+                    <img
+                      src={safeImages[activeImageIndex] || safeImages[0]}
+                      alt={car.vehicleName}
+                      className="w-full h-full object-cover transition-opacity duration-300"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/600x400?text=Vehicle+Image';
+                      }}
+                    />
+                  );
+                })()}
+
+                <div className="absolute top-4 left-4">
+                  <span className="px-5 py-2 backdrop-blur-md text-white border border-white/20 text-sm font-bold uppercase tracking-wider rounded-full shadow-lg bg-green-600/90 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse shadow-sm"></span>
+                    LIVE BIDS
                   </span>
                 </div>
               </div>
               
               <div className="p-6 md:p-8">
-                <div className="flex justify-between items-start mb-6">
-                   <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800">{car.vehicleName}</h2>
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
+                   <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">{car.vehicleName}</h2>
+                   {car.carType && (
+                     <span className="px-4 py-1.5 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider self-start shadow-md">{car.carType}</span>
+                   )}
                 </div>
                 
-                {car.vehicleImages && car.vehicleImages.length > 1 && (
-                  <div className="flex gap-4 overflow-x-auto pb-4 mb-6 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {car.vehicleImages.map((img, idx) => (
-                      <div 
-                        key={idx}
-                        onClick={() => setActiveImageIndex(idx)}
-                        className={`relative w-24 h-16 md:w-32 md:h-20 flex-shrink-0 cursor-pointer rounded-xl overflow-hidden shadow-sm transition-all duration-300 ${
-                          activeImageIndex === idx ? 'ring-4 ring-amber-500 scale-105 opacity-100 z-10' : 'opacity-60 hover:opacity-100 ring-1 ring-gray-200'
-                        }`}
-                      >
-                        <img src={img} alt={`${car.vehicleName} preview ${idx + 1}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {(() => {
+                  const imgs = [];
+                  if (car.mainImage) imgs.push(car.mainImage);
+                  else if (car.vehicleImage) imgs.push(car.vehicleImage);
+                  if (car.additionalImages?.length > 0) imgs.push(...car.additionalImages);
+                  else if (car.vehicleImages?.length > 0) {
+                    const additional = car.vehicleImages.filter(i => i !== car.vehicleImage && i !== car.mainImage);
+                    imgs.push(...additional);
+                  }
+                  
+                  if (imgs.length <= 1) return null;
+                  
+                  return (
+                    <div className="flex gap-4 overflow-x-auto pb-4 mb-6 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                      {imgs.map((img, idx) => (
+                        <div 
+                          key={idx}
+                          onClick={() => setActiveImageIndex(idx)}
+                          className={`relative w-24 h-16 md:w-32 md:h-20 flex-shrink-0 cursor-pointer rounded-xl overflow-hidden shadow-sm transition-all duration-300 ${
+                            activeImageIndex === idx ? 'ring-4 ring-amber-500 scale-105 opacity-100 z-10' : 'opacity-60 hover:opacity-100 ring-1 ring-gray-200'
+                          }`}
+                        >
+                          <img src={img} alt={`${car.vehicleName} preview ${idx + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                   <div className="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100 flex flex-col items-center justify-center">

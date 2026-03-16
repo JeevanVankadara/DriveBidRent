@@ -5,7 +5,18 @@ import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 function RequestCard({ req }) {
-  const allImages = req.vehicleImages?.length > 0 ? req.vehicleImages : (req.vehicleImage ? [req.vehicleImage] : ['/images/placeholder-car.jpg']);
+  const allImages = (() => {
+    const imgs = [];
+    if (req.mainImage) imgs.push(req.mainImage);
+    else if (req.vehicleImage) imgs.push(req.vehicleImage);
+    
+    if (req.additionalImages?.length > 0) imgs.push(...req.additionalImages);
+    else if (req.vehicleImages?.length > 0) {
+      const additional = req.vehicleImages.filter(i => i !== req.vehicleImage && i !== req.mainImage);
+      imgs.push(...additional);
+    }
+    return imgs.length > 0 ? imgs : ['/images/placeholder-car.jpg'];
+  })();
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (

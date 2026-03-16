@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 
 const auctionRequestSchema = new mongoose.Schema({
   vehicleName: { type: String, required: true },
-  vehicleImage: { type: String, required: true },
-  vehicleImages: [{ type: String }],
+  mainImage: { type: String, required: true },
+  additionalImages: [{ type: String }],
   carType: { 
     type: String, 
     required: true,

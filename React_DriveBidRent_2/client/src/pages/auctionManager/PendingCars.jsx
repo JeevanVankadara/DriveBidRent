@@ -60,7 +60,7 @@ export default function PendingCars() {
               return (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={car.mainImage || car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-4 left-4">
                       <span className={`px-3 py-1 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm ${hasReview ? 'bg-green-500/90' : 'bg-amber-500/90'}`}>
                         {hasReview ? 'REVIEWED' : 'PENDING'}

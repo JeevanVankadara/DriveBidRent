@@ -222,7 +222,7 @@ export default function ApprovedCars() {
               {filteredCars.map(car => (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={car.mainImage || car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-4 left-4">
                       <span className={`px-3 py-1 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm ${getCarTag(car).color.replace('text-', 'text-white bg-').split(' ')[0]}-500/90`}>
                         {getCarTag(car).text}
@@ -273,7 +273,7 @@ export default function ApprovedCars() {
               {reauctionCars.map(car => (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm border-2 border-red-200 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={car.mainImage || car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-red-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm">PAYMENT EXPIRED</span></div>
                   </div>
                   <div className="p-6 flex flex-col flex-grow">
@@ -294,7 +294,7 @@ export default function ApprovedCars() {
               {notStartedCars.map(car => (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={car.mainImage || car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-blue-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm">READY TO START</span></div>
                   </div>
                   <div className="p-6 flex flex-col flex-grow">
@@ -315,7 +315,7 @@ export default function ApprovedCars() {
               {ongoingCars.map(car => (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm border border-amber-200 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={car.mainImage || car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-green-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>LIVE NOW</span></div>
                   </div>
                   <div className="p-6 flex flex-col flex-grow">
@@ -336,7 +336,7 @@ export default function ApprovedCars() {
               {endedCars.map(car => (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img src={car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
+                    <img src={car.mainImage || car.vehicleImage} alt={car.vehicleName} className="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-gray-800/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm">COMPLETED</span></div>
                   </div>
                   <div className="p-6 flex flex-col flex-grow">

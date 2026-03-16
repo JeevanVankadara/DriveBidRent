@@ -124,7 +124,17 @@ export default function AssignMechanic() {
     );
   }
 
-  const allImages = request.vehicleImages?.length > 0 ? request.vehicleImages : (request.vehicleImage ? [request.vehicleImage] : ['https://via.placeholder.com/600x400?text=Vehicle+Image']);
+  const allImages = (() => {
+    const imgs = [];
+    if (request.mainImage) imgs.push(request.mainImage);
+    else if (request.vehicleImage) imgs.push(request.vehicleImage);
+    if (request.additionalImages?.length > 0) imgs.push(...request.additionalImages);
+    else if (request.vehicleImages?.length > 0) {
+      const additional = request.vehicleImages.filter(i => i !== request.vehicleImage && i !== request.mainImage);
+      imgs.push(...additional);
+    }
+    return imgs.length > 0 ? imgs : ['https://via.placeholder.com/600x400?text=Vehicle+Image'];
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50 pt-8 pb-20 px-4 font-montserrat">

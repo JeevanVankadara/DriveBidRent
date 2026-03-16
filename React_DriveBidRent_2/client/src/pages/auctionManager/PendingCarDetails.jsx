@@ -93,7 +93,17 @@ export default function PendingCarDetails() {
   }
 
   const hasFullReview = car.mechanicReview?.mechanicalCondition && car.mechanicReview?.bodyCondition;
-  const allImages = car.vehicleImages?.length > 0 ? car.vehicleImages : (car.vehicleImage ? [car.vehicleImage] : ['/images/placeholder-car.jpg']);
+  const allImages = (() => {
+    const imgs = [];
+    if (car.mainImage) imgs.push(car.mainImage);
+    else if (car.vehicleImage) imgs.push(car.vehicleImage);
+    if (car.additionalImages?.length > 0) imgs.push(...car.additionalImages);
+    else if (car.vehicleImages?.length > 0) {
+      const additional = car.vehicleImages.filter(i => i !== car.vehicleImage && i !== car.mainImage);
+      imgs.push(...additional);
+    }
+    return imgs.length > 0 ? imgs : ['/images/placeholder-car.jpg'];
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50 pt-8 pb-20 px-4 font-montserrat">

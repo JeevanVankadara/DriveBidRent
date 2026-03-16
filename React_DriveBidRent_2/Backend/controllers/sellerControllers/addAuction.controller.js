@@ -49,7 +49,8 @@ export const postAddAuction = async (req, res) => {
     }
 
     // First image is the primary (backward compat)
-    const vehicleImageUrl = vehicleImageUrls[0];
+    const mainImageUrl = vehicleImageUrls[0];
+    const additionalImageUrls = vehicleImageUrls.slice(1);
     console.log(`✅ [Add Auction] Uploaded ${vehicleImageUrls.length} vehicle image(s)`);
 
     // Upload all document files
@@ -152,8 +153,8 @@ export const postAddAuction = async (req, res) => {
     const auction = new AuctionRequest({
       // Basic Vehicle Info
       vehicleName: req.body['vehicle-name'],
-      vehicleImage: vehicleImageUrl,
-      vehicleImages: vehicleImageUrls,
+      mainImage: mainImageUrl,
+      additionalImages: additionalImageUrls,
       carType: req.body['car-type'],
       year: parseInt(req.body['vehicle-year']),
       mileage: parseInt(req.body['vehicle-mileage']),

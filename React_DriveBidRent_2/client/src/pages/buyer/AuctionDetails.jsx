@@ -59,16 +59,28 @@ export default function AuctionDetails() {
     }
   };
 
-  // Build images array — prefer vehicleImages, fallback to vehicleImage
+  // Build images array - support both old (vehicleImage) and new (mainImage) schemas
   const getImages = useCallback(() => {
     if (!auction) return [];
-    if (auction.vehicleImages && auction.vehicleImages.length > 0) {
-      return auction.vehicleImages;
+    
+    const imagesList = [];
+    
+    // 1. Add the main primary image
+    if (auction.mainImage) {
+      imagesList.push(auction.mainImage);
+    } else if (auction.vehicleImage) {
+      imagesList.push(auction.vehicleImage);
     }
-    if (auction.vehicleImage) {
-      return [auction.vehicleImage];
+    
+    // 2. Add the secondary/additional images (avoiding duplicates)
+    if (auction.additionalImages && auction.additionalImages.length > 0) {
+      imagesList.push(...auction.additionalImages);
+    } else if (auction.vehicleImages && auction.vehicleImages.length > 0) {
+      const additional = auction.vehicleImages.filter(img => img !== auction.vehicleImage && img !== auction.mainImage);
+      imagesList.push(...additional);
     }
-    return [];
+    
+    return imagesList;
   }, [auction]);
 
   const images = getImages();
