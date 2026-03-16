@@ -150,14 +150,55 @@ export default function Requests() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-12 pb-24 px-4 font-montserrat">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Page Header */}
-        <div className="mb-10 pl-4 border-l-4 border-amber-500">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Vehicle Requests</h1>
-          <p className="text-gray-600 font-medium">Review new vehicle submissions and assign mechanics for inspection.</p>
+    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+
+      {/* ── HERO — full-width dark banner ── */}
+      <section style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
+        paddingTop: 80,
+        paddingBottom: 60,
+        overflow: 'hidden',
+      }}>
+        {[
+          { top: '20%', left: '5%', size: 180, color: 'rgba(249,115,22,0.08)' },
+          { top: '55%', left: '70%', size: 240, color: 'rgba(99,102,241,0.07)' },
+          { top: '8%', left: '83%', size: 120, color: 'rgba(249,115,22,0.05)' },
+        ].map((orb, i) => (
+          <div key={i} style={{ position: 'absolute', top: orb.top, left: orb.left, width: orb.size, height: orb.size, borderRadius: '50%', background: orb.color, filter: 'blur(40px)', pointerEvents: 'none' }} />
+        ))}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 32 }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.2)', padding: '6px 14px', borderRadius: 100, marginBottom: 16 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#f97316', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Incoming</span>
+              </div>
+              <h1 style={{ fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.05, marginBottom: 12 }}>
+                Vehicle{' '}
+                <span style={{ color: '#f97316', fontStyle: 'italic' }}>Requests</span>
+              </h1>
+              <p style={{ color: '#94a3b8', fontSize: 15, maxWidth: 380, lineHeight: 1.7 }}>
+                Incoming vehicle submissions awaiting mechanic assignment.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{requests.length}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Pending</div>
+              </div>
+              <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+              <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#60a5fa' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+          </div>
         </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto pb-24 px-4 pt-12">
         
         {requests.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

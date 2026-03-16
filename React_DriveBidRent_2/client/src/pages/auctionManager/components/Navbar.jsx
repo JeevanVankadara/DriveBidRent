@@ -25,8 +25,8 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm font-montserrat">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-20">
-          <Link 
-            to="/auctionmanager/dashboard" 
+          <Link
+            to="/auctionmanager/dashboard"
             className="text-2xl font-black tracking-tight flex items-center gap-2 group"
           >
             <div className="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center group-hover:bg-amber-500 transition-colors duration-300 shadow-sm">
@@ -36,7 +36,7 @@ export default function Navbar() {
               Drive<span className="text-amber-500">Bid</span>Rent
             </span>
           </Link>
-          
+
           <div className="hidden md:flex items-center space-x-2">
             {[
               { path: '/dashboard', label: 'Dashboard' },
@@ -45,28 +45,26 @@ export default function Navbar() {
               { path: '/approved', label: 'Approved Cars' },
               { path: '/chats', label: 'Chats' },
             ].map(({ path, label }) => (
-              <Link 
+              <Link
                 key={path}
-                to={`/auctionmanager${path}`} 
-                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  isActive(path) 
-                    ? 'bg-amber-50 text-amber-600' 
+                to={`/auctionmanager${path}`}
+                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isActive(path)
+                    ? 'bg-amber-50 text-amber-600'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 {label}
               </Link>
             ))}
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <Link
               to="/auctionmanager/profile"
-              className={`p-2.5 rounded-xl transition-all duration-300 ${
-                isActive('/profile')
+              className={`p-2.5 rounded-xl transition-all duration-300 ${isActive('/profile')
                   ? 'bg-amber-50 text-amber-600'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
+                }`}
               title="Profile"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

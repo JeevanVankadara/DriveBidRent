@@ -12,7 +12,7 @@ export const auctionManagerServices = {
   // Pending Cars
   getPending: () => axiosInstance.get('/auctionmanager/pending'),
   getReview: (id) => axiosInstance.get(`/auctionmanager/get-review/${id}`),
-  updateStatus: (id, status) => axiosInstance.post(`/auctionmanager/update-status/${id}`, { status }),
+  updateStatus: (id, status, startingBid) => axiosInstance.post(`/auctionmanager/update-status/${id}`, { status, ...(startingBid ? { startingBid } : {}) }),
   getPendingCarDetails: (id) => axiosInstance.get(`/auctionmanager/pending-car-details/${id}`),
 
   // Approved Cars

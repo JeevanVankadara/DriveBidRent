@@ -95,9 +95,9 @@ export const getReview = async (req, res) => {
 export const updateStatus = async (req, res) => {
   try {
     console.log('🔄 [updateStatus] Updating status for car:', req.params.id, 'to:', req.body.status);
-    
-    const { status } = req.body;
-    
+
+    const { status, startingBid } = req.body;
+
     const car = await AuctionRequest.findById(req.params.id);
 
     if (!car) {
@@ -119,14 +119,23 @@ export const updateStatus = async (req, res) => {
       return res.json(send(false, 'Complete mechanic review required for approval'));
     }
 
+    // Build the update object
+    const updateData = { status };
+
+    // When approving, set the manager-defined starting bid
+    if (status === 'approved' && startingBid && Number(startingBid) > 0) {
+      updateData.startingBid = Number(startingBid);
+      console.log('💰 [updateStatus] Setting manager-defined starting bid:', updateData.startingBid);
+    }
+
     const updated = await AuctionRequest.findByIdAndUpdate(
       req.params.id,
-      { status },
+      updateData,
       { new: true }
     );
 
-    console.log('✅ [updateStatus] Status updated to:', updated.status);
-    res.json(send(true, 'Status updated', { status: updated.status }));
+    console.log('✅ [updateStatus] Status updated to:', updated.status, '| Starting bid:', updated.startingBid);
+    res.json(send(true, 'Status updated', { status: updated.status, startingBid: updated.startingBid }));
   } catch (err) {
     console.error('❌ [updateStatus] Error:', err);
     res.json(send(false, 'Failed to update status'));

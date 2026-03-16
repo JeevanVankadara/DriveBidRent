@@ -97,11 +97,19 @@ const ViewAuctions = () => {
                       <span className="font-medium text-gray-900">{auction.year}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Starting Bid:</span>
+                      <span className="text-gray-600">Expected Bid:</span>
                       <span className="font-bold text-orange-600">
-                        ₹{auction.startingBid?.toLocaleString('en-IN')}
+                        ₹{auction.expectedBid?.toLocaleString('en-IN') || 'N/A'}
                       </span>
                     </div>
+                    {auction.startingBid && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Auction Starting Bid:</span>
+                        <span className="font-bold text-green-600">
+                          ₹{auction.startingBid.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-gray-600">Auction Date:</span>
                       <span className="font-medium text-gray-900">{formatDate(auction.auctionDate)}</span>

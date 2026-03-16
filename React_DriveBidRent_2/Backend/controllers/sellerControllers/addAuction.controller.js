@@ -162,7 +162,7 @@ export const postAddAuction = async (req, res) => {
       transmission: req.body['transmission'],
       condition: req.body['vehicle-condition'],
       auctionDate: req.body['auction-date'],
-      startingBid: parseFloat(req.body['starting-bid']),
+      expectedBid: parseFloat(req.body['starting-bid']),  // seller's expected amount
       
       // Documentation
       vehicleDocumentation,

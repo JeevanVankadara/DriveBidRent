@@ -54,47 +54,103 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-12 pb-24 px-4 font-montserrat">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
 
-        {/* Page Header */}
-        <div className="mb-12 pl-4 border-l-4 border-amber-500">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Auction Manager</h1>
-          <p className="text-gray-600 font-medium">Manage vehicle requests, inspections, and live auctions</p>
-        </div>
+      {/* ── HERO — full-width dark banner matching Wishlist style ── */}
+      <section style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
+        paddingTop: 80,
+        paddingBottom: 60,
+        overflow: 'hidden',
+      }}>
+        {/* Floating orbs */}
+        {[
+          { top: '20%', left: '5%', size: 200, color: 'rgba(249,115,22,0.08)', delay: '0s' },
+          { top: '55%', left: '65%', size: 260, color: 'rgba(99,102,241,0.07)', delay: '1.2s' },
+          { top: '10%', left: '80%', size: 130, color: 'rgba(249,115,22,0.05)', delay: '0.6s' },
+        ].map((orb, i) => (
+          <div key={i} style={{
+            position: 'absolute', top: orb.top, left: orb.left,
+            width: orb.size, height: orb.size, borderRadius: '50%',
+            background: orb.color, filter: 'blur(40px)',
+            animationDelay: orb.delay, pointerEvents: 'none',
+          }} />
+        ))}
+        {/* Dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }} />
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:shadow-md transition-shadow duration-300 group">
-            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 32 }}>
+
+            {/* Left: title */}
+            <div>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.2)',
+                padding: '6px 14px', borderRadius: 100, marginBottom: 16,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#f97316', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Management Portal</span>
+              </div>
+              <h1 style={{ fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.05, marginBottom: 12 }}>
+                Auction{' '}
+                <span style={{ color: '#f97316', fontStyle: 'italic' }}>Manager</span>
+              </h1>
+              <p style={{ color: '#94a3b8', fontSize: 15, maxWidth: 420, lineHeight: 1.7 }}>
+                Oversee requests, inspections &amp; live auctions — all in one place.
+              </p>
             </div>
-            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Pending Requests</div>
-            <div className="text-4xl font-black text-gray-900">{data.pending.length}</div>
-          </div>
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:shadow-md transition-shadow duration-300 group">
-            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+
+            {/* Right: stat pills */}
+            <div style={{ display: 'flex', gap: 12 }}>
+              {/* Requests */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{data.pending.length}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Requests</div>
+                </div>
+                <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+                <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#60a5fa' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              {/* Inspections */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{data.assigned.length}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Inspections</div>
+                </div>
+                <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+                <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#fbbf24' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              {/* Live */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(249,115,22,0.14)', border: '1px solid rgba(249,115,22,0.3)' }}>
+                <div>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: '#f97316', lineHeight: 1 }}>{data.approved.length}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(249,115,22,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Live</div>
+                </div>
+                <div style={{ width: 1, height: 36, background: 'rgba(249,115,22,0.2)' }} />
+                <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#34d399' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
             </div>
-            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Under Inspection</div>
-            <div className="text-4xl font-black text-gray-900">{data.assigned.length}</div>
-          </div>
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:shadow-md transition-shadow duration-300 group">
-            <div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </div>
-            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Live Auctions</div>
-            <div className="text-4xl font-black text-gray-900">{data.approved.length}</div>
           </div>
         </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto pb-24 px-4 pt-12">
+
+
 
         {/* ==================== REQUESTS ==================== */}
         <section className="mb-16">
@@ -148,7 +204,7 @@ export default function Dashboard() {
                         <p className="text-sm font-medium text-gray-900 truncate">{req.sellerId?.city || 'Not specified'}</p>
                       </div>
                     </div>
-                    
+
                     {/* Documentation Quick View */}
                     {req.vehicleDocumentation && (
                       <div className="mb-6">
@@ -196,7 +252,7 @@ export default function Dashboard() {
           {data.assigned.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm flex flex-col items-center justify-center">
               <div className="w-20 h-20 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-6">
-                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -318,8 +374,8 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-100">
-                        <p className="text-[10px] text-amber-800 uppercase tracking-wider font-bold mb-1">Starting Bid</p>
-                        <p className="text-2xl font-black text-amber-600">₹{(car.startingBid || 0).toLocaleString()}</p>
+                        <p className="text-[10px] text-amber-800 uppercase tracking-wider font-bold mb-1">Auction Starting Bid</p>
+                        <p className="text-2xl font-black text-amber-600">₹{car.startingBid ? car.startingBid.toLocaleString() : '—'}</p>
                       </div>
                     </div>
 

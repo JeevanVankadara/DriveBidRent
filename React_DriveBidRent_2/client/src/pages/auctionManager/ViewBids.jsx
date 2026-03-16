@@ -99,23 +99,54 @@ export default function ViewBids() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-8 pb-20 px-4 font-montserrat">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Page Header */}
-        <div className="mb-8 pl-4 border-l-4 border-amber-500 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Live Auction Dashboard</h1>
-            <p className="text-gray-600">Monitor live bids and manage auction status for {car.vehicleName}.</p>
+    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+
+      {/* ── HERO — full-width dark banner ── */}
+      <section style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
+        paddingTop: 60,
+        paddingBottom: 48,
+        overflow: 'hidden',
+      }}>
+        {[
+          { top: '15%', left: '4%', size: 160, color: 'rgba(249,115,22,0.08)' },
+          { top: '50%', left: '70%', size: 220, color: 'rgba(99,102,241,0.07)' },
+          { top: '5%', left: '84%', size: 110, color: 'rgba(34,197,94,0.06)' },
+        ].map((orb, i) => (
+          <div key={i} style={{ position: 'absolute', top: orb.top, left: orb.left, width: orb.size, height: orb.size, borderRadius: '50%', background: orb.color, filter: 'blur(40px)', pointerEvents: 'none' }} />
+        ))}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.2)', padding: '6px 14px', borderRadius: 100, marginBottom: 14 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 0 3px rgba(34,197,94,0.3)' }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Live Auction</span>
+              </div>
+              <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', letterSpacing: '-1.2px', lineHeight: 1.08, marginBottom: 8 }}>
+                Live Auction{' '}
+                <span style={{ color: '#f97316', fontStyle: 'italic' }}>Dashboard</span>
+              </h1>
+              <p style={{ color: '#94a3b8', fontSize: 14, maxWidth: 400, lineHeight: 1.7 }}>
+                Monitor live bids and manage auction status for <strong style={{ color: '#e2e8f0' }}>{car.vehicleName}</strong>.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/auctionmanager/approved')}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#94a3b8', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', padding: '12px 20px', borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#94a3b8'; }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 16, height: 16 }} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg>
+              Back to Cars
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/auctionmanager/approved')}
-            className="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-5 py-2.5 rounded-xl transition duration-200 shadow-sm whitespace-nowrap"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg>
-            Back to Cars
-          </button>
         </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto pb-20 px-4 pt-8">
 
         <div className="flex flex-col lg:flex-row gap-8">
           
@@ -196,7 +227,8 @@ export default function ViewBids() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                   <div className="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100 flex flex-col items-center justify-center">
                     <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Starting Bid</p>
-                    <p className="font-bold text-xl text-gray-900">₹{car.startingBid?.toLocaleString()}</p>
+                    <p className="font-bold text-xl text-gray-900">₹{car.startingBid?.toLocaleString() || '—'}</p>
+                    {car.expectedBid && <p className="text-xs text-gray-400 mt-1">Seller asked: ₹{car.expectedBid.toLocaleString()}</p>}
                   </div>
                   <div className="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100 flex flex-col items-center justify-center">
                     <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Condition</p>

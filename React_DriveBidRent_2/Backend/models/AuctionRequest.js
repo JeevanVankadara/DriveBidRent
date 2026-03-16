@@ -15,7 +15,8 @@ const auctionRequestSchema = new mongoose.Schema({
   condition: { type: String, required: true },
   fuelType: { type: String, required: true },
   transmission: { type: String, required: true },
-  startingBid: { type: Number, required: true },
+  expectedBid: { type: Number, required: true },  // Seller's expected sale amount
+  startingBid: { type: Number },                   // Set by Auction Manager on approval (auction floor)
   auctionDate: { type: Date, required: true },
   status: { 
     type: String, 

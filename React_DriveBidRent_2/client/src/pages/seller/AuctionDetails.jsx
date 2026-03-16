@@ -106,11 +106,21 @@ const AuctionDetails = () => {
                     <p className="text-lg font-semibold text-gray-900">{formatDate(auction.auctionDate)}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600 font-medium">Starting Bid</span>
+                    <span className="text-sm text-gray-600 font-medium">Expected Bid</span>
                     <p className="text-2xl font-bold text-orange-600">
-                      ₹{auction.startingBid ? auction.startingBid.toLocaleString('en-IN') : 'N/A'}
+                      ₹{auction.expectedBid ? auction.expectedBid.toLocaleString('en-IN') : 'N/A'}
                     </p>
+                    <p className="text-xs text-gray-500 mt-1">Amount you expected to receive</p>
                   </div>
+                  {auction.startingBid && (
+                    <div>
+                      <span className="text-sm text-gray-600 font-medium">Auction Starting Bid</span>
+                      <p className="text-2xl font-bold text-green-600">
+                        ₹{auction.startingBid.toLocaleString('en-IN')}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Minimum bid set by Auction Manager</p>
+                    </div>
+                  )}
                   {auction.started_auction !== 'no' && (
                     <div>
                       <span className="text-sm text-gray-600 font-medium">Auction Status</span>

@@ -46,12 +46,56 @@ export default function PendingCars() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-12 pb-24 px-4 font-montserrat">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-10 pl-4 border-l-4 border-amber-500">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Pending Inspections</h1>
-          <p className="text-gray-600 font-medium">Monitor vehicles awaiting mechanic inspection and approval.</p>
+    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+
+      {/* ── HERO — full-width dark banner ── */}
+      <section style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
+        paddingTop: 80,
+        paddingBottom: 60,
+        overflow: 'hidden',
+      }}>
+        {[
+          { top: '15%', left: '4%', size: 180, color: 'rgba(249,115,22,0.08)', delay: '0s' },
+          { top: '60%', left: '68%', size: 240, color: 'rgba(99,102,241,0.07)', delay: '1s' },
+          { top: '8%', left: '82%', size: 120, color: 'rgba(249,115,22,0.05)', delay: '0.5s' },
+        ].map((orb, i) => (
+          <div key={i} style={{ position: 'absolute', top: orb.top, left: orb.left, width: orb.size, height: orb.size, borderRadius: '50%', background: orb.color, filter: 'blur(40px)', pointerEvents: 'none' }} />
+        ))}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 32 }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.2)', padding: '6px 14px', borderRadius: 100, marginBottom: 16 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#f97316', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Under Review</span>
+              </div>
+              <h1 style={{ fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.05, marginBottom: 12 }}>
+                Pending{' '}
+                <span style={{ color: '#f97316', fontStyle: 'italic' }}>Inspections</span>
+              </h1>
+              <p style={{ color: '#94a3b8', fontSize: 15, maxWidth: 380, lineHeight: 1.7 }}>
+                Vehicles awaiting mechanic review and approval.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{cars.length}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Awaiting</div>
+              </div>
+              <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+              <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#fbbf24' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+          </div>
         </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto pb-24 px-4 pt-12">
         
         {cars.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
