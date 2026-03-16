@@ -278,7 +278,6 @@ export default function AuctionDetails() {
         </div>
       </section>
 
-      {/* ────────── MAIN CONTENT GRID ────────── */}
       <div className="ad-content">
         {/* Left Column */}
         <div className="ad-content__left">
