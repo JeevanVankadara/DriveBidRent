@@ -195,76 +195,64 @@ export default function ChatRoomMechanic({ chatIdProp }) {
 
   if (!chatId) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-white p-8">
-        <div className="text-center max-w-md">
-          <div className="w-32 h-32 mx-auto mb-8 text-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-full h-full">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <h3 className="text-3xl font-bold text-gray-800 mb-3">Select a Conversation</h3>
-          <p className="text-gray-600 text-lg mb-8">
-            Choose a chat from the sidebar to start communicating with auction managers about vehicle inspections
-          </p>
-          <div className="inline-flex items-center justify-center space-x-2 text-orange-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <span className="font-medium">Click on an inspection to begin</span>
-          </div>
+      <div className="h-full flex flex-col items-center justify-center bg-[#f8fafc] border-l border-gray-100 p-8 text-center" style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
+        <div className="w-24 h-24 bg-white shadow-sm border border-gray-100 rounded-3xl flex items-center justify-center mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-10 h-10 text-gray-300">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
         </div>
+        <h3 className="text-2xl font-black text-gray-900 mb-2">No Chat Selected</h3>
+        <p className="text-gray-500 font-medium max-w-sm">
+          Select a conversation from the sidebar to communicate with auction managers.
+        </p>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-gray-200 rounded-full"></div>
-            <div className="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
-          </div>
-          <p className="mt-6 text-gray-600 font-medium">Loading conversation...</p>
-          <p className="text-sm text-gray-500 mt-2">Preparing your chat interface</p>
-        </div>
+      <div className="h-full flex flex-col items-center justify-center bg-white border-l border-gray-100">
+        <div className="w-16 h-16 border-4 border-gray-100 border-t-amber-500 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-500 font-bold text-sm uppercase tracking-wider">Loading conversation</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <InspectionChatHeader
-        carName={chat?.inspectionTask?.vehicleName || "Vehicle Inspection"}
-        currentUserId={myUserId}
-        chat={chat}
-      />
+    <div className="flex flex-col h-full bg-white relative">
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+        <InspectionChatHeader
+          carName={chat?.inspectionTask?.vehicleName || "Vehicle Inspection"}
+          currentUserId={myUserId}
+          chat={chat}
+        />
+      </div>
       
       <div 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-8 bg-gradient-to-b from-white to-gray-50/50"
+        className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc]/50 relative"
       >
         <div className="max-w-4xl mx-auto space-y-6">
           {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <div className="w-24 h-24 mx-auto mb-6 text-gray-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-full h-full">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            <div className="h-full flex items-center justify-center min-h-[300px]">
+              <div className="text-center p-8 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                <div className="w-16 h-16 mx-auto mb-4 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-2">Start the Conversation</h3>
-                <p className="text-gray-500 max-w-md mx-auto">
-                  Send your first message to discuss the vehicle inspection details with the auction manager
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Start the Conversation</h3>
+                <p className="text-sm text-gray-500 max-w-xs mx-auto font-medium">
+                  Send your first message to discuss the vehicle inspection details.
                 </p>
               </div>
             </div>
           ) : (
             <>
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200">
-                  <span className="text-sm font-medium text-purple-700">
-                    Inspection Chat Started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm">
+                  <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                    Started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -289,27 +277,27 @@ export default function ChatRoomMechanic({ chatIdProp }) {
       </div>
       
       {expired ? (
-        <div className="px-8 py-4 bg-gradient-to-r from-amber-50 to-amber-100 border-t border-amber-200">
-          <div className="max-w-4xl mx-auto flex items-center justify-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <div className="max-w-4xl mx-auto flex items-center justify-center space-x-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-amber-800">This inspection chat has expired</p>
-              <p className="text-xs text-amber-600">The conversation is now read-only</p>
+              <p className="text-sm font-bold text-gray-900">This inspection chat has expired</p>
+              <p className="text-xs font-medium text-gray-500">The conversation is now read-only</p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="border-t border-gray-200 bg-white">
-          <div className="max-w-4xl mx-auto px-8">
+        <div className="border-t border-gray-100 bg-white p-4 z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+          <div className="max-w-4xl mx-auto">
             <InspectionMessageInput 
               onSend={handleSend} 
               disabled={expired} 
               placeholder="Type your message here..." 
-              className="border-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 rounded-2xl shadow-sm bg-gray-50"
             />
           </div>
         </div>
