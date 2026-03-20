@@ -8,6 +8,7 @@ import userActivitiesControllers from '../controllers/superAdminControllers/user
 import revenueControllers from '../controllers/superAdminControllers/revenue.controllers.js';
 import trendsControllers from '../controllers/superAdminControllers/trends.controllers.js';
 import profileControllers from '../controllers/superAdminControllers/profile.controllers.js';
+import createAdminController from '../controllers/superAdminControllers/createAdmin.controller.js';
 import superadminMiddleware from '../middlewares/superadmin.middleware.js';
 
 // Dashboard - Overview
@@ -29,5 +30,8 @@ router.get("/trends", superadminMiddleware, trendsControllers.getTrends);
 // Profile management
 router.get("/profile", superadminMiddleware, profileControllers.getProfile);
 router.post("/update-password", superadminMiddleware, profileControllers.updatePassword);
+
+// Create Admin
+router.post("/create-admin", superadminMiddleware, createAdminController.createAdmin);
 
 export default router;

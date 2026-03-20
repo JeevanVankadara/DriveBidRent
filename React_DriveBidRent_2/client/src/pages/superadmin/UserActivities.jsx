@@ -1,8 +1,9 @@
 // client/src/pages/superadmin/UserActivities.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
+import superadminServices from "../../services/superadmin.services";
 
 const UserActivities = () => {
   const [users, setUsers] = useState([]);
@@ -15,6 +16,74 @@ const UserActivities = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Create Admin modal state
+  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
+  const [adminForm, setAdminForm] = useState({ email: '', password: '', phone: '' });
+  const [adminFormErrors, setAdminFormErrors] = useState({});
+  const [adminSubmitting, setAdminSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  const showToast = (message, type = 'success') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message, type });
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  };
+
+  // Validation helpers
+  const validateAdminForm = () => {
+    const errors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!adminForm.email.trim()) errors.email = 'Email is required.';
+    else if (!emailRegex.test(adminForm.email)) errors.email = 'Invalid email format.';
+    if (!adminForm.password) errors.password = 'Password is required.';
+    else if (adminForm.password.length < 8) errors.password = 'Password must be at least 8 characters.';
+    if (!adminForm.phone.trim()) errors.phone = 'Phone number is required.';
+    else if (!/^\d{10}$/.test(adminForm.phone)) errors.phone = 'Phone number must be exactly 10 digits.';
+    return errors;
+  };
+
+  const handleAdminFormChange = (e) => {
+    const { name, value } = e.target;
+    setAdminForm(prev => ({ ...prev, [name]: value }));
+    // Clear field error on change
+    if (adminFormErrors[name]) {
+      setAdminFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleCreateAdminSubmit = async (e) => {
+    e.preventDefault();
+    const errors = validateAdminForm();
+    if (Object.keys(errors).length > 0) {
+      setAdminFormErrors(errors);
+      return;
+    }
+    setAdminSubmitting(true);
+    try {
+      const res = await superadminServices.createAdmin(adminForm);
+      showToast(res.message || 'Admin created successfully!', 'success');
+      setShowCreateAdmin(false);
+      setAdminForm({ email: '', password: '', phone: '' });
+      setAdminFormErrors({});
+      // Refresh users list
+      fetchUserActivities();
+    } catch (err) {
+      showToast(err.message || 'Failed to create admin.', 'error');
+    } finally {
+      setAdminSubmitting(false);
+    }
+  };
+
+  const closeCreateAdminModal = () => {
+    setShowCreateAdmin(false);
+    setAdminForm({ email: '', password: '', phone: '' });
+    setAdminFormErrors({});
+  };
 
   useEffect(() => {
     fetchUserActivities();
@@ -80,10 +149,34 @@ const UserActivities = () => {
 
   return (
     <div className="min-h-screen py-8 relative" style={{ zIndex: 1 }}>
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-6 right-6 z-[100] px-6 py-4 rounded-xl shadow-2xl text-white font-semibold text-sm flex items-center gap-3 animate-fade-in-up transition-all duration-300 ${
+            toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+          }`}
+          style={{ minWidth: 280, maxWidth: 420 }}
+        >
+          <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} className="ml-auto text-white hover:text-gray-200 text-xl leading-none">&times;</button>
+        </div>
+      )}
+
       <section className="max-w-7xl mx-auto px-6">
-        <div className="premium-page-header animate-fade-in-up">
-          <h1 className="premium-page-title">User Activities</h1>
-          <p className="premium-page-subtitle">Monitor what each user is doing on the platform</p>
+        <div className="premium-page-header animate-fade-in-up flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="premium-page-title">User Activities</h1>
+            <p className="premium-page-subtitle">Monitor what each user is doing on the platform</p>
+          </div>
+          <button
+            id="create-admin-btn"
+            onClick={() => setShowCreateAdmin(true)}
+            className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 self-start md:self-auto"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            <span className="text-lg">+</span> Create Admin
+          </button>
         </div>
 
         {/* Filter */}
@@ -363,6 +456,128 @@ const UserActivities = () => {
                   <p className="text-center text-gray-500">No details available</p>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Admin Modal */}
+        {showCreateAdmin && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={closeCreateAdminModal}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              {/* Header */}
+              <div className="bg-orange-600 text-white p-6 rounded-t-2xl">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>Create Admin</h2>
+                    <p className="text-orange-100 text-sm mt-1">Add a new admin to the platform</p>
+                  </div>
+                  <button onClick={closeCreateAdminModal} className="text-2xl hover:bg-orange-700 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    &times;
+                  </button>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleCreateAdminSubmit} className="p-6 space-y-5">
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                  <input
+                    id="admin-email"
+                    type="email"
+                    name="email"
+                    value={adminForm.email}
+                    onChange={handleAdminFormChange}
+                    placeholder="admin@example.com"
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
+                      adminFormErrors.email
+                        ? 'border-red-400 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-orange-500'
+                    }`}
+                  />
+                  {adminFormErrors.email && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{adminFormErrors.email}</p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                  <div className="relative">
+                    <input
+                      id="admin-password"
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={adminForm.password}
+                      onChange={handleAdminFormChange}
+                      placeholder="Minimum 8 characters"
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all pr-12 ${
+                        adminFormErrors.password
+                          ? 'border-red-400 focus:ring-red-400'
+                          : 'border-gray-300 focus:ring-orange-500'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm font-medium"
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                  {adminFormErrors.password && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{adminFormErrors.password}</p>
+                  )}
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    id="admin-phone"
+                    type="text"
+                    name="phone"
+                    value={adminForm.phone}
+                    onChange={handleAdminFormChange}
+                    placeholder="10 digit number"
+                    maxLength={10}
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
+                      adminFormErrors.phone
+                        ? 'border-red-400 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-orange-500'
+                    }`}
+                  />
+                  {adminFormErrors.phone && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{adminFormErrors.phone}</p>
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeCreateAdminModal}
+                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    id="submit-create-admin"
+                    type="submit"
+                    disabled={adminSubmitting}
+                    className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                  >
+                    {adminSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                        Creating...
+                      </span>
+                    ) : (
+                      'Create Admin'
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
