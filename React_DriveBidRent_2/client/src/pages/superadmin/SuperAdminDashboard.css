@@ -25,7 +25,7 @@
 
   /* Accent Colors */
   --accent-blue: #3b82f6;
-  --accent-blue-light: #60a5fa;
+  --accent-blue-light: hsl(213, 94%, 68%);
   --accent-purple: #8b5cf6;
   --accent-teal: #14b8a6;
   --accent-pink: #ec4899;
@@ -80,7 +80,8 @@
 @media (max-width: 768px) {
   .superadmin-main-content {
     margin-left: 0;
-    padding-top: 60px; /* room for mobile hamburger */
+    padding-top: 60px;
+    /* room for mobile hamburger */
   }
 }
 
@@ -88,8 +89,12 @@
 
 
 /* Font Weights */
-.superadmin-layout h1, .superadmin-layout h2, .superadmin-layout h3, 
-.superadmin-layout h4, .superadmin-layout h5, .superadmin-layout h6 {
+.superadmin-layout h1,
+.superadmin-layout h2,
+.superadmin-layout h3,
+.superadmin-layout h4,
+.superadmin-layout h5,
+.superadmin-layout h6 {
   font-weight: 700 !important;
   letter-spacing: -0.025em;
   color: var(--gray-900);
@@ -410,26 +415,26 @@
   .premium-page-title {
     font-size: 2rem;
   }
-  
+
   .premium-stat-value {
     font-size: 2rem;
   }
-  
+
   .premium-chart-container,
   .premium-performer-card {
     padding: 1.5rem;
   }
-  
+
   .premium-performer-item {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
   }
-  
+
   .premium-performer-info {
     margin: 0;
   }
-  
+
   .premium-performer-stats {
     text-align: center;
   }
@@ -444,6 +449,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -451,9 +457,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
@@ -463,6 +472,7 @@
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -477,10 +487,21 @@
 }
 
 /* Stagger animation for cards */
-.premium-stat-card:nth-child(1) { animation-delay: 0s; }
-.premium-stat-card:nth-child(2) { animation-delay: 0.1s; }
-.premium-stat-card:nth-child(3) { animation-delay: 0.2s; }
-.premium-stat-card:nth-child(4) { animation-delay: 0.3s; }
+.premium-stat-card:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.premium-stat-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.premium-stat-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.premium-stat-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
 
 /* ==========================================
    UTILITY CLASSES
