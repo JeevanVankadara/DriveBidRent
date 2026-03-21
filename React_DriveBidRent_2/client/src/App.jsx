@@ -50,6 +50,8 @@ import AboutUs from './pages/buyer/AboutUs';
 import ChatListBuyer from './pages/buyer/ChatListBuyer';
 import ChatRoomBuyer from './pages/buyer/ChatRoomBuyer';
 import ChatPageBuyer from './pages/buyer/ChatPageBuyer';
+import PaymentSuccess from './pages/buyer/PaymentSuccess';
+import PaymentCancel from './pages/buyer/PaymentCancel';
 
 // === SELLER ===
 import SellerLayout from './pages/seller/SellerLayout';
@@ -143,6 +145,8 @@ function App() {
         <Route path="rentals/:id/book" element={<BookRental />} />
         <Route path="purchases" element={<PurchasesList />} />
         <Route path="purchases/:id" element={<PurchaseDetails />} />
+        <Route path="payment-success" element={<PaymentSuccess />} />
+        <Route path="payment-cancel" element={<PaymentCancel />} />
         <Route path="my-bids" element={<MyBids />} />
         <Route path="wishlist" element={<Wishlist />} />
         <Route path="profile" element={<BuyerProfile />} />

@@ -183,6 +183,27 @@ export const completeAuctionPayment = async (purchaseId, paymentMethod) => {
   }
 };
 
+// === STRIPE CHECKOUT EXPERIMENTAL ===
+export const createCheckoutSession = async (paymentData) => {
+  try {
+    const response = await axios.post('/buyer/payment/create-checkout-session', paymentData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw error;
+  }
+};
+
+export const verifyPaymentSession = async (sessionId) => {
+  try {
+    const response = await axios.get(`/buyer/payment/verify-session?sessionId=${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error verifying payment session:', error);
+    throw error;
+  }
+};
+
 // === MY BIDS ===
 export const getMyBids = async () => {
   try {

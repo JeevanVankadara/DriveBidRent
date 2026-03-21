@@ -34,6 +34,10 @@ import {
   getReviews,
   checkCanReview
 } from '../controllers/buyer/review.controller.js';
+import {
+  createCheckoutSession,
+  verifySession
+} from '../controllers/buyer/payment.controller.js';
 import Notification from '../models/Notification.js';
 
 const router = Router();
@@ -99,6 +103,10 @@ router.post('/wishlist', buyerMiddleware, checkBlocked, addToWishlistApi);
 router.post('/api/wishlist', buyerMiddleware, checkBlocked, addToWishlistApi);
 router.delete('/wishlist', buyerMiddleware, checkBlocked, removeFromWishlistApi);
 router.delete('/api/wishlist', buyerMiddleware, checkBlocked, removeFromWishlistApi);
+
+// === PAYMENTS ===
+router.post('/payment/create-checkout-session', buyerMiddleware, checkBlocked, createCheckoutSession);
+router.get('/payment/verify-session', buyerMiddleware, verifySession);
 
 // === PROFILE ===
 router.get('/profile', buyerMiddleware, async (req, res) => {
