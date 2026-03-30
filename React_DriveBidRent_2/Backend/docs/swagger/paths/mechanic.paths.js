@@ -68,6 +68,63 @@ const mechanicPaths = {
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       responses: { 200: { description: "Review submitted" } }
     }
+  },
+  "/api/mechanic/inspection/schedule": {
+    post: {
+      tags: ["Mechanic"],
+      summary: "Schedule inspection",
+      security: mechanicSecurity,
+      requestBody: {
+        required: true,
+        content: { "application/json": { schema: { type: "object" } } }
+      },
+      responses: { 200: { description: "Inspection scheduled" } }
+    }
+  },
+  "/api/mechanic/submit-inspection/{auctionId}": {
+    post: {
+      tags: ["Mechanic"],
+      summary: "Submit full inspection report",
+      security: mechanicSecurity,
+      parameters: [{ name: "auctionId", in: "path", required: true, schema: { type: "string" } }],
+      requestBody: {
+        required: true,
+        content: { "application/json": { schema: { type: "object" } } }
+      },
+      responses: { 200: { description: "Inspection submitted" } }
+    }
+  },
+  "/api/mechanic/profile": {
+    get: {
+      tags: ["Mechanic"],
+      summary: "Get mechanic profile",
+      security: mechanicSecurity,
+      responses: { 200: { description: "Profile fetched" } }
+    }
+  },
+  "/api/mechanic/change-password": {
+    post: {
+      tags: ["Mechanic"],
+      summary: "Change mechanic password",
+      security: mechanicSecurity,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["oldPassword", "newPassword", "confirmPassword"],
+              properties: {
+                oldPassword: { type: "string" },
+                newPassword: { type: "string", minLength: 8 },
+                confirmPassword: { type: "string", minLength: 8 }
+              }
+            }
+          }
+        }
+      },
+      responses: { 200: { description: "Password changed" } }
+    }
   }
 };
 

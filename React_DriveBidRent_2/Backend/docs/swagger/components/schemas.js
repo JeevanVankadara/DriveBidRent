@@ -85,6 +85,20 @@ export const schemas = {
       newPassword: { type: "string", example: "NewPass123" },
       confirmPassword: { type: "string", example: "NewPass123" }
     }
+  },
+  BuyerProfileUpdateRequest: {
+    type: "object",
+    required: ["firstName", "lastName", "email", "phone"],
+    properties: {
+      firstName: { type: "string", example: "Rahul" },
+      lastName: { type: "string", example: "Sharma" },
+      email: { type: "string", format: "email", example: "rahul@example.com" },
+      phone: { type: "string", example: "9876543210" },
+      doorNo: { type: "string", example: "12A" },
+      street: { type: "string", example: "MG Road" },
+      city: { type: "string", example: "Kochi" },
+      state: { type: "string", example: "Kerala" }
+    }
   }
 };
 

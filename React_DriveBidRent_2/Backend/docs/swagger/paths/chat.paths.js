@@ -47,6 +47,15 @@ const chatPaths = {
       responses: { 200: { description: "Message sent" } }
     }
   },
+  "/api/chat/{chatId}/mark-read": {
+    post: {
+      tags: ["Chat"],
+      summary: "Mark chat messages as read",
+      security: chatSecurity,
+      parameters: [{ name: "chatId", in: "path", required: true, schema: { type: "string" } }],
+      responses: { 200: { description: "Messages marked read" } }
+    }
+  },
   "/api/chat/create/rental/{rentalId}": {
     post: {
       tags: ["Chat"],

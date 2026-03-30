@@ -50,6 +50,48 @@ const authPaths = {
       }
     }
   },
+  "/api/auth/google": {
+    post: {
+      tags: ["Auth"],
+      summary: "Login or signup with Google",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                token: { type: "string", example: "google-id-token" }
+              }
+            }
+          }
+        }
+      },
+      responses: { 200: { description: "Google auth success" } }
+    }
+  },
+  "/api/auth/verify-signup-otp": {
+    post: {
+      tags: ["Auth"],
+      summary: "Verify OTP for signup",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["email", "otp"],
+              properties: {
+                email: { type: "string", format: "email", example: "user@example.com" },
+                otp: { type: "string", example: "123456" }
+              }
+            }
+          }
+        }
+      },
+      responses: { 200: { description: "OTP verified" } }
+    }
+  },
   "/api/auth/logout": {
     get: {
       tags: ["Auth"],
@@ -112,6 +154,13 @@ const authPaths = {
           }
         }
       }
+    }
+  },
+  "/api/auth/auctionmanager/logout": {
+    get: {
+      tags: ["Auction Manager Auth"],
+      summary: "Logout auction manager",
+      responses: { 200: { description: "Logout successful" } }
     }
   }
 };

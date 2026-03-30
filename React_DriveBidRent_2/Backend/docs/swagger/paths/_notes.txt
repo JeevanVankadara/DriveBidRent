@@ -1,2 +1,0 @@
-This folder is intentionally split by role/module for easier maintenance.
-Each *.paths.js file exports a plain object that gets merged into openapi.js.

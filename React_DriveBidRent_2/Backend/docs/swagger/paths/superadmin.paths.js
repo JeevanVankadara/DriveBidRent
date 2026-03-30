@@ -65,9 +65,48 @@ const superadminPaths = {
       security: superadminSecurity,
       requestBody: {
         required: true,
-        content: { "application/json": { schema: { $ref: "#/components/schemas/ChangePasswordRequest" } } }
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["currentPassword", "newPassword"],
+              properties: {
+                currentPassword: { type: "string", example: "Superadmin@123" },
+                newPassword: { type: "string", minLength: 8, example: "Superadmin@1234" }
+              }
+            }
+          }
+        }
       },
       responses: { 200: { description: "Password updated" } }
+    }
+  },
+  "/api/superadmin/create-admin": {
+    post: {
+      tags: ["Superadmin"],
+      summary: "Create admin account",
+      security: superadminSecurity,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["firstName", "lastName", "email", "phone", "password", "dateOfBirth", "city"],
+              properties: {
+                firstName: { type: "string", example: "Admin" },
+                lastName: { type: "string", example: "User" },
+                email: { type: "string", format: "email", example: "admin@example.com" },
+                phone: { type: "string", example: "9876543210" },
+                password: { type: "string", minLength: 8, example: "StrongPass123" },
+                dateOfBirth: { type: "string", format: "date", example: "1992-01-10" },
+                city: { type: "string", example: "Kochi" }
+              }
+            }
+          }
+        }
+      },
+      responses: { 201: { description: "Admin created" }, 400: { description: "Validation error" } }
     }
   }
 };

@@ -46,6 +46,15 @@ const inspectionChatPaths = {
       },
       responses: { 200: { description: "Message sent" } }
     }
+  },
+  "/api/inspection-chat/{chatId}/mark-read": {
+    post: {
+      tags: ["Inspection Chat"],
+      summary: "Mark inspection chat messages as read",
+      security: inspectionChatSecurity,
+      parameters: [{ name: "chatId", in: "path", required: true, schema: { type: "string" } }],
+      responses: { 200: { description: "Messages marked read" } }
+    }
   }
 };
 
