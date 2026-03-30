@@ -44,6 +44,14 @@ export default function Dashboard() {
 
   const { showApprovalPopup, displayedVehicles = [], completedTasks = [] } = data;
 
+  const upcomingInspections = displayedVehicles.filter(v => {
+    if (v.inspectionStatus !== 'scheduled' || !v.inspectionDate) return false;
+    const inspectDate = new Date(v.inspectionDate);
+    const now = new Date();
+    const diffHours = (inspectDate - now) / (1000 * 60 * 60);
+    return diffHours >= -24 && diffHours <= 48; // upcoming in next 48 or missed by today
+  });
+
   return (
     <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
       
@@ -87,6 +95,32 @@ export default function Dashboard() {
               <div className="flex-grow">
                 <h3 className="text-orange-400 font-bold mb-1">Account Under Review</h3>
                 <p className="text-gray-400 text-sm">Your profile is being verified by the admin team. You'll receive full access once approved.</p>
+              </div>
+            </div>
+          )}
+
+          {upcomingInspections.length > 0 && (
+            <div className="mb-8 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-4 backdrop-blur-sm shadow-sm overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+              <div className="p-2 bg-blue-500/20 rounded-xl text-blue-400 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-blue-400 font-bold mb-1">
+                  Upcoming Inspections ({upcomingInspections.length})
+                </h3>
+                <p className="text-gray-400 text-sm font-medium">
+                  You have vehicle inspections scheduled soon. Please check your assigned tasks and sync with your calendar.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  {upcomingInspections.map(v => (
+                    <Link key={v._id} to={`/mechanic/car-details/${v._id}`} className="px-3 py-1 bg-white/10 hover:bg-white/20 text-blue-300 text-xs font-bold rounded-lg transition-colors border border-white/5">
+                      {v.vehicleName}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           )}

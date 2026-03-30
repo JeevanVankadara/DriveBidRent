@@ -1,6 +1,7 @@
 // client/src/pages/buyer/AuctionsList.jsx
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import io from 'socket.io-client';
 import CarCard from './components/CarCard';
 import { getAuctions, getWishlist, addToWishlist, removeFromWishlist } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -34,12 +35,17 @@ export default function AuctionsList() {
     fetchAuctions();
     fetchWishlist();
     
-    // Set up polling for real-time auction updates every 2 seconds
-    const intervalId = setInterval(() => {
-      fetchAuctions();
-    }, 2000);
+    // Setup Socket.io for real-time bid updates
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const socket = io(backendUrl);
     
-    return () => clearInterval(intervalId);
+    socket.on('global_new_bid', () => {
+      fetchAuctions();
+    });
+    
+    return () => {
+      socket.disconnect();
+    };
   }, [debouncedSearch, condition, fuelType, transmission, minPrice, maxPrice]);
 
   const fetchAuctions = async () => {

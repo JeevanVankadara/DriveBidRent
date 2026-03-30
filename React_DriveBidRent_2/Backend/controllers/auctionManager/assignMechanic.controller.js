@@ -125,6 +125,7 @@ export const assignMechanic = async (req, res) => {
         const created = await InspectionChat.create({
           mechanic: mechanicId,
           auctionManager: req.user._id,
+          seller: updated.sellerId,
           inspectionTask: updated._id,
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           title: `Inspection: ${updated.vehicleName}`

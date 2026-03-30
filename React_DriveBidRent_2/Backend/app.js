@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 import connectDB from "./config/db.js";
 import "./models/User.js";
@@ -103,10 +105,23 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: corsOptions || {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+app.set("io", io);
+
+import setupAuctionSockets from "./sockets/auction.socket.js";
+setupAuctionSockets(io);
+
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });

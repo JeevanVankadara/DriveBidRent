@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import './AuctionDetails.css';
 import { useParams, useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
 import { getAuctionById, placeBid, createOrGetChatForAuction } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -38,11 +39,25 @@ export default function AuctionDetails() {
     };
     
     fetchAuctionDetails(true);
-    const intervalId = setInterval(() => {
+    fetchAuctionDetails(true);
+    
+    // Setup Socket.io for real-time bid updates
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const socket = io(backendUrl);
+
+    socket.on('connect', () => {
+      socket.emit('join_auction', id);
+    });
+
+    socket.on('new_bid', () => {
       if (!error) fetchAuctionDetails(false);
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, [id]);
+    });
+
+    return () => {
+      socket.emit('leave_auction', id);
+      socket.disconnect();
+    };
+  }, [id, error]);
 
   const fetchAuctionDetails = async (isInitial = false) => {
     try {
@@ -456,6 +471,37 @@ export default function AuctionDetails() {
                   </div>
                 )}
               </div>
+              {/* Mechanic Section */}
+              {auction.assignedMechanic && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-500 font-medium text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.492-3.053c.227-.277.467-.567.725-.841m-3.217 3.894l-2.852 2.853m-1.5-1.5l2.852-2.853m-1.5-1.5l2.852-2.853M8.25 12l2.852-2.853M15 11.25L12.75 9l-3-3m0 0l-1.5 1.5m1.5-1.5L7.5 4.5M3 12h.008v.008H3V12zm0 3h.008v.008H3V15zm0 3h.008v.008H3V18zm0 3h.008v.008H3V21zm3-9h.008v.008H6V12zm0 3h.008v.008H6V15zm0 3h.008v.008H6V18zm0 3h.008v.008H6V21z" />
+                    </svg>
+                    Verified By
+                  </span>
+                  <p className="text-gray-900">
+                    {auction.assignedMechanic.firstName} {auction.assignedMechanic.lastName}
+                  </p>
+                </div>
+              )}
+              
+              {/* Inspection Report Button */}
+              {auction.inspectionReportPdf && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <a 
+                    href={auction.inspectionReportPdf} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 px-4 rounded-xl border border-indigo-200 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    View Official Inspection Report
+                  </a>
+                </div>
+              )}
 
               {/* Registration Info */}
               <div className="ad-registration">
@@ -517,6 +563,16 @@ export default function AuctionDetails() {
               <>
                 {error && <div className="ad-bid-card__alert ad-bid-card__alert--error">{error}</div>}
                 {success && <div className="ad-bid-card__alert ad-bid-card__alert--success">{success}</div>}
+
+                <button 
+                  type="button" 
+                  onClick={() => navigate(`/buyer/live-auction/${id}`)}
+                  className="ad-bid-card__submit" 
+                  style={{ background: 'linear-gradient(135deg, #ff8a3d 0%, #ff4500 100%)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 0 15px rgba(255, 107, 0, 0.4)' }}
+                >
+                  <span style={{ width: '8px', height: '8px', background: 'white', borderRadius: '50%', boxShadow: '0 0 5px white' }}></span>
+                  ENTER LIVE AUCTION ROOM
+                </button>
 
                 <div className="ad-bid-card__current">
                   <span className="ad-bid-card__current-label">Current Highest Bid</span>

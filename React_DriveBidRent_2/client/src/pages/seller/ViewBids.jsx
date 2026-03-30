@@ -1,27 +1,30 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import io from 'socket.io-client';
 import useSellerAuctions from '../../hooks/useSellerAuctions';
 
 const ViewBids = () => {
   const { id } = useParams();
   const { bids, bidsError: error, loadBids } = useSellerAuctions();
-  const pollingIntervalRef = useRef(null);
-
   useEffect(() => {
     // Initial fetch
     loadBids(id);
     
-    // Set up polling for real-time bid updates every 1 second
-    pollingIntervalRef.current = setInterval(() => {
-      if (!error) {
-        loadBids(id);
-      }
-    }, 1000);
+    // Setup Socket.io for real-time bid updates
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const socket = io(backendUrl);
+    
+    socket.on('connect', () => {
+      socket.emit('join_auction', id);
+    });
+
+    socket.on('new_bid', () => {
+      if (!error) loadBids(id);
+    });
     
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
+      socket.emit('leave_auction', id);
+      socket.disconnect();
     };
   }, [id, loadBids, error]);
 

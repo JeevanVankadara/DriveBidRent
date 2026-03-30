@@ -1,0 +1,34 @@
+﻿ M Backend/app.js
+ M Backend/controllers/auctionManager/assignMechanic.controller.js
+ M Backend/controllers/buyer/auctions.controller.js
+ M Backend/controllers/inspectionChat.controller.js
+ M Backend/controllers/sellerControllers/auctionDetail.controller.js
+ M Backend/models/AuctionRequest.js
+ M Backend/models/InspectionChat.js
+ M Backend/package-lock.json
+ M Backend/package.json
+ M Backend/routes/mechanic.routes.js
+ M client/package-lock.json
+ M client/package.json
+ M client/src/App.jsx
+ M client/src/pages/auctionManager/ViewBids.jsx
+ M client/src/pages/buyer/AuctionDetails.jsx
+ M client/src/pages/buyer/AuctionsList.jsx
+ M client/src/pages/buyer/BidPage.jsx
+ M client/src/pages/buyer/Dashboard.jsx
+ M client/src/pages/buyer/MyBids.jsx
+ M client/src/pages/mechanic/ChatRoomMechanic.jsx
+ M client/src/pages/mechanic/car-details/CarDetails.jsx
+ M client/src/pages/mechanic/dashboard/Dashboard.jsx
+ M client/src/pages/seller/AuctionDetails.jsx
+ M client/src/pages/seller/ChatListSeller.jsx
+ M client/src/pages/seller/ViewBids.jsx
+?? Backend/controllers/mechanic/
+?? Backend/models/InspectionReport.js
+?? Backend/sockets/
+?? client/src/pages/buyer/LiveAuctionRoom.css
+?? client/src/pages/buyer/LiveAuctionRoom.jsx
+?? client/src/pages/mechanic/car-details/ChecklistForm.jsx
+?? client/src/pages/seller/InspectionChatPageSeller.jsx
+?? client/src/pages/seller/InspectionChatRoomSeller.jsx
+?? uncommitted_changes.txt

@@ -1,19 +1,14 @@
 // client/src/pages/mechanic/car-details/CarDetails.jsx
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getVehicleDetails, submitReview } from '../../../services/mechanic.services';
+import { getVehicleDetails } from '../../../services/mechanic.services';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import toast from 'react-hot-toast';
+import ChecklistForm from './ChecklistForm';
 
 export default function CarDetails() {
   const { id } = useParams();
   const [data, setData] = useState(null);
-  const [form, setForm] = useState({
-    mechanicalCondition: '',
-    bodyCondition: '',
-    recommendations: '',
-    conditionRating: ''
-  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -24,27 +19,10 @@ export default function CarDetails() {
       });
   }, [id]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!form.conditionRating) {
-      toast.error('Please select a star rating');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await submitReview(id, form);
-      toast.success('Inspection report submitted successfully');
-      setTimeout(() => {
-        window.location.href = '/mechanic/current-tasks';
-      }, 1200);
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit inspection report');
-    } finally {
-      setLoading(false);
-    }
+  const handleInspectionSuccess = () => {
+    setTimeout(() => {
+      window.location.href = '/mechanic/current-tasks';
+    }, 1500);
   };
 
   if (!data) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center"><LoadingSpinner /></div>;
@@ -147,101 +125,66 @@ export default function CarDetails() {
                     <span className="font-bold text-gray-900">{seller.city}, {seller.state}</span>
                   </div>
                 </div>
+
+                {vehicle.inspectionStatus === 'scheduled' && vehicle.inspectionDate && (
+                  <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6">
+                    <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Inspection Scheduled
+                    </h4>
+                    <p className="text-sm text-blue-800 mb-4">
+                      {new Date(vehicle.inspectionDate).toLocaleDateString()} at {vehicle.inspectionTime || 'TBD'}
+                    </p>
+                    <a 
+                      href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`Vehicle Inspection: ${vehicle.vehicleName}`)}&details=${encodeURIComponent(`Inspection for ${vehicle.year} ${vehicle.vehicleName}.\nSeller Phone: ${seller.phone}\nLocation: ${seller.doorNo}, ${seller.street}, ${seller.city}`)}&location=${encodeURIComponent(`${seller.city}, ${seller.state}`)}`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg text-sm hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" alt="Google Calendar" className="w-4 h-4" />
+                      Add to Google Calendar
+                    </a>
+                  </div>
+                )}
+                
+                {data.chatId && vehicle.reviewStatus !== 'completed' && (
+                  <div className="mt-8">
+                    <button 
+                      onClick={() => window.location.href = `/mechanic/chats/${data.chatId}`}
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 transition-colors shadow-sm"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      CHAT WITH SELLER TO SCHEDULE
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Review Section */}
             {vehicle.reviewStatus === 'completed' ? (
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-10 text-center">
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-10 text-center mt-8">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="text-2xl font-black text-green-800">Inspection Already Completed</p>
+                <p className="text-2xl font-black text-green-800">Inspection Completed</p>
                 <p className="text-green-700 mt-2 font-medium">
-                  Your review has been successfully submitted and is under manager review.
+                  The PDF report has been generated and distributed.
                 </p>
+                {vehicle.inspectionReportPdf && (
+                  <a href={vehicle.inspectionReportPdf} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 bg-white border border-green-300 text-green-800 font-bold px-6 py-2 rounded-xl shadow-sm hover:bg-green-50 transition-colors">
+                    View My PDF Report
+                  </a>
+                )}
               </div>
             ) : (
-              <div className="border border-gray-200 rounded-3xl p-8 md:p-12 bg-white shadow-sm mt-8 relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-                <h3 className="text-3xl font-black text-gray-900 text-center mb-10">
-                  Submit Inspection Report
-                </h3>
-
-                <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                      Overall Condition Rating
-                    </label>
-                    <select
-                      required
-                      value={form.conditionRating}
-                      onChange={(e) => setForm({ ...form, conditionRating: e.target.value })}
-                      className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none text-gray-900 font-bold"
-                    >
-                      <option value="">Choose rating (1-5)</option>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <option key={n} value={n}>
-                          {n} Star{n > 1 ? 's' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                      Mechanical Condition
-                    </label>
-                    <textarea
-                      required
-                      rows="5"
-                      placeholder="Engine, transmission, brakes, suspension, electrical..."
-                      className="w-full p-5 border border-gray-200 bg-gray-50 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-medium resize-none text-gray-900"
-                      value={form.mechanicalCondition}
-                      onChange={(e) => setForm({ ...form, mechanicalCondition: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                      Body & Interior Condition
-                    </label>
-                    <textarea
-                      required
-                      rows="5"
-                      placeholder="Paint, dents, interior wear, AC, lights..."
-                      className="w-full p-5 border border-gray-200 bg-gray-50 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-medium resize-none text-gray-900"
-                      value={form.bodyCondition}
-                      onChange={(e) => setForm({ ...form, bodyCondition: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                      Recommendations (Optional)
-                    </label>
-                    <textarea
-                      rows="4"
-                      placeholder="Suggested repairs or notes for auction manager..."
-                      className="w-full p-5 border border-gray-200 bg-gray-50 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-medium resize-none text-gray-900"
-                      value={form.recommendations}
-                      onChange={(e) => setForm({ ...form, recommendations: e.target.value })}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={`w-full bg-gray-900 hover:bg-indigo-600 text-white font-bold py-5 rounded-xl text-lg transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
-                      loading ? 'cursor-wait opacity-80' : ''
-                    }`}
-                  >
-                    {loading ? 'Submitting Report...' : 'Submit Final Inspection'}
-                  </button>
-                </form>
-              </div>
+              <ChecklistForm vehicleId={id} onSuccess={handleInspectionSuccess} />
             )}
             
           </div>

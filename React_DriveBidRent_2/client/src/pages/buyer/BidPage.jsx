@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
+import io from 'socket.io-client';
 import { getAuctionById, placeBid } from '../../services/buyer.services';
 import useProfile from '../../hooks/useProfile';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -20,12 +21,22 @@ export default function BidPage() {
     // Initial fetch with loading state
     fetchAuctionData(true);
     
-    // Set up polling for real-time bid updates every 1 second
-    const intervalId = setInterval(() => {
+    // Setup Socket.io for real-time bid updates
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const socket = io(backendUrl);
+
+    socket.on('connect', () => {
+      socket.emit('join_auction', id);
+    });
+
+    socket.on('new_bid', () => {
       fetchAuctionData(false);
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
+    });
+
+    return () => {
+      socket.emit('leave_auction', id);
+      socket.disconnect();
+    };
     
   }, [id]);
 

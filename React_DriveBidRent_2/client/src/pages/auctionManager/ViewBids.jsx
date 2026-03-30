@@ -1,6 +1,7 @@
 // client/src/pages/auctionManager/ViewBids.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
 import { auctionManagerServices } from '../../services/auctionManager.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -43,15 +44,23 @@ export default function ViewBids() {
     // Initial fetch with loading state
     fetchBids(true);
     
-    // Set up polling for real-time bid updates every 1 second (without loading state)
-    const intervalId = setInterval(() => {
-      if (!error) {
-        fetchBids(false);
-      }
-    }, 1000);
+    // Setup Socket.io for real-time bid updates
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const socket = io(backendUrl);
     
-    return () => clearInterval(intervalId);
-  }, [id]);
+    socket.on('connect', () => {
+      socket.emit('join_auction', id);
+    });
+
+    socket.on('new_bid', () => {
+      if (!error) fetchBids(false);
+    });
+    
+    return () => {
+      socket.emit('leave_auction', id);
+      socket.disconnect();
+    };
+  }, [id, error]);
 
   const endAuction = async () => {
     if (!window.confirm('Are you sure you want to end this auction?')) return;

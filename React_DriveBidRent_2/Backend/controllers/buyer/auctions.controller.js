@@ -179,6 +179,29 @@ export const placeBid = async (req, res) => {
 
     await newBid.save();
 
+    // Emit real-time WebSocket event
+    const io = req.app.get('io');
+    if (io) {
+      try {
+        const User = (await import('../../models/User.js')).default;
+        const bidder = await User.findById(buyerId).select('firstName lastName -_id').lean();
+        const payload = {
+          bidAmount: bidValue,
+          auctionId: auctionId.toString(),
+          buyerId: buyerId.toString(),
+          bidderName: bidder ? `${bidder.firstName} ${bidder.lastName.charAt(0)}.` : 'Anonymous'
+        };
+
+        // Emit to specific auction room
+        io.to(auctionId.toString()).emit('new_bid', payload);
+        
+        // Emit globally for dashboard lists
+        io.emit('global_new_bid', payload);
+      } catch (err) {
+        console.error('Socket.io error emitting new_bid:', err);
+      }
+    }
+
     res.json({
       success: true,
       message: 'Bid placed successfully',

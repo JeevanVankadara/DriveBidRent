@@ -79,6 +79,16 @@ const auctionRequestSchema = new mongoose.Schema({
     conditionRating: String
   },
   
+  // === INSPECTION & SCHEDULING SCHEMAS ===
+  inspectionDate: { type: Date },
+  inspectionTime: { type: String }, // e.g. "10:00 AM - 11:30 AM"
+  inspectionStatus: { 
+    type: String, 
+    default: 'pending_negotiation',
+    enum: ['pending_negotiation', 'scheduled', 'completed', 'cancelled']
+  },
+  inspectionReportPdf: { type: String }, // URL to generated Cloudinary PDF
+
   // === VEHICLE VERIFICATION & DOCUMENTATION ===
   vehicleDocumentation: {
     // Registration & Ownership

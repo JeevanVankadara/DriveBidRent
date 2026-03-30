@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import InspectionChatBubble from '../../components/inspection/InspectionChatBubble';
 import InspectionMessageInput from '../../components/inspection/InspectionMessageInput';
 import InspectionChatHeader from '../../components/inspection/InspectionChatHeader';
+import toast from 'react-hot-toast';
 
 export default function ChatRoomMechanic({ chatIdProp }) {
   const { chatId: chatIdFromParam } = useParams();
@@ -13,6 +14,12 @@ export default function ChatRoomMechanic({ chatIdProp }) {
   const [lastFetchedAt, setLastFetchedAt] = useState(null);
   const [myUserId, setMyUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Scheduling State
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleTime, setScheduleTime] = useState('');
+  const [isScheduling, setIsScheduling] = useState(false);
 
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -191,6 +198,27 @@ export default function ChatRoomMechanic({ chatIdProp }) {
     }
   };
 
+  const handleSetOfficialDate = async (e) => {
+    e.preventDefault();
+    if (!chat || !scheduleDate || !scheduleTime) return;
+    setIsScheduling(true);
+    try {
+      await axiosInstance.post('/mechanic/inspection/schedule', {
+        auctionId: chat.inspectionTask._id,
+        date: scheduleDate,
+        time: scheduleTime
+      });
+      // Also send an automated system message or normal chat message to notify the seller
+      await handleSend(`[SYSTEM: Official Inspection Scheduled for ${new Date(scheduleDate).toLocaleDateString()} at ${scheduleTime}]`);
+      toast.success('Inspection date successfully locked in!');
+      setShowScheduleModal(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to schedule');
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   const expired = chat && new Date() > new Date(chat.expiresAt);
 
   if (!chatId) {
@@ -226,6 +254,43 @@ export default function ChatRoomMechanic({ chatIdProp }) {
           currentUserId={myUserId}
           chat={chat}
         />
+        {/* Mechanic Only: Scheduling Widget Banner */}
+        {myUserId === String(chat?.mechanic?._id || chat?.mechanic) && !expired && (
+          <div className="bg-amber-50 px-6 py-3 flex items-center justify-between border-b border-amber-100 shadow-inner">
+            <span className="text-sm font-bold text-amber-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+              </svg>
+              Ready to lock in the final date?
+            </span>
+            <button 
+              onClick={() => setShowScheduleModal(!showScheduleModal)}
+              className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg font-bold text-sm shadow-sm transition-colors"
+            >
+              {showScheduleModal ? 'Close Scheduler' : 'Set Official Date'}
+            </button>
+          </div>
+        )}
+
+        {/* The Schedule Popdown Modal */}
+        {showScheduleModal && (
+          <div className="bg-white p-6 border-b border-gray-100 shadow-md animate-fade-in">
+            <h4 className="font-black text-gray-900 mb-4">Set Official Inspection Slot</h4>
+            <form onSubmit={handleSetOfficialDate} className="flex gap-4 items-end">
+              <div className="flex-1">
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
+                <input type="date" required value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} className="w-full border border-gray-200 p-2 rounded-lg font-medium text-gray-900 focus:ring-2 focus:ring-amber-500 outline-none" />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Time Window (e.g. 10:00 AM)</label>
+                <input type="text" placeholder="10:00 AM" required value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} className="w-full border border-gray-200 p-2 rounded-lg font-medium text-gray-900 focus:ring-2 focus:ring-amber-500 outline-none" />
+              </div>
+              <button disabled={isScheduling} type="submit" className="bg-gray-900 hover:bg-black text-white px-6 py-2 rounded-lg font-bold shadow-sm disabled:opacity-50 h-[42px]">
+                {isScheduling ? 'Saving...' : 'Confirm Date'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
       
       <div 
