@@ -356,7 +356,7 @@ export default function AssignMechanic() {
                     <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 22, height: 22, color: '#16a34a' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <p style={{ fontSize: 15, fontWeight: 700, color: '#15803d', marginBottom: 6 }}>Mechanic Assigned!</p>
-                  <p style={{ fontSize: 13, color: '#4ade80', color: '#166534' }}>Head to Chats to begin the inspection.</p>
+                  <p style={{ fontSize: 13, color: '#4ade80' }}>Head to Chats to begin the inspection.</p>
                 </div>
               ) : (
                 <>

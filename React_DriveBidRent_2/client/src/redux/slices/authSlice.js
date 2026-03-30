@@ -241,12 +241,8 @@ const authSlice = createSlice({
       })
       .addCase(verifySignupOtp.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.userType = action.payload.user?.userType;
-        state.approved_status = action.payload.user?.approved_status;
-        state.redirect = action.payload.user?.userType ? `/${action.payload.user.userType}` : '/';
         state.success = action.payload.message;
+        state.redirect = action.payload.redirect || '/login';
         state.requireSignupOtpUI = false;
         state.signupEmail = null;
       })

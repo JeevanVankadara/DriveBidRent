@@ -41,14 +41,12 @@ const Signup = () => {
     if (success) {
       toast.success(message || 'Success!');
       setTimeout(() => {
-        if (isAuthenticated && authRedirect) {
-          navigate(authRedirect);
-        } else if (!requireSignupOtpUI) {
-          navigate('/login');
+        if (!requireSignupOtpUI) {
+          navigate(authRedirect || '/login');
         }
       }, 2000);
     }
-  }, [success, message, navigate, isAuthenticated, authRedirect, requireSignupOtpUI]);
+  }, [success, message, navigate, authRedirect, requireSignupOtpUI]);
 
   useEffect(() => {
     if (error) {

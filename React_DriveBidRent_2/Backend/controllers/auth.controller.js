@@ -137,21 +137,18 @@ const authController = {
         });
       }
 
-      // No OTP required, sign them in directly
+      // No OTP required, create account but redirect to login
       const user = new User(userData);
       await user.save();
 
-      const token = generateToken(user);
-      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict" });
+      const successMessage = user.userType === 'mechanic'
+        ? "Account created! Your details are under admin review. You'll be notified once approved."
+        : "Account created successfully! Please login to continue.";
 
       return res.status(201).json({
         success: true,
-        message: "User registered successfully",
-        user: {
-          id: user._id,
-          userType: user.userType,
-          firstName: user.firstName,
-        }
+        message: successMessage,
+        redirect: '/login'
       });
 
     } catch (err) {
@@ -196,20 +193,18 @@ const authController = {
       const token = generateToken(user);
       res.cookie("jwt", token, { httpOnly: true, sameSite: "strict", maxAge: 30 * 24 * 60 * 60 * 1000 });
 
-      // CRITICAL FIX: These now match your current frontend routes (from App.jsx)
       const redirectMap = {
-        buyer: "/buyer",                    // Updated: now uses BuyerLayout
-        seller: "/seller",                  // Correct
-        driver: "/driver-dashboard",        // Adjust if you have a driver layout
-        mechanic: "/mechanic/dashboard",    // Correct
-        admin: "/admin",                    // Updated: now uses /admin base
-        auction_manager: "/auctionmanager", // Updated to match frontend
-        superadmin: "/superadmin"          // Super Admin route
+        buyer: "/buyer",
+        seller: "/seller",
+        driver: "/driver-dashboard",
+        mechanic: "/mechanic/dashboard",
+        admin: "/admin",
+        auction_manager: "/auctionmanager",
+        superadmin: "/superadmin"
       };
 
       const redirectUrl = redirectMap[user.userType] || "/";
 
-      // Include notification flag in response so frontend can show badge immediately
       const responseUser = {
         _id: user._id,
         id: user._id,
@@ -280,17 +275,11 @@ const authController = {
           await user.save();
         }
       } else {
-        // New user — create account with Google profile data
-        user = new User({
-          firstName: given_name || name?.split(' ')[0] || 'User',
-          lastName: family_name || name?.split(' ').slice(1).join(' ') || '',
-          email,
-          googleId,
-          provider: 'google',
-          userType: 'buyer', // Default role for Google sign-ups
-          dateOfBirth: new Date('2000-01-01'), // Placeholder for Google users
+        // No account exists — require proper signup first
+        return res.status(401).json({
+          success: false,
+          message: "No account found for this email. Please sign up first."
         });
-        await user.save();
       }
 
       // Direct login path for Google users
@@ -335,7 +324,7 @@ const authController = {
 
     } catch (err) {
       console.error("Google login error:", err);
-      
+
       if (err.message?.includes('Token used too late') || err.message?.includes('Invalid token')) {
         return res.status(401).json({ success: false, message: "Google token expired or invalid. Please try again." });
       }
@@ -370,18 +359,14 @@ const authController = {
       // Clear the OTP record so it can't be reused
       await OTP.deleteMany({ email });
 
-      // Proceed to log the user in immediately
-      const token = generateToken(user);
-      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict" });
+      const successMessage = user.userType === 'mechanic'
+        ? "Email verified & account created! Your details are under admin review. You'll be notified once approved."
+        : "Email verified & account created successfully! Please login to continue.";
 
       return res.status(200).json({
         success: true,
-        message: "Email verified successfully! You are now logged in.",
-        user: {
-          id: user._id,
-          userType: user.userType,
-          firstName: user.firstName,
-        }
+        message: successMessage,
+        redirect: '/login'
       });
     } catch (err) {
       console.error("Signup OTP verification error:", err);
