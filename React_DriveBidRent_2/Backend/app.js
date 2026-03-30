@@ -38,6 +38,7 @@ import superadminMiddleware from "./middlewares/superadmin.middleware.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 import { devLogger, accessLogger, errorLogger } from "./middlewares/logger.middleware.js";
 import { corsOptions, helmetConfig, limiter } from "./middlewares/security.middleware.js";
+import { setupSwagger } from "./docs/swagger/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,6 +71,9 @@ app.use("/api/admin", adminMiddleware, adminRoutes);
 app.use("/api/superadmin", superadminMiddleware, superadminRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/inspection-chat', inspectionChatRoutes);
+
+// API documentation
+setupSwagger(app);
 
 // Serve client in production
 if (process.env.NODE_ENV === "production") {
