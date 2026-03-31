@@ -233,24 +233,6 @@ const sellerPaths = {
       responses: { 200: { description: "Bids fetched" } }
     }
   },
-  "/api/seller/accept-bid/{id}": {
-    put: {
-      tags: ["Seller"],
-      summary: "Accept bid",
-      security: sellerSecurity,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: { 200: { description: "Bid accepted" } }
-    }
-  },
-  "/api/seller/reject-bid/{id}": {
-    put: {
-      tags: ["Seller"],
-      summary: "Reject bid",
-      security: sellerSecurity,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: { 200: { description: "Bid rejected" } }
-    }
-  },
   "/api/seller/view-rentals": {
     get: {
       tags: ["Seller"],
@@ -334,37 +316,6 @@ const sellerPaths = {
     }
   },
   "/api/seller/update-rental/{id}": {
-    post: {
-      tags: ["Seller"],
-      summary: "Update rental listing",
-      security: sellerSecurity,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      requestBody: {
-        required: true,
-        content: {
-          "multipart/form-data": {
-            schema: {
-              type: "object",
-              required: ["vehicle-ac", "vehicle-condition", "rental-cost", "driver-available", "availability"],
-              properties: {
-                "vehicle-ac": { type: "string", enum: ["available", "not"], example: "available" },
-                "vehicle-condition": { type: "string", enum: ["excellent", "good", "fair"], example: "good" },
-                "rental-cost": { type: "string", example: "3500" },
-                "driver-available": { type: "string", enum: ["yes", "no"], example: "yes" },
-                "driver-rate": { type: "string", example: "500" },
-                availability: { type: "string", enum: ["available", "unavailable"], example: "available" },
-                vehicleImage: { type: "string", format: "binary" }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        200: { description: "Rental updated" },
-        400: { description: "Validation error" },
-        404: { description: "Rental not found" }
-      }
-    },
     put: {
       tags: ["Seller"],
       summary: "Update rental listing",
