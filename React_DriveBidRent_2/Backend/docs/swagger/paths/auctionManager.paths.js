@@ -17,14 +17,6 @@ const auctionManagerPaths = {
       responses: { 200: { description: "Requests fetched" } }
     }
   },
-  "/api/auctionmanager/migrate-assignments": {
-    post: {
-      tags: ["Auction Manager"],
-      summary: "Migrate existing assignment mappings",
-      security: auctionManagerSecurity,
-      responses: { 200: { description: "Migration completed" } }
-    }
-  },
   "/api/auctionmanager/pending": {
     get: {
       tags: ["Auction Manager"],
