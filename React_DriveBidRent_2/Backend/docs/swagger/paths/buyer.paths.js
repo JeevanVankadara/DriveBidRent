@@ -196,14 +196,6 @@ const buyerPaths = {
       responses: { 200: { description: "Purchase details fetched" } }
     }
   },
-  "/api/buyer/purchase_details": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Get purchase details legacy endpoint",
-      security: buyerSecurity,
-      responses: { 200: { description: "Purchase details fetched" } }
-    }
-  },
   "/api/buyer/rental_details/{id}": {
     get: {
       tags: ["Buyer"],
