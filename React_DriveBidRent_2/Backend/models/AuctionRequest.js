@@ -23,6 +23,11 @@ const auctionRequestSchema = new mongoose.Schema({
     default: 'pending', 
     enum: ['pending', 'approved', 'rejected', 'assignedMechanic'] 
   },
+  rejectionReason: { type: String },
+  rejectedBy: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'AuctionManager' 
+  },
   started_auction: { 
     type: String, 
     default: 'no', 

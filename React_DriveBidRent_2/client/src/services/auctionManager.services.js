@@ -8,6 +8,7 @@ export const auctionManagerServices = {
 
   // Requests
   getRequests: () => axiosInstance.get('/auctionmanager/requests'),
+  rejectRequest: (id, rejectionReason) => axiosInstance.post(`/auctionmanager/reject-request/${id}`, { rejectionReason }),
 
   // Pending Cars
   getPending: () => axiosInstance.get('/auctionmanager/pending'),

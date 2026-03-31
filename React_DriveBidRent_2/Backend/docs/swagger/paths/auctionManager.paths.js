@@ -69,6 +69,34 @@ const auctionManagerPaths = {
       }
     }
   },
+  "/api/auctionmanager/reject-request/{id}": {
+    post: {
+      tags: ["Auction Manager"],
+      summary: "Reject a pending car request",
+      security: auctionManagerSecurity,
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["rejectionReason"],
+              properties: {
+                rejectionReason: { type: "string", example: "Missing important documentation" }
+              }
+            }
+          }
+        }
+      },
+      responses: {
+        200: { description: "Request rejected successfully" },
+        400: { description: "Validation failure or rejectionReason missing" },
+        404: { description: "Request not found" },
+        500: { description: "Server error" }
+      }
+    }
+  },
   "/api/auctionmanager/pending-car-details/{id}": {
     get: {
       tags: ["Auction Manager"],
