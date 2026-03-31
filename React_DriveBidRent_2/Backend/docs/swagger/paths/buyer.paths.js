@@ -46,19 +46,6 @@ const buyerPaths = {
       responses: { 200: { description: "Bid placed" }, 400: { $ref: "#/components/responses/ValidationError" } }
     }
   },
-  "/api/buyer/auctions/{id}/bid": {
-    post: {
-      tags: ["Buyer"],
-      summary: "Place bid by auction id",
-      security: buyerSecurity,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      requestBody: {
-        required: true,
-        content: { "application/json": { schema: { $ref: "#/components/schemas/PlaceBidRequest" } } }
-      },
-      responses: { 200: { description: "Bid placed" } }
-    }
-  },
   "/api/buyer/auction/winner-status/{id}": {
     get: {
       tags: ["Buyer"],
