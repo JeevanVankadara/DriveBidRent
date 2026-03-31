@@ -133,7 +133,26 @@ const buyerPaths = {
       summary: "Add review for rental",
       security: buyerSecurity,
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: { 200: { description: "Review added" } }
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["rating", "comment"],
+              properties: {
+                rating: { type: "number", minimum: 1, maximum: 5, example: 4 },
+                comment: { type: "string", example: "Vehicle was clean and pickup was smooth." }
+              }
+            }
+          }
+        }
+      },
+      responses: {
+        200: { description: "Review added" },
+        400: { description: "Rating/comment validation failed" },
+        403: { description: "Buyer has not rented this car" }
+      }
     },
     get: {
       tags: ["Buyer"],
