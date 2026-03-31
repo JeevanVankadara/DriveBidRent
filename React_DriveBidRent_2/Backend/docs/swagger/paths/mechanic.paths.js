@@ -60,18 +60,7 @@ const mechanicPaths = {
       responses: { 200: { description: "Review submitted" } }
     }
   },
-  "/api/mechanic/inspection/schedule": {
-    post: {
-      tags: ["Mechanic"],
-      summary: "Schedule inspection",
-      security: mechanicSecurity,
-      requestBody: {
-        required: true,
-        content: { "application/json": { schema: { type: "object" } } }
-      },
-      responses: { 200: { description: "Inspection scheduled" } }
-    }
-  },
+
   "/api/mechanic/profile": {
     get: {
       tags: ["Mechanic"],
