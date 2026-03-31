@@ -62,12 +62,14 @@ export const schemas = {
   },
   BookRentalRequest: {
     type: "object",
-    required: ["rentalId"],
+    required: ["rentalCarId", "sellerId", "pickupDate", "dropDate", "totalCost"],
     properties: {
-      rentalId: { type: "string", example: "67f9f50c3f1f7cc4abfe1030" },
-      days: { type: "number", example: 3 },
+      rentalCarId: { type: "string", example: "67f9f50c3f1f7cc4abfe1030" },
+      sellerId: { type: "string", example: "65a123bcdef4567890abcdef" },
       pickupDate: { type: "string", format: "date", example: "2026-04-15" },
-      paymentMethod: { type: "string", example: "upi" }
+      dropDate: { type: "string", format: "date", example: "2026-04-18" },
+      totalCost: { type: "number", example: 4500 },
+      includeDriver: { type: "boolean", example: true }
     }
   },
   MessageRequest: {

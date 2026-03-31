@@ -127,20 +127,6 @@ const buyerPaths = {
       responses: { 200: { description: "Rental booked" } }
     }
   },
-  "/api/buyer/rental": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Rental legacy redirect endpoint",
-      security: buyerSecurity,
-      responses: { 200: { description: "Redirect or rental response" } }
-    },
-    post: {
-      tags: ["Buyer"],
-      summary: "Book rental legacy endpoint",
-      security: buyerSecurity,
-      responses: { 200: { description: "Rental booked" } }
-    }
-  },
   "/api/buyer/rentals/{id}/reviews": {
     post: {
       tags: ["Buyer"],
@@ -236,76 +222,6 @@ const buyerPaths = {
       responses: { 200: { description: "Wishlist item removed" } }
     }
   },
-  "/api/buyer/api/wishlist": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Get wishlist legacy API endpoint",
-      security: buyerSecurity,
-      responses: { 200: { description: "Wishlist fetched" } }
-    },
-    post: {
-      tags: ["Buyer"],
-      summary: "Add wishlist item legacy API endpoint",
-      security: buyerSecurity,
-      requestBody: {
-        required: true,
-        content: { "application/json": { schema: { $ref: "#/components/schemas/WishlistRequest" } } }
-      },
-      responses: { 200: { description: "Wishlist updated" } }
-    },
-    delete: {
-      tags: ["Buyer"],
-      summary: "Delete wishlist item legacy API endpoint",
-      security: buyerSecurity,
-      requestBody: {
-        required: true,
-        content: { "application/json": { schema: { $ref: "#/components/schemas/WishlistRequest" } } }
-      },
-      responses: { 200: { description: "Wishlist item removed" } }
-    }
-  },
-  "/api/buyer/payment/create-checkout-session": {
-    post: {
-      tags: ["Buyer"],
-      summary: "Create Stripe checkout session",
-      security: buyerSecurity,
-      responses: { 200: { description: "Checkout session created" } }
-    }
-  },
-  "/api/buyer/payment/verify-session": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Verify checkout session",
-      security: buyerSecurity,
-      responses: { 200: { description: "Session verified" } }
-    }
-  },
-  "/api/buyer/profile": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Get buyer profile",
-      security: buyerSecurity,
-      responses: { 200: { description: "Profile fetched" } }
-    },
-    put: {
-      tags: ["Buyer"],
-      summary: "Update buyer profile",
-      security: buyerSecurity,
-      requestBody: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/BuyerProfileUpdateRequest" }
-          }
-        }
-      },
-      responses: {
-        200: { description: "Profile updated" },
-        400: { $ref: "#/components/responses/ValidationError" },
-        401: { $ref: "#/components/responses/Unauthorized" }
-      }
-    }
-  },
   "/api/buyer/update-profile": {
     post: {
       tags: ["Buyer"],
@@ -373,27 +289,6 @@ const buyerPaths = {
       summary: "Get unread notification count",
       security: buyerSecurity,
       responses: { 200: { description: "Unread count fetched" } }
-    }
-  },
-  "/api/buyer/upload/photo": {
-    post: {
-      tags: ["Buyer"],
-      summary: "Upload buyer profile photo",
-      security: buyerSecurity,
-      requestBody: {
-        required: true,
-        content: {
-          "multipart/form-data": {
-            schema: {
-              type: "object",
-              properties: {
-                profilePhoto: { type: "string", format: "binary" }
-              }
-            }
-          }
-        }
-      },
-      responses: { 200: { description: "Photo uploaded" } }
     }
   },
   "/api/buyer/about": {
