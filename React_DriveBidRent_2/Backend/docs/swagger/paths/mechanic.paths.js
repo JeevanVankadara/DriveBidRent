@@ -9,32 +9,6 @@ const mechanicPaths = {
       responses: { 200: { description: "Dashboard data fetched" } }
     }
   },
-  "/api/mechanic/pending-tasks": {
-    get: {
-      tags: ["Mechanic"],
-      summary: "Get pending tasks",
-      security: mechanicSecurity,
-      responses: { 200: { description: "Pending tasks fetched" } }
-    }
-  },
-  "/api/mechanic/pending-tasks/{id}/accept": {
-    post: {
-      tags: ["Mechanic"],
-      summary: "Accept pending task",
-      security: mechanicSecurity,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: { 200: { description: "Task accepted" } }
-    }
-  },
-  "/api/mechanic/pending-tasks/{id}/decline": {
-    post: {
-      tags: ["Mechanic"],
-      summary: "Decline pending task",
-      security: mechanicSecurity,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: { 200: { description: "Task declined" } }
-    }
-  },
   "/api/mechanic/current-tasks": {
     get: {
       tags: ["Mechanic"],
@@ -66,6 +40,23 @@ const mechanicPaths = {
       summary: "Submit vehicle inspection review",
       security: mechanicSecurity,
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["mechanicalCondition", "bodyCondition", "recommendations", "conditionRating"],
+              properties: {
+                mechanicalCondition: { type: "string", example: "Good engine condition, runs smoothly" },
+                bodyCondition: { type: "string", example: "No major dents, minor scratches" },
+                recommendations: { type: "string", example: "Ready for auction" },
+                conditionRating: { type: "number", example: 8 }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Review submitted" } }
     }
   },
@@ -79,19 +70,6 @@ const mechanicPaths = {
         content: { "application/json": { schema: { type: "object" } } }
       },
       responses: { 200: { description: "Inspection scheduled" } }
-    }
-  },
-  "/api/mechanic/submit-inspection/{auctionId}": {
-    post: {
-      tags: ["Mechanic"],
-      summary: "Submit full inspection report",
-      security: mechanicSecurity,
-      parameters: [{ name: "auctionId", in: "path", required: true, schema: { type: "string" } }],
-      requestBody: {
-        required: true,
-        content: { "application/json": { schema: { type: "object" } } }
-      },
-      responses: { 200: { description: "Inspection submitted" } }
     }
   },
   "/api/mechanic/profile": {
