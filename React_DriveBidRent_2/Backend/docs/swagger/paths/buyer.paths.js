@@ -422,20 +422,6 @@ const buyerPaths = {
       summary: "About us page data",
       responses: { 200: { description: "About us data fetched" } }
     }
-  },
-  "/api/buyer/driver": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Driver legacy redirect endpoint",
-      responses: { 200: { description: "Redirect or driver response" } }
-    }
-  },
-  "/api/buyer/drivers": {
-    get: {
-      tags: ["Buyer"],
-      summary: "Drivers legacy redirect endpoint",
-      responses: { 200: { description: "Redirect or drivers response" } }
-    }
   }
 };
 
