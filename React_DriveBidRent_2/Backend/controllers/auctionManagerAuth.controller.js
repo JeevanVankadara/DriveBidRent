@@ -195,9 +195,11 @@ const auctionManagerAuthController = {
       };
       
       const token = generateToken(tokenData);
+      const isProd = process.env.NODE_ENV === "production";
       res.cookie("jwt", token, { 
         httpOnly: true, 
-        sameSite: "strict", 
+        sameSite: isProd ? "none" : "strict", 
+        secure: isProd,
         maxAge: 30 * 24 * 60 * 60 * 1000 
       });
 
@@ -233,9 +235,11 @@ const auctionManagerAuthController = {
 
   // === AUCTION MANAGER LOGOUT ===
   logout: (req, res) => {
+    const isProd = process.env.NODE_ENV === "production";
     res.clearCookie("jwt", {
       httpOnly: true,
-      sameSite: 'strict'
+      sameSite: isProd ? "none" : "strict",
+      secure: isProd
     });
     return res.json({ 
       success: true, 

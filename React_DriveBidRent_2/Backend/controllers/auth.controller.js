@@ -191,7 +191,13 @@ const authController = {
       }
 
       const token = generateToken(user);
-      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict", maxAge: 30 * 24 * 60 * 60 * 1000 });
+      const isProd = process.env.NODE_ENV === "production";
+      res.cookie("jwt", token, { 
+        httpOnly: true, 
+        sameSite: isProd ? "none" : "strict", 
+        secure: isProd,
+        maxAge: 30 * 24 * 60 * 60 * 1000 
+      });
 
       const redirectMap = {
         buyer: "/buyer",
@@ -236,9 +242,13 @@ const authController = {
     }
   },
 
-  // === LOGOUT ===
   logout: (req, res) => {
-    res.clearCookie("jwt");
+    const isProd = process.env.NODE_ENV === "production";
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      sameSite: isProd ? "none" : "strict",
+      secure: isProd
+    });
     return res.json({ success: true, message: "Logged out successfully" });
   },
 
@@ -284,7 +294,13 @@ const authController = {
 
       // Direct login path for Google users
       const token = generateToken(user);
-      res.cookie("jwt", token, { httpOnly: true, sameSite: "strict", maxAge: 30 * 24 * 60 * 60 * 1000 });
+      const isProd = process.env.NODE_ENV === "production";
+      res.cookie("jwt", token, { 
+        httpOnly: true, 
+        sameSite: isProd ? "none" : "strict", 
+        secure: isProd,
+        maxAge: 30 * 24 * 60 * 60 * 1000 
+      });
 
       const redirectMap = {
         buyer: "/buyer",
