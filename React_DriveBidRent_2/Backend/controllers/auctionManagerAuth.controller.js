@@ -221,7 +221,8 @@ const auctionManagerAuthController = {
         success: true,
         message: "Login successful",
         redirect: "/auctionmanager",
-        user: responseManager
+        user: responseManager,
+        token
       });
 
     } catch (err) {

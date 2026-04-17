@@ -233,7 +233,8 @@ const authController = {
         success: true,
         message: "Login successful",
         redirect: redirectUrl,
-        user: responseUser
+        user: responseUser,
+        token
       });
 
     } catch (err) {
@@ -335,7 +336,8 @@ const authController = {
         success: true,
         message: "Google login successful",
         redirect: redirectUrl,
-        user: responseUser
+        user: responseUser,
+        token
       });
 
     } catch (err) {

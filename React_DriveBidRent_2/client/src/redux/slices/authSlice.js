@@ -23,6 +23,7 @@ export const loginUser = createAsyncThunk(
       if (response.success) {
         // Save auth state to localStorage
         saveAuthState(response.user);
+        if (response.token) localStorage.setItem('token', response.token);
         return {
           user: response.user,
           redirect: response.redirect,
@@ -53,6 +54,7 @@ export const googleLogin = createAsyncThunk(
         }
         // Save auth state to localStorage
         saveAuthState(response.user);
+        if (response.token) localStorage.setItem('token', response.token);
         return {
           user: response.user,
           redirect: response.redirect,
@@ -125,6 +127,7 @@ export const logoutUser = createAsyncThunk(
       await authServices.logout();
       // Clear auth state from localStorage
       localStorage.removeItem('authState');
+      localStorage.removeItem('token');
       return { message: 'Logged out successfully' };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Logout error');
@@ -183,6 +186,7 @@ const authSlice = createSlice({
       state.signupEmail = null;
       // Clear from localStorage
       localStorage.removeItem('authState');
+      localStorage.removeItem('token');
     },
     cancelSignupOtp: (state) => {
       state.requireSignupOtpUI = false;
