@@ -34,7 +34,7 @@ import mechanicMiddleware from "./middlewares/mechanic.middleware.js";
 import adminMiddleware from "./middlewares/admin.middleware.js";
 import auctionManagerMiddleware from "./middlewares/auction_manager.middleware.js";
 import buyerMiddleware from "./middlewares/buyer.middleware.js";
-import superadminMiddleware from "./middlewares/superadmin.middleware.js";
+import superadminMiddleware from "./middlewares/superAdmin.middleware.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 import { devLogger, accessLogger, errorLogger } from "./middlewares/logger.middleware.js";
 import { corsOptions, helmetConfig, limiter } from "./middlewares/security.middleware.js";

@@ -195,4 +195,13 @@ const auctionRequestSchema = new mongoose.Schema({
   timestamps: true 
 });
 
+// Create text index for search functionality on vehicles
+auctionRequestSchema.index({ vehicleName: 'text', condition: 'text', 'vehicleDocumentation.registrationState': 'text' });
+
+// Create compound and single indexes for fast filtering and query planning
+auctionRequestSchema.index({ status: 1 });
+auctionRequestSchema.index({ carType: 1, fuelType: 1, transmission: 1 });
+auctionRequestSchema.index({ started_auction: 1 });
+auctionRequestSchema.index({ sellerId: 1 });
+
 export default mongoose.model('AuctionRequest', auctionRequestSchema);

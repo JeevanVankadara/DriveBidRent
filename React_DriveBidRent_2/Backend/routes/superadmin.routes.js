@@ -9,7 +9,7 @@ import revenueControllers from '../controllers/superAdminControllers/revenue.con
 import trendsControllers from '../controllers/superAdminControllers/trends.controllers.js';
 import profileControllers from '../controllers/superAdminControllers/profile.controllers.js';
 import createAdminController from '../controllers/superAdminControllers/createAdmin.controller.js';
-import superadminMiddleware from '../middlewares/superadmin.middleware.js';
+import superadminMiddleware from '../middlewares/superAdmin.middleware.js';
 
 // Dashboard - Overview
 router.get("/dashboard", superadminMiddleware, dashboardControllers.getDashboard);

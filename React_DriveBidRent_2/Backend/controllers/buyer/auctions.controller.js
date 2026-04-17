@@ -4,18 +4,35 @@ import AuctionBid from '../../models/AuctionBid.js';
 import Purchase from '../../models/Purchase.js';
 import AuctionCost from '../../models/AuctionCost.js';
 
+import redisClient from '../../utils/redisClient.js';
+
 // Controller for all auctions page with search/filter
 export const getAuctions = async (req, res) => {
   try {
     const { search, condition, fuelType, transmission, minPrice, maxPrice } = req.query;
+    
+    // Check Redis Cache first
+    const cacheKey = `auctions:${JSON.stringify(req.query)}`;
+    if (redisClient.isReady) {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        return res.json({
+          success: true,
+          message: 'Auctions fetched successfully (Cached)',
+          data: JSON.parse(cachedData)
+        });
+      }
+    }
+
     const query = {
       status: 'approved',
       started_auction: 'yes',
       auction_stopped: false  // Only show ongoing auctions
     };
 
+    // Optimize user search experience utilizing MongoDB text indexes instead of regex
     if (search) {
-      query.vehicleName = { $regex: search, $options: 'i' };
+      query.$text = { $search: search };
     }
     if (condition) query.condition = condition;
     if (fuelType) query.fuelType = fuelType;
@@ -53,13 +70,20 @@ export const getAuctions = async (req, res) => {
       }));
     }
 
+    const responseData = {
+      auctions: auctionsWithBids,
+      filters: { search, condition, fuelType, transmission, minPrice, maxPrice }
+    };
+
+    // Save to Redis Cache for 60 seconds
+    if (redisClient.isReady) {
+      await redisClient.setEx(cacheKey, 60, JSON.stringify(responseData));
+    }
+
     res.json({
       success: true,
       message: 'Auctions fetched successfully',
-      data: {
-        auctions: auctionsWithBids,
-        filters: { search, condition, fuelType, transmission, minPrice, maxPrice }
-      }
+      data: responseData
     });
   } catch (err) {
     console.error('Error fetching auctions:', err);
