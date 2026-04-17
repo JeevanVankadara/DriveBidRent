@@ -70,8 +70,8 @@ export default function LiveAuctionRoom() {
     fetchInit();
 
     // 2. Setup Socket.io
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
-    socketRef.current = io(backendUrl);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'https://drivebidrent.onrender.com';
+    socketRef.current = io(backendUrl, { withCredentials: true });
 
     socketRef.current.on('connect', () => {
       console.log('Connected to Live Auction Socket');

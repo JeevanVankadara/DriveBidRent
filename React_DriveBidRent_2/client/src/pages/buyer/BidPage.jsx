@@ -22,8 +22,8 @@ export default function BidPage() {
     fetchAuctionData(true);
     
     // Setup Socket.io for real-time bid updates
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
-    const socket = io(backendUrl);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'https://drivebidrent.onrender.com';
+    const socket = io(backendUrl, { withCredentials: true });
 
     socket.on('connect', () => {
       socket.emit('join_auction', id);
