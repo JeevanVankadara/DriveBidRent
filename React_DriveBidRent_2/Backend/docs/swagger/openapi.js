@@ -19,8 +19,8 @@ const openApiDefinition = {
   },
   servers: [
     {
-      url: "http://localhost:8000",
-      description: "Local development"
+      url: process.env.BACKEND_URL || "http://localhost:8000",
+      description: process.env.NODE_ENV === 'production' ? "Production environment" : "Local development"
     }
   ],
   tags: [
