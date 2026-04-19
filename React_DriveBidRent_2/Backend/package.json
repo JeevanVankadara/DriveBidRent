@@ -4,9 +4,18 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --coverage",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --silent",
+    "test:report": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --silent --reporters=default --reporters=jest-html-reporter",
     "dev": "nodemon app.js",
     "start": "node app.js"
+  },
+  "jest-html-reporter": {
+    "pageTitle": "DriveBidRent — Backend Test Report",
+    "outputPath": "./test-report.html",
+    "includeFailureMsg": true,
+    "includeSuiteFailure": true,
+    "theme": "darkTheme",
+    "dateFormat": "dd/mm/yyyy HH:MM:ss"
   },
   "keywords": [],
   "author": "",
@@ -43,6 +52,7 @@
   },
   "devDependencies": {
     "jest": "^30.3.0",
+    "jest-html-reporter": "^4.4.0",
     "mongodb-memory-server": "^11.0.1",
     "nodemon": "^3.1.10",
     "supertest": "^7.2.2"

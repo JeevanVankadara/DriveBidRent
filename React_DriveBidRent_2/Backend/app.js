@@ -75,6 +75,23 @@ app.use('/api/inspection-chat', inspectionChatRoutes);
 // API documentation
 setupSwagger(app);
 
+// Test report — viewable at http://localhost:8000/test-report
+app.get('/test-report', (req, res) => {
+  const reportPath = path.join(__dirname, 'test-report.html');
+  import('fs').then(fs => {
+    if (fs.existsSync(reportPath)) {
+      res.sendFile(reportPath);
+    } else {
+      res.status(404).send(`
+        <div style="font-family:sans-serif;text-align:center;padding:60px;color:#666">
+          <h2>Test report not generated yet</h2>
+          <p>Run <code style="background:#f4f4f4;padding:4px 10px;border-radius:4px">npm run test:report</code> in the Backend directory first.</p>
+        </div>
+      `);
+    }
+  });
+});
+
 // Serve client in production
 if (process.env.NODE_ENV === "production") {
   const clientDistPath = path.join(__dirname, "..", "client", "dist");
