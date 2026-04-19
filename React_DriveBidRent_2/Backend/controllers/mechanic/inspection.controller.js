@@ -33,72 +33,60 @@ export const scheduleInspection = async (req, res) => {
   }
 };
 
-// Helper: upload PDF buffer stream to Cloudinary
-const uploadPdfToCloudinary = (pdfBuffer) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'inspection_reports',
-        resource_type: 'raw',
-        format: 'pdf',
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result.secure_url);
-      }
-    );
-    uploadStream.end(pdfBuffer);
-  });
-};
-
 export const submitInspection = async (req, res) => {
   try {
     const { auctionId } = req.params;
+    
     const {
       exterior, interior, engine, testDrive, overallRating, isApprovedForAuction, mechanicSummary
     } = req.body;
 
-    // Validate Auction
-    const auction = await AuctionRequest.findOne({ _id: auctionId, assignedMechanic: req.user._id });
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
 
+    const auction = await AuctionRequest.findById(auctionId);
     if (!auction) {
-      return res.status(404).json({ success: false, message: 'Auction request not found or unauthorized' });
+      return res.status(404).json({ success: false, message: 'Auction not found' });
     }
 
-    // Update Auction Request
-    auction.inspectionStatus = 'completed';
-    
-    // Save to multipointInspection natively
-    auction.multipointInspection = {
-      exterior, interior, engine, testDrive, overallRating, isApprovedForAuction, mechanicSummary
-    };
-    
-    // Construct meaningful string summaries from checkpoints for backward compatibility
-    const mechCond = `Engine: ${engine.startupSmoothness}, Battery: ${engine.batteryHealth}. Brakes: ${testDrive.brakesCondition}, Transmission: ${testDrive.transmissionShift}. Leaks: ${engine.fluidLeaks ? 'Yes' : 'No'}.`;
-    const bodyCond = `Paint: ${exterior.paintCondition}/10. Tires: ${exterior.tiresCondition}. Seats: ${interior.seatsCondition}. AC/Electronics: ${interior.acWorks && interior.electronicsWork ? 'Working' : 'Review Needed'}.`;
-
-    auction.mechanicReview = {
-      mechanicalCondition: mechCond,
-      bodyCondition: bodyCond,
-      recommendations: mechanicSummary,
-      conditionRating: `${overallRating}/10`
-    };
-
-    // Usually the mechanic review completes the process
-    auction.reviewStatus = 'completed';
-    
-    if (!auction.vehicleDocumentation) {
-      auction.vehicleDocumentation = {};
+    if (!auction.assignedMechanic || auction.assignedMechanic.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not assigned to you' });
     }
-    auction.vehicleDocumentation.documentsVerified = true;
-    auction.vehicleDocumentation.verificationDate = new Date();
-    auction.vehicleDocumentation.verifiedBy = req.user._id;
 
-    await auction.save();
+    if (!exterior || !interior || !engine || !testDrive || overallRating === undefined || isApprovedForAuction === undefined || !mechanicSummary) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
 
-    res.json({ success: true, message: 'Inspection report submitted successfully!' });
+    const updatePayload = {
+      inspectionStatus: 'completed',
+      reviewStatus: 'completed',
+      multipointInspection: {
+        exterior, interior, engine, testDrive, overallRating, isApprovedForAuction, mechanicSummary
+      },
+      mechanicReview: {
+        mechanicalCondition: `Engine: ${engine.startupSmoothness}, Battery: ${engine.batteryHealth}`,
+        bodyCondition: `Paint: ${exterior.paintCondition}/10. Tires: ${exterior.tiresCondition}`,
+        recommendations: mechanicSummary,
+        conditionRating: `${overallRating}/10`
+      }
+    };
+
+    await AuctionRequest.findByIdAndUpdate(auctionId, updatePayload, { 
+      new: true,
+      runValidators: false 
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Inspection report submitted successfully!' 
+    });
+
   } catch (err) {
     console.error('Submit Inspection Error:', err);
-    res.status(500).json({ success: false, message: 'Server error while submitting inspection' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Server error while submitting inspection'
+    });
   }
 };

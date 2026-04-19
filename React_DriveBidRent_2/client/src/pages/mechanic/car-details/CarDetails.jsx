@@ -175,13 +175,8 @@ export default function CarDetails() {
                 </div>
                 <p className="text-2xl font-black text-green-800">Inspection Completed</p>
                 <p className="text-green-700 mt-2 font-medium">
-                  The PDF report has been generated and distributed.
+                  All inspection details have been recorded and submitted successfully.
                 </p>
-                {vehicle.inspectionReportPdf && (
-                  <a href={vehicle.inspectionReportPdf} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 bg-white border border-green-300 text-green-800 font-bold px-6 py-2 rounded-xl shadow-sm hover:bg-green-50 transition-colors">
-                    View My PDF Report
-                  </a>
-                )}
               </div>
             ) : (
               <ChecklistForm vehicleId={id} onSuccess={handleInspectionSuccess} />

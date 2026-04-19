@@ -63,10 +63,7 @@ const inspectionReportSchema = new mongoose.Schema({
   mechanicSummary: {
     type: String,
     required: true
-  },
-  
-  // Hosted Media
-  pdfReportUrl: { type: String }
+  }
 
 }, { timestamps: true });
 
