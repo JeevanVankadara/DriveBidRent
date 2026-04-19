@@ -3,8 +3,14 @@ name: DriveBidRent CI/CD
 on:
   push:
     branches: [main, master]
+    paths:
+      - 'React_DriveBidRent_2/**'
+      - '.github/workflows/drivebidrent-cicd.yml'
   pull_request:
     branches: [main, master]
+    paths:
+      - 'React_DriveBidRent_2/**'
+      - '.github/workflows/drivebidrent-cicd.yml'
   workflow_dispatch:
 
 permissions:
@@ -32,14 +38,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: Backend/package-lock.json
+          cache-dependency-path: React_DriveBidRent_2/Backend/package-lock.json
 
       - name: Install backend dependencies
-        working-directory: ./Backend
+        working-directory: ./React_DriveBidRent_2/Backend
         run: npm ci
 
       - name: Run backend unit tests
-        working-directory: ./Backend
+        working-directory: ./React_DriveBidRent_2/Backend
         run: npm run test
 
   frontend-build:
@@ -55,14 +61,14 @@ jobs:
         with:
           node-version: 20.x
           cache: npm
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: React_DriveBidRent_2/client/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: ./client
+        working-directory: ./React_DriveBidRent_2/client
         run: npm ci
 
       - name: Build frontend
-        working-directory: ./client
+        working-directory: ./React_DriveBidRent_2/client
         run: npm run build
 
   deploy:
@@ -102,7 +108,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./client
+          working-directory: ./React_DriveBidRent_2/client
           vercel-args: --prod
 
       - name: Trigger backend deployment (Render API)
