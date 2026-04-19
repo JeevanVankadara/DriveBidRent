@@ -1,7 +1,7 @@
 // models/AuctionBid.js
 import mongoose from 'mongoose';
 import Notification from './Notification.js'; // ESM import
-
+// new things
 const auctionBidSchema = new mongoose.Schema({
   auctionId: {
     type: mongoose.Schema.Types.ObjectId,
