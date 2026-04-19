@@ -47,7 +47,6 @@ export default function RentalsList() {
       const result = await getRentals(filters);
       setRentals(result.rentals || []);
       setUniqueCities(result.uniqueCities || []);
-      setCacheInfo({ status: result.cacheStatus, time: result.responseTime });
     } catch (error) {
       console.error('Error fetching rentals:', error);
     } finally {

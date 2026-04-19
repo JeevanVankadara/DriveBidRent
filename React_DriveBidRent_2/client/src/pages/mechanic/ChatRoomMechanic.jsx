@@ -174,15 +174,15 @@ export default function ChatRoomMechanic({ chatIdProp }) {
   const handleSend = async (content) => {
     if (!chatId || !content.trim()) return;
     
+    const tempMessage = {
+      _id: `temp-${Date.now()}`,
+      content,
+      sender: { _id: myUserId },
+      createdAt: new Date().toISOString(),
+      isSending: true
+    };
+
     try {
-      const tempMessage = {
-        _id: `temp-${Date.now()}`,
-        content,
-        sender: { _id: myUserId },
-        createdAt: new Date().toISOString(),
-        isSending: true
-      };
-      
       setMessages(prev => [...prev, tempMessage]);
       
       const res = await axiosInstance.post(`/inspection-chat/${chatId}/message`, { content });

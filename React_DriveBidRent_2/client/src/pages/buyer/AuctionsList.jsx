@@ -61,7 +61,6 @@ export default function AuctionsList() {
 
       const result = await getAuctions(filters);
       setAuctions(result.auctions);
-      setCacheInfo({ status: result.cacheStatus, time: result.responseTime });
     } catch (error) {
       console.error('Error fetching auctions:', error);
     } finally {
