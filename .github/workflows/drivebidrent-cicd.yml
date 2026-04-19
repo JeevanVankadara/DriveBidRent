@@ -70,3 +70,53 @@ jobs:
       - name: Build frontend
         working-directory: ./React_DriveBidRent_2/client
         run: npm run build
+
+  deploy-verify:
+    name: Verify Deployment (Render)
+    needs: [backend-test, frontend-build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Wait for Render auto-deploy
+        run: |
+          echo "Render auto-deploys on push to main."
+          echo "Waiting 60s for deployment to propagate..."
+          sleep 60
+
+      - name: Verify Backend is live
+        run: |
+          echo "Checking backend at https://drivebidrent.onrender.com/api/home/data"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://drivebidrent.onrender.com/api/home/data || true)
+            echo "  Attempt $i — HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Backend is healthy!"
+              break
+            fi
+            if [ "$i" = "5" ]; then
+              echo "Backend health check failed after 5 attempts."
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Verify Frontend is live
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://drivebidrent.onrender.com || true)
+          echo "Frontend HTTP status: $STATUS"
+          if [ "$STATUS" = "200" ] || [ "$STATUS" = "304" ]; then
+            echo "Frontend is live!"
+          else
+            echo "Frontend check returned HTTP $STATUS"
+            exit 1
+          fi
+
+      - name: Deployment Summary
+        run: |
+          echo "============================================"
+          echo "  DriveBidRent — Deployment Verified"
+          echo "============================================"
+          echo "  Backend:  https://drivebidrent.onrender.com"
+          echo "  Status:   LIVE"
+          echo "============================================"
