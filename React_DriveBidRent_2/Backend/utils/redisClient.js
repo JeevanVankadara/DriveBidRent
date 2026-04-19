@@ -1,29 +1,46 @@
-import { createClient } from 'redis';
+import { Redis } from '@upstash/redis';
 
-// Initialize Redis client. It will try connecting to default localhost:6379 unless URL is provided in env
-const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-  socket: {
-    reconnectStrategy: false
-  }
-});
 
-redisClient.on('error', (err) => {
-  console.error('Redis Client Error:', err.message);
-  // We do not throw to avoid crashing the app if Redis is not locally available for the user
-});
+let redisClient;
+let isRedisReady = false;
 
-redisClient.on('connect', () => {
-  console.log('Redis client connected successfully');
-});
+try {
+  redisClient = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  isRedisReady = true;
+  console.log('Redis (Upstash) client initialized successfully');
+} catch (err) {
+  console.error('Failed to initialize Redis client:', err.message);
+  isRedisReady = false;
+}
 
-// Since the app uses top-level await and async initialization is fine we connect immediately
-(async () => {
-  try {
-    await redisClient.connect();
-  } catch (e) {
-    console.log("Failed to connect to redis, caching will be bypassed");
-  }
-})();
+const redisWrapper = {
+  get isReady() {
+    return isRedisReady;
+  },
 
-export default redisClient;
+  async get(key) {
+    try {
+      const data = await redisClient.get(key);
+      if (data !== null && data !== undefined) {
+        return typeof data === 'string' ? data : JSON.stringify(data);
+      }
+      return null;
+    } catch (err) {
+      console.error('Redis GET error:', err.message);
+      return null;
+    }
+  },
+
+  async setEx(key, ttl, value) {
+    try {
+      await redisClient.set(key, value, { ex: ttl });
+    } catch (err) {
+      console.error('Redis SET error:', err.message);
+    }
+  },
+};
+
+export default redisWrapper;

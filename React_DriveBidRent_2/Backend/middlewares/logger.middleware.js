@@ -105,12 +105,8 @@ export const errorLogger = morgan("detailed", {
 });
 
 export const devLogger = morgan("dev", {
-    skip: (req) =>
-        req.url.includes("/notifications") ||
-        req.url.includes("/auction/") ||
-        req.url.includes("/buyer/dashboard") ||
-        req.url.includes("/wishlist") ||
-        req.url.includes("/socket.io"),
+    // Skip all routes — logs go to access log files only, keeping console clean for Redis logs
+    skip: () => true,
 });
 
 export const logger = (req, res, next) => {

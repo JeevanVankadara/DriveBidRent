@@ -10,20 +10,28 @@ import redisClient from '../../utils/redisClient.js';
 export const getAuctions = async (req, res) => {
   try {
     const { search, condition, fuelType, transmission, minPrice, maxPrice } = req.query;
-    
-    // Check Redis Cache first
+
+    // Build a unique cache key based on query params
     const cacheKey = `auctions:${JSON.stringify(req.query)}`;
+    const startTime = Date.now();
+
+    // Check Redis Cache first
     if (redisClient.isReady) {
       const cachedData = await redisClient.get(cacheKey);
       if (cachedData) {
+        const responseTime = Date.now() - startTime;
+        console.log(`\x1b[32m[REDIS HIT]\x1b[0m  Key: ${cacheKey} | Time: ${responseTime}ms (served from Redis cache)\x1b[0m`);
         return res.json({
           success: true,
           message: 'Auctions fetched successfully (Cached)',
+          cacheStatus: 'HIT',
+          responseTime: responseTime,
           data: JSON.parse(cachedData)
         });
       }
     }
 
+    // CACHE MISS — fetch from MongoDB Atlas
     const query = {
       status: 'approved',
       started_auction: 'yes',
@@ -75,14 +83,19 @@ export const getAuctions = async (req, res) => {
       filters: { search, condition, fuelType, transmission, minPrice, maxPrice }
     };
 
-    // Save to Redis Cache for 60 seconds
+    // Save to Redis Cache with 90 second TTL
     if (redisClient.isReady) {
-      await redisClient.setEx(cacheKey, 60, JSON.stringify(responseData));
+      await redisClient.setEx(cacheKey, 90, JSON.stringify(responseData));
     }
+
+    const responseTime = Date.now() - startTime;
+    console.log(`\x1b[33m[REDIS MISS]\x1b[0m Key: ${cacheKey} | Time: ${responseTime}ms (fetched from MongoDB Atlas)\x1b[0m`);
 
     res.json({
       success: true,
-      message: 'Auctions fetched successfully',
+      message: 'Auctions fetched successfully (from Atlas)',
+      cacheStatus: 'MISS',
+      responseTime: responseTime,
       data: responseData
     });
   } catch (err) {
@@ -218,7 +231,7 @@ export const placeBid = async (req, res) => {
 
         // Emit to specific auction room
         io.to(auctionId.toString()).emit('new_bid', payload);
-        
+
         // Emit globally for dashboard lists
         io.emit('global_new_bid', payload);
       } catch (err) {
