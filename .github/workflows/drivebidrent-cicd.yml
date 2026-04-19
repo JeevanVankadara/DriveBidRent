@@ -108,8 +108,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./React_DriveBidRent_2/client
-          vercel-args: --prod
+          vercel-args: --prod --cwd React_DriveBidRent_2/client
 
       - name: Trigger backend deployment (Render API)
         run: |
