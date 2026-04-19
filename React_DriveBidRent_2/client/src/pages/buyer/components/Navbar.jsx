@@ -38,25 +38,8 @@ export default function Navbar() {
       }
     };
     
-    // Initial load
+    // Initial load only
     loadData();
-    
-    // Set up polling for real-time notification updates every 1 second
-    const intervalId = setInterval(async () => {
-      try {
-        const count = await getUnreadNotificationCount();
-        setUnreadCount(count);
-        
-        // Also refresh profile data
-        if (profile) {
-          setUser(profile);
-        }
-      } catch (err) {
-        // Silently fail during polling
-      }
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
   }, [profile]);
 
   useEffect(() => {
