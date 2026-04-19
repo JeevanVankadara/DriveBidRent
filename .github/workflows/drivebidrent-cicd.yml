@@ -1,3 +1,14 @@
+# ============================================================
+# DriveBidRent  –  CI / CD  Pipeline
+# ============================================================
+# Three Pillars:
+#   1. Continuous Integration  → lint, backend-test, frontend-test
+#   2. Continuous Delivery     → build (staging gate)
+#   3. Continuous Deployment   → deploy-verify (production smoke)
+#
+# If ANY CI job fails, CD is blocked — no build, no deploy.
+# ============================================================
+
 name: DriveBidRent CI/CD
 
 on:
@@ -20,15 +31,40 @@ concurrency:
   group: drivebidrent-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# ────────────────────────────────────────────────────────────
+#  STAGE 1 — Continuous Integration  (CI)
+#  Goal: Prevent "integration hell" — every commit is tested.
+# ────────────────────────────────────────────────────────────
 jobs:
+  lint:
+    name: "CI › Lint Frontend"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          cache-dependency-path: React_DriveBidRent_2/client/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./React_DriveBidRent_2/client
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./React_DriveBidRent_2/client
+        run: npm run lint
+
   backend-test:
-    name: Backend Tests (Node ${{ matrix.node-version }})
+    name: "CI › Backend Tests (Node ${{ matrix.node-version }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         node-version: [18.x, 20.x]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,10 +84,9 @@ jobs:
         working-directory: ./React_DriveBidRent_2/Backend
         run: npm run test
 
-  frontend-build:
-    name: Frontend Build
+  frontend-test:
+    name: "CI › Frontend Tests"
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,56 +102,101 @@ jobs:
         working-directory: ./React_DriveBidRent_2/client
         run: npm ci
 
-      - name: Build frontend
+      - name: Run Vitest unit tests
+        working-directory: ./React_DriveBidRent_2/client
+        run: npm test
+
+# ────────────────────────────────────────────────────────────
+#  STAGE 2 — Continuous Delivery  (CD – Delivery)
+#  Goal: Be ready to release at any moment.
+#  The build is the "staging gate" — proves the code compiles
+#  and the production bundle is healthy.
+#  Blocked by: ALL CI jobs (lint + backend-test + frontend-test)
+# ────────────────────────────────────────────────────────────
+  build:
+    name: "CD › Build & Validate"
+    needs: [lint, backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          cache-dependency-path: React_DriveBidRent_2/client/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./React_DriveBidRent_2/client
+        run: npm ci
+
+      - name: Build production bundle
         working-directory: ./React_DriveBidRent_2/client
         run: npm run build
 
+      - name: Build Summary
+        run: |
+          echo "============================================"
+          echo "  ✅  Build passed — code is deployable"
+          echo "============================================"
+
+# ────────────────────────────────────────────────────────────
+#  STAGE 3 — Continuous Deployment  (CD – Deployment)
+#  Goal: Verify live production after auto-deploy.
+#  Render (backend) & Vercel (frontend) auto-deploy on push.
+#  This stage smoke-tests the production URLs.
+#  Only runs on push to main/master (not PRs).
+# ────────────────────────────────────────────────────────────
   deploy-verify:
-    name: Verify Deployment (Render)
-    needs: [backend-test, frontend-build]
+    name: "CD › Verify Production"
+    needs: [build]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
     steps:
-      - name: Wait for Render auto-deploy
+      - name: Wait for auto-deploy propagation
         run: |
-          echo "Render auto-deploys on push to main."
-          echo "Waiting 60s for deployment to propagate..."
+          echo "Render & Vercel auto-deploy on push to main."
+          echo "Waiting 60s for deployments to propagate..."
           sleep 60
 
-      - name: Verify Backend is live
+      - name: "Verify Backend (Render)"
         run: |
           echo "Checking backend at https://drivebidrent.onrender.com/api/home/data"
           for i in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://drivebidrent.onrender.com/api/home/data || true)
             echo "  Attempt $i — HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
-              echo "Backend is healthy!"
+              echo "✅ Backend is healthy!"
               break
             fi
             if [ "$i" = "5" ]; then
-              echo "Backend health check failed after 5 attempts."
+              echo "❌ Backend health check failed after 5 attempts."
               exit 1
             fi
             sleep 30
           done
 
-      - name: Verify Frontend is live
+      - name: "Verify Frontend (Vercel)"
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://drivebidrent.onrender.com || true)
+          echo "Checking frontend at https://drive-bid-rent-sepia.vercel.app"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://drive-bid-rent-sepia.vercel.app || true)
           echo "Frontend HTTP status: $STATUS"
           if [ "$STATUS" = "200" ] || [ "$STATUS" = "304" ]; then
-            echo "Frontend is live!"
+            echo "✅ Frontend is live!"
           else
-            echo "Frontend check returned HTTP $STATUS"
+            echo "❌ Frontend check returned HTTP $STATUS"
             exit 1
           fi
 
-      - name: Deployment Summary
+      - name: "🚀 Deployment Summary"
         run: |
-          echo "============================================"
-          echo "  DriveBidRent — Deployment Verified"
-          echo "============================================"
-          echo "  Backend:  https://drivebidrent.onrender.com"
-          echo "  Status:   LIVE"
-          echo "============================================"
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║  DriveBidRent — Production Verified  ✅      ║"
+          echo "╠══════════════════════════════════════════════╣"
+          echo "║  Backend:   https://drivebidrent.onrender.com"
+          echo "║  Frontend:  https://drive-bid-rent-sepia.vercel.app"
+          echo "║  Status:    ALL SYSTEMS LIVE                 ║"
+          echo "╚══════════════════════════════════════════════╝"
