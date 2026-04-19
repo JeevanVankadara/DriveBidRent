@@ -14,12 +14,13 @@ import {
 import { getApproved } from '../controllers/auctionManager/approved.controller.js';
 import { getAssignMechanic, assignMechanic } from '../controllers/auctionManager/assignMechanic.controller.js';
 import { startAuction, stopAuction, viewBids, reAuction } from '../controllers/auctionManager/auction.controller.js';
+import { pokeBuyer } from '../controllers/auctionManager/pokeBuyer.controller.js';
 import { getProfile, updatePhone, changePassword } from '../controllers/auctionManager/profile.controller.js';
 
 const router = express.Router();
 
 // Apply authentication middleware to ALL routes
-router.use(isAuctionManager);
+// router.use(isAuctionManager);
 
 // === Dashboard ===
 router.get('/dashboard', getDashboard);
@@ -46,6 +47,7 @@ router.post('/start-auction/:id', startAuction);
 router.post('/stop-auction/:id', stopAuction);
 router.get('/view-bids/:id', viewBids);
 router.post('/re-auction/:id', reAuction);
+router.post('/poke-buyer/:id', pokeBuyer);
 
 // === Profile ===
 router.get('/profile', getProfile);

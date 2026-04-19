@@ -2,7 +2,10 @@ import { createClient } from 'redis';
 
 // Initialize Redis client. It will try connecting to default localhost:6379 unless URL is provided in env
 const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379'
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: {
+    reconnectStrategy: false
+  }
 });
 
 redisClient.on('error', (err) => {
@@ -11,14 +14,14 @@ redisClient.on('error', (err) => {
 });
 
 redisClient.on('connect', () => {
-    console.log('Redis client connected successfully');
+  console.log('Redis client connected successfully');
 });
 
 // Since the app uses top-level await and async initialization is fine we connect immediately
 (async () => {
   try {
     await redisClient.connect();
-  } catch(e) {
+  } catch (e) {
     console.log("Failed to connect to redis, caching will be bypassed");
   }
 })();
