@@ -254,6 +254,7 @@ router.get('/notifications', buyerMiddleware, async (req, res) => {
     const notifications = await Notification.find({ userId })
       .populate('auctionId', 'vehicleName vehicleImage')
       .sort({ createdAt: -1 })
+      .limit(10)
       .lean();
     const unreadCount = await Notification.countDocuments({ userId, isRead: false });
     res.json({
@@ -288,7 +289,8 @@ router.put('/notifications/seen', buyerMiddleware, async (req, res) => {
   try {
     const User = (await import('../models/User.js')).default;
     await User.findByIdAndUpdate(req.user._id, { notificationFlag: false });
-    res.json({ success: true, message: 'Notification flag cleared' });
+    await Notification.updateMany({ userId: req.user._id, isRead: false }, { isRead: true });
+    res.json({ success: true, message: 'Notification flag cleared and marked as read' });
   } catch (error) {
     console.error('Error clearing notification flag:', error);
     res.status(500).json({ success: false, message: 'Failed to clear notification flag' });

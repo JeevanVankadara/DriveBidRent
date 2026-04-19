@@ -85,9 +85,13 @@ const AdminProfile = () => {
   return (
     <>
       <div className="profile-settings" style={{ padding: "4rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <h2 style={{ color: "#ff6b00", fontSize: "2.2rem", textAlign: "center", marginBottom: "2rem", fontWeight: 700 }}>
-          Admin Profile
-        </h2>
+        <div className="admin-page-header">
+          <h1 className="admin-page-title">
+            <i className="fas fa-user-shield"></i>
+            Admin Profile
+          </h1>
+          <p className="admin-page-subtitle">Manage your personal details and security</p>
+        </div>
 
         <div className="profile-container" style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
           <div className="profile-details" style={{ flex: 1, minWidth: "300px", background: "#fff", padding: "2rem", borderRadius: "1rem", border: "1px solid #ff6b00", boxShadow: "0 5px 15px rgba(255,107,0,0.1)" }}>
