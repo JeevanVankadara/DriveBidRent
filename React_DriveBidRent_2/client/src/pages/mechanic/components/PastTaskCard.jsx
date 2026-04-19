@@ -36,8 +36,8 @@ export default function PastTaskCard({ vehicle }) {
           <div className="bg-green-50 rounded-xl p-4 text-center border border-green-100">
             <p className="text-[10px] text-green-800 uppercase tracking-wider font-bold mb-1">Rating Given</p>
             <p className="text-2xl font-black text-green-600 flex items-center justify-center gap-2">
-              {vehicle.mechanicReview?.conditionRating || 'N/A'}
-              {vehicle.mechanicReview?.conditionRating && <span className="text-yellow-500 text-2xl leading-none">★</span>}
+              {vehicle.multipointInspection?.overallRating ? `${vehicle.multipointInspection.overallRating}/10` : vehicle.mechanicReview?.conditionRating || 'N/A'}
+              {(vehicle.multipointInspection?.overallRating || vehicle.mechanicReview?.conditionRating) && <span className="text-yellow-500 text-2xl leading-none">★</span>}
             </p>
           </div>
         </div>

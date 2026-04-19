@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../../utils/axiosInstance.util';
 
+const InputWrapper = ({ label, children }) => (
+  <div className="mb-5">
+    <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">{label}</label>
+    {children}
+  </div>
+);
+
 export default function ChecklistForm({ vehicleId, onSuccess }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -58,21 +65,14 @@ export default function ChecklistForm({ vehicleId, onSuccess }) {
     setLoading(true);
     try {
       const res = await axiosInstance.post(`/mechanic/submit-inspection/${vehicleId}`, form);
-      toast.success('Inspection report submitted successfully! PDF generated.');
-      if (onSuccess) onSuccess(res.data.pdfUrl);
+      toast.success('Inspection report submitted successfully!');
+      if (onSuccess) onSuccess();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to submit inspection report');
     } finally {
       setLoading(false);
     }
   };
-
-  const InputWrapper = ({ label, children }) => (
-    <div className="mb-5">
-      <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-8 md:p-12 relative overflow-hidden mt-8">
@@ -328,7 +328,7 @@ export default function ChecklistForm({ vehicleId, onSuccess }) {
                 : 'bg-indigo-600 hover:bg-indigo-700'
             }`}
           >
-            {loading ? 'Generating PDF...' : (step === 5 ? 'Sign & Generate PDF' : 'Next Step →')}
+            {loading ? 'Submitting Report...' : (step === 5 ? 'Submit Report' : 'Next Step →')}
           </button>
         </div>
 

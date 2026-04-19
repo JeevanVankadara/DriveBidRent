@@ -83,6 +83,23 @@ const auctionRequestSchema = new mongoose.Schema({
     recommendations: String,
     conditionRating: String
   },
+  multipointInspection: {
+    exterior: {
+      paintCondition: Number, scratches: Boolean, dents: Boolean, rust: Boolean, tiresCondition: String, notes: String
+    },
+    interior: {
+      seatsCondition: String, dashboardCondition: String, acWorks: Boolean, electronicsWork: Boolean, notes: String
+    },
+    engine: {
+      fluidLeaks: Boolean, abnormalNoise: Boolean, startupSmoothness: String, batteryHealth: String, notes: String
+    },
+    testDrive: {
+      brakesCondition: String, steeringFeel: String, suspension: String, transmissionShift: String, notes: String
+    },
+    overallRating: Number,
+    isApprovedForAuction: Boolean,
+    mechanicSummary: String
+  },
   
   // === INSPECTION & SCHEDULING SCHEMAS ===
   inspectionDate: { type: Date },
