@@ -158,21 +158,29 @@ export const submitInspection = async (req, res) => {
     await newReport.save();
 
     // Step 4: Update Auction Request
-    // We auto-fill the legacy mechanicReview for backward compatibility 
-    // but the real juice is in `inspectionReportPdf`.
     auction.inspectionStatus = 'completed';
     auction.inspectionReportPdf = pdfReportUrl;
+    
+    // Construct meaningful string summaries from checkpoints for backward compatibility
+    const mechCond = `Engine: ${engine.startupSmoothness}, Battery: ${engine.batteryHealth}. Brakes: ${testDrive.brakesCondition}, Transmission: ${testDrive.transmissionShift}. Leaks: ${engine.fluidLeaks ? 'Yes' : 'No'}.`;
+    const bodyCond = `Paint: ${exterior.paintCondition}/10. Tires: ${exterior.tiresCondition}. Seats: ${interior.seatsCondition}. AC/Electronics: ${interior.acWorks && interior.electronicsWork ? 'Working' : 'Review Needed'}.`;
+
     auction.mechanicReview = {
-      mechanicalCondition: "See attached PDF report",
-      bodyCondition: "See attached PDF report",
+      mechanicalCondition: mechCond,
+      bodyCondition: bodyCond,
       recommendations: mechanicSummary,
       conditionRating: `${overallRating}/10`
     };
+
     // Usually the mechanic review completes the process
     auction.reviewStatus = 'completed';
-    auction['vehicleDocumentation.documentsVerified'] = true;
-    auction['vehicleDocumentation.verificationDate'] = new Date();
-    auction['vehicleDocumentation.verifiedBy'] = req.user._id;
+    
+    if (!auction.vehicleDocumentation) {
+      auction.vehicleDocumentation = {};
+    }
+    auction.vehicleDocumentation.documentsVerified = true;
+    auction.vehicleDocumentation.verificationDate = new Date();
+    auction.vehicleDocumentation.verifiedBy = req.user._id;
 
     await auction.save();
 

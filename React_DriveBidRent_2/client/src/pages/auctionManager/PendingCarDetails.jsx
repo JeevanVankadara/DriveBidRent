@@ -252,6 +252,15 @@ export default function PendingCarDetails() {
                       <p style={{ fontSize: 14, color: i === 2 ? '#7c2d12' : '#374151', lineHeight: 1.7 }}>{item.value}</p>
                     </div>
                   ))}
+                  
+                  {car.inspectionReportPdf && (
+                    <a href={car.inspectionReportPdf} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '13px', fontWeight: 700, textDecoration: 'none', borderRadius: '12px', transition: 'all 0.2s', marginTop: '4px' }}>
+                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      View Detailed Inspection PDF
+                    </a>
+                  )}
                 </div>
               ) : (
                 <div style={{ padding: '40px 24px', textAlign: 'center', background: '#f8fafc', borderRadius: 14, border: '1px dashed #e2e8f0' }}>
