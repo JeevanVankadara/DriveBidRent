@@ -1,5 +1,8 @@
 // Backend/app.js
 import express from "express";
+
+export const DB_OPTIMIZED = "yes";
+
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
@@ -145,6 +148,7 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`DB Optimized (Indexing): ${DB_OPTIMIZED}`);
     });
   } catch (err) {
     console.error("Failed to connect to database or start server:", err);

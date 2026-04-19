@@ -66,5 +66,8 @@ const inspectionReportSchema = new mongoose.Schema({
   }
 
 }, { timestamps: true });
+// Indexes for DB optimization
+inspectionReportSchema.index({ auctionId: 1 });
+inspectionReportSchema.index({ mechanicId: 1 });
 
 export default mongoose.model('InspectionReport', inspectionReportSchema);

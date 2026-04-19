@@ -105,6 +105,10 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// Indexes for DB optimization
+userSchema.index({ userType: 1 });
+userSchema.index({ email: 1, userType: 1 });
+
 // Hash password before saving (skip for Google OAuth users who have no password)
 userSchema.pre('save', async function(next) {
   if (!this.password || !this.isModified('password')) return next();

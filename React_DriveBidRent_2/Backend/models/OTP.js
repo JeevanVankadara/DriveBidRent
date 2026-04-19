@@ -20,4 +20,7 @@ const otpSchema = new mongoose.Schema({
   }
 });
 
+// Indexes for DB optimization
+otpSchema.index({ email: 1 });
+
 export default mongoose.model('OTP', otpSchema);

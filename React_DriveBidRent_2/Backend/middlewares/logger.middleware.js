@@ -2,6 +2,7 @@ import morgan from "morgan";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { DB_OPTIMIZED } from "../app.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,10 +74,13 @@ morgan.token("ip", (req) => {
     );
 });
 
+// Custom token: DB optimization status
+morgan.token("db_optimized", () => DB_OPTIMIZED);
+
+// Access log format — shows response time + DB optimization flag
 morgan.format(
     "detailed",
-    ":date[iso]  :method  :url  :status  :response-time ms │ " +
-    "user=:username  type=:usertype  id=:userid  ip=:ip  │  body=:body"
+    ":date[iso]  :method  :url  :status  :response-time ms  │  db=:db_optimized  user=:username  type=:usertype  id=:userid  ip=:ip"
 );
 
 function createWriteStream(logPath) {
@@ -94,8 +98,8 @@ function createWriteStream(logPath) {
 const accessFileStream = createWriteStream(getAccessLogPath());
 const errorFileStream = createWriteStream(getErrorLogPath());
 
+// NOTE: No `immediate: true` — logs AFTER the response so :response-time is populated
 export const accessLogger = morgan("detailed", {
-    immediate: true,
     stream: accessFileStream
 });
 
@@ -114,4 +118,4 @@ export const logger = (req, res, next) => {
         if (err) return next(err);
         errorLogger(req, res, next);
     });
-};
+};
