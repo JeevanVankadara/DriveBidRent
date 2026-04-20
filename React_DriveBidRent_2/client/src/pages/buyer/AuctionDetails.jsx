@@ -236,6 +236,13 @@ export default function AuctionDetails() {
   const minBid = calculateMinBid();
   const documents = getDocuments();
 
+  console.log("=== AUCTION DETAILS RENDER ===", {
+    auctionId: auction?._id,
+    vehicleName: auction?.vehicleName,
+    hasContent: !!auction,
+    loadingState: loading
+  });
+
   return (
     <div className="ad-page">
       {/* ────────── IMAGE GALLERY ────────── */}
@@ -305,7 +312,7 @@ export default function AuctionDetails() {
         </div>
       </section>
 
-      <div className="ad-content">
+      <div className="ad-content" style={{ display: 'grid', gridTemplateColumns: '1fr', border: '5px solid purple', minHeight: '300px', backgroundColor: '#fff', margin: '2rem 1rem' }}>
         <ErrorBoundary>
           {/* Left Column */}
           <div className="ad-content__left">
