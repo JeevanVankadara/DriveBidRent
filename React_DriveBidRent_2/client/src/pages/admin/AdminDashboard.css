@@ -1,3 +1,39 @@
+/* Responsive grid and section tweaks */
+@media (max-width: 1024px) {
+  .admin-section {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-section {
+    padding: 0.75rem;
+  }
+
+  .admin-stat-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .admin-page-header {
+    padding: 1rem 0.5rem;
+  }
+
+  .admin-section-title {
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-section {
+    padding: 0.5rem;
+  }
+
+  .admin-page-header {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
 /* ============================================
    ADMIN DASHBOARD - PREMIUM CSS STYLES
    Ultra-Modern Design System with Glassmorphism

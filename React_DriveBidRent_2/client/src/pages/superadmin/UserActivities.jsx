@@ -87,7 +87,7 @@ const UserActivities = () => {
 
   useEffect(() => {
     fetchUserActivities();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userType, currentPage]);
 
   const fetchUserActivities = async () => {
@@ -151,9 +151,8 @@ const UserActivities = () => {
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-6 right-6 z-[100] px-6 py-4 rounded-xl shadow-2xl text-white font-semibold text-sm flex items-center gap-3 animate-fade-in-up transition-all duration-300 ${
-            toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-          }`}
+          className={`fixed top-6 right-6 z-[100] px-6 py-4 rounded-xl shadow-2xl text-white font-semibold text-sm flex items-center gap-3 animate-fade-in-up transition-all duration-300 ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            }`}
           style={{ minWidth: 280, maxWidth: 420 }}
         >
           <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
@@ -181,8 +180,8 @@ const UserActivities = () => {
         {/* Filter */}
         <div className="premium-chart-container mb-6 flex items-center gap-4 py-3">
           <label className="font-bold text-gray-700">Filter by User Type:</label>
-          <select 
-            value={userType} 
+          <select
+            value={userType}
             onChange={(e) => { setUserType(e.target.value); setCurrentPage(1); }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
@@ -200,8 +199,8 @@ const UserActivities = () => {
         {/* User Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {users.map((user) => (
-            <div 
-              key={user._id} 
+            <div
+              key={user._id}
               className="premium-stat-card animate-fade-in-up cursor-pointer hover-lift"
               onClick={() => handleUserClick(user)}
             >
@@ -264,7 +263,7 @@ const UserActivities = () => {
                     </div>
                   </>
                 )}
-                
+
                 <div className="flex justify-between pt-2 border-t">
                   <span className="text-gray-600">Joined:</span>
                   <span className="font-semibold text-gray-700">
@@ -307,9 +306,23 @@ const UserActivities = () => {
 
         {/* User Details Modal */}
         {selectedUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={closeModal}>
-            <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="sticky top-0 bg-orange-600 text-white p-6 rounded-t-lg">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 md:p-4"
+            style={{
+              left: '0',
+              // On desktop, add left margin to avoid sidebar overlap
+              marginLeft: window.innerWidth > 1024 ? 260 : 0,
+              width: window.innerWidth > 1024 ? `calc(100vw - 260px)` : '100vw',
+              transition: 'margin-left 0.3s',
+            }}
+            onClick={closeModal}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200"
+              style={{ boxSizing: 'border-box', margin: '0 auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-orange-600 text-white p-4 md:p-6 rounded-t-2xl">
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-2xl font-bold">{selectedUser.firstName} {selectedUser.lastName}</h2>
@@ -360,7 +373,7 @@ const UserActivities = () => {
                     {userDetails.user.userType === 'buyer' && (
                       <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-3">🛒 Buyer Activity</h3>
-                        
+
                         {userDetails.detailedActivity.bids && userDetails.detailedActivity.bids.length > 0 && (
                           <div className="bg-blue-50 p-4 rounded-xl mb-4">
                             <h4 className="font-bold text-blue-800 mb-2">Recent Bids ({userDetails.detailedActivity.bids.length})</h4>
@@ -414,7 +427,7 @@ const UserActivities = () => {
                     {userDetails.user.userType === 'seller' && (
                       <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-3">Seller Activity</h3>
-                        
+
                         {userDetails.detailedActivity.auctions && userDetails.detailedActivity.auctions.length > 0 && (
                           <div className="bg-orange-50 p-4 rounded-xl mb-4">
                             <h4 className="font-bold text-orange-800 mb-2">Auctions ({userDetails.detailedActivity.auctions.length})</h4>
@@ -488,11 +501,10 @@ const UserActivities = () => {
                     value={adminForm.email}
                     onChange={handleAdminFormChange}
                     placeholder="admin@example.com"
-                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                      adminFormErrors.email
-                        ? 'border-red-400 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-orange-500'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${adminFormErrors.email
+                      ? 'border-red-400 focus:ring-red-400'
+                      : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                   />
                   {adminFormErrors.email && (
                     <p className="text-red-500 text-xs mt-1 font-medium">{adminFormErrors.email}</p>
@@ -510,11 +522,10 @@ const UserActivities = () => {
                       value={adminForm.password}
                       onChange={handleAdminFormChange}
                       placeholder="Minimum 8 characters"
-                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all pr-12 ${
-                        adminFormErrors.password
-                          ? 'border-red-400 focus:ring-red-400'
-                          : 'border-gray-300 focus:ring-orange-500'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all pr-12 ${adminFormErrors.password
+                        ? 'border-red-400 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-orange-500'
+                        }`}
                     />
                     <button
                       type="button"
@@ -540,11 +551,10 @@ const UserActivities = () => {
                     onChange={handleAdminFormChange}
                     placeholder="10 digit number"
                     maxLength={10}
-                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                      adminFormErrors.phone
-                        ? 'border-red-400 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-orange-500'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${adminFormErrors.phone
+                      ? 'border-red-400 focus:ring-red-400'
+                      : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                   />
                   {adminFormErrors.phone && (
                     <p className="text-red-500 text-xs mt-1 font-medium">{adminFormErrors.phone}</p>
