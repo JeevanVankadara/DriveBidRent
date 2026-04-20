@@ -6,6 +6,11 @@ import PastTaskCard from '../components/PastTaskCard';
 import { Link } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MechanicDashboardVisuals from './MechanicDashboardVisuals';
+import {
+  Wrench, Settings, CheckCircle2, BarChart3, Search,
+  ClipboardList, AlertTriangle, Calendar, ArrowRight,
+  RefreshCw
+} from 'lucide-react';
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -22,20 +27,40 @@ export default function Dashboard() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 font-montserrat">
-        <div className="bg-white rounded-3xl shadow-xl p-10 text-center max-w-md border border-red-100">
-          <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+      <div style={{
+        minHeight: '80vh', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', padding: 24,
+      }}>
+        <div style={{
+          background: '#fff', borderRadius: 24,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          padding: 48, textAlign: 'center', maxWidth: 400,
+          border: '1px solid #fecaca',
+        }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            background: '#fef2f2', color: '#ef4444',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px',
+          }}>
+            <AlertTriangle size={28} />
           </div>
-          <p className="text-2xl font-extrabold text-gray-900 mb-3">Connection Error</p>
-          <p className="text-gray-600 mb-8 font-medium">Failed to load dashboard data</p>
+          <p style={{ fontSize: 20, fontWeight: 800, color: '#111827', marginBottom: 8 }}>Connection Error</p>
+          <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 28 }}>Failed to load dashboard data</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full bg-gray-900 hover:bg-orange-500 text-white font-bold py-4 px-8 rounded-xl transition duration-300 shadow-sm hover:shadow-md"
+            style={{
+              width: '100%', padding: '14px 24px',
+              background: '#111827', color: '#fff',
+              border: 'none', borderRadius: 14,
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#3b82f6'}
+            onMouseLeave={e => e.currentTarget.style.background = '#111827'}
           >
-            Retry Connection
+            <RefreshCw size={15} /> Retry Connection
           </button>
         </div>
       </div>
@@ -49,31 +74,28 @@ export default function Dashboard() {
     const inspectDate = new Date(v.inspectionDate);
     const now = new Date();
     const diffHours = (inspectDate - now) / (1000 * 60 * 60);
-    return diffHours >= -24 && diffHours <= 48; // upcoming in next 48 or missed by today
+    return diffHours >= -24 && diffHours <= 48;
   });
 
   return (
-    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
-      
-      {/* ── HERO — full-width dark banner matching Auction Manager style ── */}
+    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+
+      {/* ── HERO SECTION ── */}
       <section style={{
         position: 'relative',
         background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
-        paddingTop: 80,
-        paddingBottom: 60,
-        overflow: 'hidden',
+        paddingTop: 80, paddingBottom: 60, overflow: 'hidden',
       }}>
         {/* Floating orbs */}
         {[
-          { top: '20%', left: '5%', size: 200, color: 'rgba(59,130,246,0.08)', delay: '0s' },
-          { top: '55%', left: '65%', size: 260, color: 'rgba(249,115,22,0.07)', delay: '1.2s' },
-          { top: '10%', left: '80%', size: 130, color: 'rgba(16,185,129,0.05)', delay: '0.6s' },
+          { top: '20%', left: '5%', size: 200, color: 'rgba(59,130,246,0.08)' },
+          { top: '55%', left: '65%', size: 260, color: 'rgba(249,115,22,0.07)' },
+          { top: '10%', left: '80%', size: 130, color: 'rgba(16,185,129,0.05)' },
         ].map((orb, i) => (
           <div key={i} style={{
             position: 'absolute', top: orb.top, left: orb.left,
             width: orb.size, height: orb.size, borderRadius: '50%',
-            background: orb.color, filter: 'blur(40px)',
-            animationDelay: orb.delay, pointerEvents: 'none',
+            background: orb.color, filter: 'blur(40px)', pointerEvents: 'none',
           }} />
         ))}
         {/* Dot grid */}
@@ -84,39 +106,64 @@ export default function Dashboard() {
         }} />
 
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
-          
+
           {showApprovalPopup && (
-            <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-start gap-4 backdrop-blur-sm">
-              <div className="p-2 bg-orange-500/20 rounded-xl text-orange-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+            <div style={{
+              marginBottom: 28, padding: '16px 20px',
+              background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)',
+              borderRadius: 16, display: 'flex', alignItems: 'flex-start', gap: 14,
+              backdropFilter: 'blur(8px)',
+            }}>
+              <div style={{
+                padding: 8, background: 'rgba(249,115,22,0.2)', borderRadius: 12,
+                color: '#fb923c', flexShrink: 0,
+              }}>
+                <AlertTriangle size={20} />
               </div>
-              <div className="flex-grow">
-                <h3 className="text-orange-400 font-bold mb-1">Account Under Review</h3>
-                <p className="text-gray-400 text-sm">Your profile is being verified by the admin team. You'll receive full access once approved.</p>
+              <div>
+                <h3 style={{ color: '#fb923c', fontWeight: 700, marginBottom: 4, fontSize: 14 }}>Account Under Review</h3>
+                <p style={{ color: '#94a3b8', fontSize: 13 }}>Your profile is being verified by the admin team. You'll receive full access once approved.</p>
               </div>
             </div>
           )}
 
           {upcomingInspections.length > 0 && (
-            <div className="mb-8 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-4 backdrop-blur-sm shadow-sm overflow-hidden relative">
-              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-              <div className="p-2 bg-blue-500/20 rounded-xl text-blue-400 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+            <div style={{
+              marginBottom: 28, padding: '16px 20px',
+              background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)',
+              borderRadius: 16, display: 'flex', alignItems: 'flex-start', gap: 14,
+              position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute', top: 0, left: 0, width: 3,
+                height: '100%', background: '#3b82f6',
+              }} />
+              <div style={{
+                padding: 8, background: 'rgba(59,130,246,0.2)', borderRadius: 12,
+                color: '#60a5fa', flexShrink: 0,
+              }}>
+                <Calendar size={20} />
               </div>
-              <div className="flex-grow">
-                <h3 className="text-blue-400 font-bold mb-1">
+              <div>
+                <h3 style={{ color: '#60a5fa', fontWeight: 700, marginBottom: 4, fontSize: 14 }}>
                   Upcoming Inspections ({upcomingInspections.length})
                 </h3>
-                <p className="text-gray-400 text-sm font-medium">
-                  You have vehicle inspections scheduled soon. Please check your assigned tasks and sync with your calendar.
+                <p style={{ color: '#94a3b8', fontSize: 13, marginBottom: 10 }}>
+                  You have vehicle inspections scheduled soon.
                 </p>
-                <div className="mt-3 flex gap-2">
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {upcomingInspections.map(v => (
-                    <Link key={v._id} to={`/mechanic/car-details/${v._id}`} className="px-3 py-1 bg-white/10 hover:bg-white/20 text-blue-300 text-xs font-bold rounded-lg transition-colors border border-white/5">
+                    <Link key={v._id} to={`/mechanic/car-details/${v._id}`}
+                      style={{
+                        padding: '4px 12px', background: 'rgba(255,255,255,0.1)',
+                        color: '#93c5fd', fontSize: 11, fontWeight: 700,
+                        borderRadius: 8, textDecoration: 'none',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    >
                       {v.vehicleName}
                     </Link>
                   ))}
@@ -125,8 +172,12 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 32 }}>
-            {/* Left: title */}
+          {/* Title + Stats row */}
+          <div style={{
+            display: 'flex', flexWrap: 'wrap',
+            alignItems: 'flex-end', justifyContent: 'space-between', gap: 32,
+          }}>
+            {/* Left: Title */}
             <div>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -136,7 +187,10 @@ export default function Dashboard() {
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3b82f6', display: 'inline-block' }} />
                 <span style={{ fontSize: 10, fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Mechanic Portal</span>
               </div>
-              <h1 style={{ fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.05, marginBottom: 12 }}>
+              <h1 style={{
+                fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800, color: '#fff',
+                letterSpacing: '-1.5px', lineHeight: 1.05, marginBottom: 12,
+              }}>
                 Mechanic{' '}
                 <span style={{ color: '#3b82f6', fontStyle: 'italic' }}>Dashboard</span>
               </h1>
@@ -145,105 +199,138 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Right: stat pills */}
-            <div style={{ display: 'flex', gap: 12 }}>
-              {/* Current Tasks */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(59,130,246,0.3)' }}>
-                <div>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: '#60a5fa', lineHeight: 1 }}>{displayedVehicles.length}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(96,165,250,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Current Tasks</div>
+            {/* Right: Stat pills */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {[
+                { count: displayedVehicles.length, label: 'Current Tasks', color: '#60a5fa', bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.3)', Icon: Settings },
+                { count: completedTasks.length, label: 'Completed', color: '#34d399', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', Icon: CheckCircle2 },
+                { count: displayedVehicles.length + completedTasks.length, label: 'Total Tasks', color: '#fbbf24', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', Icon: BarChart3 },
+              ].map((stat, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '16px 24px', borderRadius: 16,
+                  background: stat.bg, border: `1px solid ${stat.border}`,
+                }}>
+                  <div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.count}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>{stat.label}</div>
+                  </div>
+                  <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
+                  <stat.Icon size={18} color={stat.color} strokeWidth={1.8} />
                 </div>
-                <div style={{ width: 1, height: 36, background: 'rgba(59,130,246,0.2)' }} />
-                <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#60a5fa' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-
-              {/* Completed Tasks */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{completedTasks.length}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Completed</div>
-                </div>
-                <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
-                <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#34d399' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-
-              {/* Total Tasks */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{displayedVehicles.length + completedTasks.length}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>Total Tasks</div>
-                </div>
-                <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
-                <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 18, height: 18, color: '#fbbf24' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto pb-24 px-4 pt-12">
+      {/* ── CONTENT ── */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 16px 96px' }}>
 
-        {/* ==================== VISUAL ANALYTICS ==================== */}
+        {/* Visual Analytics */}
         <MechanicDashboardVisuals currentTasks={displayedVehicles} completedTasks={completedTasks} />
 
-        {/* ==================== CURRENT ASSIGNMENTS ==================== */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black text-gray-900 px-2 lg:px-4">Current Assignments</h2>
+        {/* ── CURRENT ASSIGNMENTS ── */}
+        <section style={{ marginBottom: 64 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', marginBottom: 28,
+            padding: '0 8px',
+          }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827' }}>Current Assignments</h2>
             {displayedVehicles.length > 0 && (
-              <Link to="/mechanic/current-tasks" className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-xl transition duration-300 shadow-sm">
-                View All
+              <Link to="/mechanic/current-tasks" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 18px', background: '#f3f4f6',
+                color: '#374151', fontSize: 13, fontWeight: 700,
+                borderRadius: 12, textDecoration: 'none',
+                transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; }}
+              >
+                View All <ArrowRight size={14} />
               </Link>
             )}
           </div>
 
           {displayedVehicles.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+            <div style={{
+              background: '#fff', borderRadius: 24, padding: 48,
+              textAlign: 'center', border: '1px dashed #d1d5db',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: '#f9fafb', color: '#9ca3af',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 20,
+              }}>
+                <Search size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No vehicles assigned</h3>
-              <p className="text-gray-500">You currently have no tasks assigned to you.</p>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 6 }}>No vehicles assigned</h3>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>You currently have no tasks assigned to you.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+              gap: 24,
+            }}>
               {displayedVehicles.map(v => <CurrentTaskCard key={v._id} vehicle={v} />)}
             </div>
           )}
         </section>
 
-        {/* ==================== COMPLETED INSPECTIONS ==================== */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black text-gray-900 px-2 lg:px-4">Completed Inspections</h2>
+        {/* ── COMPLETED INSPECTIONS ── */}
+        <section style={{ marginBottom: 64 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', marginBottom: 28,
+            padding: '0 8px',
+          }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827' }}>Completed Inspections</h2>
             {completedTasks.length > 0 && (
-              <Link to="/mechanic/past-tasks" className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-xl transition duration-300 shadow-sm">
-                View All
+              <Link to="/mechanic/past-tasks" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 18px', background: '#f3f4f6',
+                color: '#374151', fontSize: 13, fontWeight: 700,
+                borderRadius: 12, textDecoration: 'none',
+                transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; }}
+              >
+                View All <ArrowRight size={14} />
               </Link>
             )}
           </div>
 
           {completedTasks.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 shadow-sm flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
+            <div style={{
+              background: '#fff', borderRadius: 24, padding: 48,
+              textAlign: 'center', border: '1px dashed #d1d5db',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: '#f9fafb', color: '#9ca3af',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 20,
+              }}>
+                <ClipboardList size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No completed tasks yet</h3>
-              <p className="text-gray-500">Your completed inspection reports will appear here.</p>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 6 }}>No completed tasks yet</h3>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>Your completed inspection reports will appear here.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+              gap: 24,
+            }}>
               {completedTasks.slice(0, 6).map(v => <PastTaskCard key={v._id} vehicle={v} />)}
             </div>
           )}

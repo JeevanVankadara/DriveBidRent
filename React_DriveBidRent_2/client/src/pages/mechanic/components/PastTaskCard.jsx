@@ -1,51 +1,150 @@
 // client/src/pages/mechanic/components/PastTaskCard.jsx
+import { useState } from 'react';
+import { Calendar, Gauge, Star, CheckCircle, Car } from 'lucide-react';
+
 export default function PastTaskCard({ vehicle }) {
+  const [imgError, setImgError] = useState(false);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'https://drivebidrent.onrender.com';
+  const imgSrc = vehicle.vehicleImage?.startsWith('http')
+    ? vehicle.vehicleImage
+    : `${backendUrl}${vehicle.vehicleImage}`;
+
+  const rating = vehicle.multipointInspection?.overallRating
+    ? `${vehicle.multipointInspection.overallRating}/10`
+    : vehicle.mechanicReview?.conditionRating || 'N/A';
+
+  const hasRating = vehicle.multipointInspection?.overallRating || vehicle.mechanicReview?.conditionRating;
+
+  const s = {
+    card: {
+      background: '#fff', borderRadius: 20,
+      border: '1px solid #e5e7eb', overflow: 'hidden',
+      display: 'flex', flexDirection: 'column', height: '100%',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      transition: 'all 0.25s ease',
+    },
+    imageWrap: {
+      position: 'relative', height: 200, overflow: 'hidden', background: '#f3f4f6',
+    },
+    image: {
+      width: '100%', height: '100%', objectFit: 'cover',
+      transition: 'transform 0.5s ease',
+    },
+    placeholder: {
+      width: '100%', height: '100%',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+      color: '#94a3b8',
+    },
+    badge: {
+      position: 'absolute', top: 14, left: 14, zIndex: 2,
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: '5px 12px', borderRadius: 8,
+      background: 'rgba(16,185,129,0.9)', backdropFilter: 'blur(8px)',
+      color: '#fff', fontSize: 10, fontWeight: 700,
+      textTransform: 'uppercase', letterSpacing: '0.08em',
+    },
+    body: { padding: 24, flex: 1, display: 'flex', flexDirection: 'column' },
+    title: {
+      fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 16,
+      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+    },
+    grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 },
+    infoCell: {
+      background: '#f9fafb', borderRadius: 12,
+      padding: '12px 14px', border: '1px solid #f3f4f6',
+      display: 'flex', alignItems: 'center', gap: 10,
+    },
+    infoIcon: {
+      width: 32, height: 32, borderRadius: 9,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    },
+    infoLabel: { fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' },
+    infoValue: { fontSize: 14, fontWeight: 800, color: '#111827' },
+    ratingBox: {
+      background: '#ecfdf5', borderRadius: 12,
+      padding: '14px', border: '1px solid #d1fae5',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+      marginBottom: 20,
+    },
+    footer: {
+      marginTop: 'auto', paddingTop: 16, borderTop: '1px solid #f3f4f6',
+    },
+    btn: {
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+      width: '100%', padding: '12px 0',
+      background: '#f3f4f6', color: '#6b7280',
+      borderRadius: 12, fontSize: 13, fontWeight: 700,
+    },
+  };
+
   return (
-    <div className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
-      <div className="relative h-56 overflow-hidden bg-gray-100">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[1] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <img
-          src={vehicle.vehicleImage}
-          alt={vehicle.vehicleName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div className="absolute top-4 left-4 z-10">
-          <span className="px-3 py-1 bg-green-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-white"></span>
-            COMPLETED
-          </span>
+    <div style={s.card}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
+    >
+      {/* Image */}
+      <div style={s.imageWrap}>
+        <div style={s.badge}>
+          <CheckCircle size={12} />
+          COMPLETED
         </div>
+        {imgError || !vehicle.vehicleImage ? (
+          <div style={s.placeholder}>
+            <Car size={40} strokeWidth={1.2} />
+            <span style={{ fontSize: 12, fontWeight: 600, marginTop: 8 }}>{vehicle.vehicleName}</span>
+          </div>
+        ) : (
+          <img
+            src={imgSrc}
+            alt={vehicle.vehicleName}
+            style={s.image}
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
 
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-extrabold text-gray-900 mb-4 truncate group-hover:text-green-600 transition-colors">
-          {vehicle.vehicleName}
-        </h3>
+      {/* Body */}
+      <div style={s.body}>
+        <h3 style={s.title}>{vehicle.vehicleName}</h3>
 
-        <div className="mb-6">
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Make Year</p>
-              <p className="text-lg font-black text-gray-900">{vehicle.year}</p>
+        <div style={s.grid}>
+          <div style={s.infoCell}>
+            <div style={{ ...s.infoIcon, background: '#eff6ff', color: '#3b82f6' }}>
+              <Calendar size={15} />
             </div>
-            <div className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Mileage</p>
-              <p className="text-lg font-black text-gray-900">{(vehicle.mileage || 0).toLocaleString()} <span className="text-xs text-gray-500 font-medium">km</span></p>
+            <div>
+              <div style={s.infoLabel}>Year</div>
+              <div style={s.infoValue}>{vehicle.year}</div>
             </div>
           </div>
-          <div className="bg-green-50 rounded-xl p-4 text-center border border-green-100">
-            <p className="text-[10px] text-green-800 uppercase tracking-wider font-bold mb-1">Rating Given</p>
-            <p className="text-2xl font-black text-green-600 flex items-center justify-center gap-2">
-              {vehicle.multipointInspection?.overallRating ? `${vehicle.multipointInspection.overallRating}/10` : vehicle.mechanicReview?.conditionRating || 'N/A'}
-              {(vehicle.multipointInspection?.overallRating || vehicle.mechanicReview?.conditionRating) && <span className="text-yellow-500 text-2xl leading-none">★</span>}
-            </p>
+          <div style={s.infoCell}>
+            <div style={{ ...s.infoIcon, background: '#f0fdf4', color: '#22c55e' }}>
+              <Gauge size={15} />
+            </div>
+            <div>
+              <div style={s.infoLabel}>Mileage</div>
+              <div style={s.infoValue}>{(vehicle.mileage || 0).toLocaleString()} km</div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-auto border-t border-gray-100 pt-4">
-          <span className="w-full inline-flex justify-center items-center py-3 bg-gray-100 text-gray-500 font-bold rounded-xl">
+        {/* Rating */}
+        <div style={s.ratingBox}>
+          {hasRating && <Star size={20} fill="#eab308" color="#eab308" />}
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rating Given</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#059669' }}>{rating}</div>
+          </div>
+        </div>
+
+        <div style={s.footer}>
+          <div style={s.btn}>
+            <CheckCircle size={14} />
             Review Submitted
-          </span>
+          </div>
         </div>
       </div>
     </div>
