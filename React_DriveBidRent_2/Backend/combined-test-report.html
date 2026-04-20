@@ -132,7 +132,7 @@
 <body>
   <div class="header">
     <h1>DriveBidRent - <span>Test Report</span></h1>
-    <p class="meta">Generated on 20/4/2026, 11:56:38 pm | Backend (Jest) + Frontend (Vitest)</p>
+    <p class="meta">Generated on 21/4/2026, 12:12:49 am | Backend (Jest) + Frontend (Vitest)</p>
   </div>
 
   <div class="summary-bar">
@@ -154,70 +154,70 @@
 
   <div id="panel-backend" class="panel active">
     <div class="section-label">Console Output - Backend Test Suites</div>
-    <div class="console-output">(node:14584) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+    <div class="console-output">(node:33204) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-PASS tests/auth.test.js
+PASS tests/auth.test.js (5.008 s)
 PASS tests/roleMiddlewares.test.js
 PASS tests/auth.controller.extensive.test.js
 PASS tests/admin.controllers.test.js
 PASS tests/auctions.core.test.js
-PASS tests/security.middleware.test.js
 PASS tests/chat.handlers.test.js
+PASS tests/auth.middleware.test.js
 PASS tests/errorHandler.middleware.test.js
 PASS tests/chat.controller.test.js
-PASS tests/auth.middleware.test.js
-PASS tests/generateToken.test.js
+PASS tests/security.middleware.test.js
 PASS tests/home.controller.test.js
 PASS tests/checkBlocked.middleware.test.js
+PASS tests/generateToken.test.js
 
 Test Suites: 13 passed, 13 total
 Tests:       149 passed, 149 total
 Snapshots:   0 total
-Time:        3.698 s</div>
+Time:        12.518 s</div>
   </div>
 
   <div id="panel-frontend" class="panel">
     <div class="section-label">Console Output - Frontend Vitest Suites</div>
     <div class="console-output"> RUN  v4.1.4 C:/Users/jeeva/OneDrive/Desktop/github/WBD DriveBidRent/DriveBidRent/React_DriveBidRent_2/client
 
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; should return the initial state 3ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; fetchWishlist.pending should set loading true 1ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; fetchWishlist.fulfilled should populate auctions and rentals 1ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; fetchWishlist.rejected should set error 0ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.fulfilled should add an auction item 1ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.fulfilled should add a rental item 0ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.fulfilled should not duplicate existing items 1ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; removeWishlistItem.fulfilled should remove an auction item 0ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; removeWishlistItem.fulfilled should remove a rental item 1ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.rejected should set error 0ms
- ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; removeWishlistItem.rejected should set error 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; should return the initial state 4ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearError should nullify the error field 1ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearSuccess should nullify the success field 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearRedirect should nullify the redirect field 1ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; setUser should populate user and derived fields 1ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; setUser(null) should mark unauthenticated 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearAuth should reset all auth state and clear localStorage 1ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; cancelSignupOtp should clear OTP UI flags 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; loginUser.pending should set loading true and clear error 1ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; loginUser.fulfilled should authenticate the user 1ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; loginUser.rejected should set error and clear auth 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; signupUser.fulfilled with OTP should set OTP flags 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; signupUser.fulfilled without OTP should set redirect 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; logoutUser.fulfilled should clear all auth state 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; googleLogin.fulfilled should authenticate the user 0ms
- ✓ src/tests/authSlice.test.js &gt; authSlice &gt; googleLogin.rejected should set error 0ms
- ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; renders children when user is authenticated 35ms
- ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; redirects to /login when user is NOT authenticated 6ms
- ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; redirects when authenticated but wrong userType 4ms
- ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; renders children when userType matches requiredUserType 3ms
- ✓ src/tests/ProtectedRoute.test.jsx &gt; PublicRoute &gt; renders children when user is NOT authenticated 3ms
- ✓ src/tests/ProtectedRoute.test.jsx &gt; PublicRoute &gt; redirects when user IS authenticated 3ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; should return the initial state 32ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; fetchWishlist.pending should set loading true 8ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; fetchWishlist.fulfilled should populate auctions and rentals 6ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; fetchWishlist.rejected should set error 4ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.fulfilled should add an auction item 13ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.fulfilled should add a rental item 3ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.fulfilled should not duplicate existing items 3ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; removeWishlistItem.fulfilled should remove an auction item 6ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; removeWishlistItem.fulfilled should remove a rental item 6ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; addWishlistItem.rejected should set error 2ms
+ ✓ src/tests/wishlistSlice.test.js &gt; wishlistSlice &gt; removeWishlistItem.rejected should set error 2ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; should return the initial state 21ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearError should nullify the error field 4ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearSuccess should nullify the success field 2ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearRedirect should nullify the redirect field 2ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; setUser should populate user and derived fields 3ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; setUser(null) should mark unauthenticated 2ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; clearAuth should reset all auth state and clear localStorage 7ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; cancelSignupOtp should clear OTP UI flags 1ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; loginUser.pending should set loading true and clear error 3ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; loginUser.fulfilled should authenticate the user 3ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; loginUser.rejected should set error and clear auth 1ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; signupUser.fulfilled with OTP should set OTP flags 1ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; signupUser.fulfilled without OTP should set redirect 1ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; logoutUser.fulfilled should clear all auth state 1ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; googleLogin.fulfilled should authenticate the user 1ms
+ ✓ src/tests/authSlice.test.js &gt; authSlice &gt; googleLogin.rejected should set error 1ms
+ ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; renders children when user is authenticated 168ms
+ ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; redirects to /login when user is NOT authenticated 27ms
+ ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; redirects when authenticated but wrong userType 14ms
+ ✓ src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; renders children when userType matches requiredUserType 11ms
+ ✓ src/tests/ProtectedRoute.test.jsx &gt; PublicRoute &gt; renders children when user is NOT authenticated 12ms
+ ✓ src/tests/ProtectedRoute.test.jsx &gt; PublicRoute &gt; redirects when user IS authenticated 11ms
 
  Test Files  3 passed (3)
       Tests  33 passed (33)
-   Start at  23:56:35
-   Duration  2.41s (transform 234ms, setup 508ms, import 824ms, tests 81ms, environment 4.87s)
+   Start at  00:12:40
+   Duration  8.40s (transform 987ms, setup 2.64s, import 4.51s, tests 422ms, environment 14.89s)
 
 
 stderr | src/tests/ProtectedRoute.test.jsx &gt; ProtectedRoute &gt; renders children when user is authenticated

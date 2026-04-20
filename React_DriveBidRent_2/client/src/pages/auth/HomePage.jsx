@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -8,223 +8,130 @@ import Footer from '../components/Footer';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
-const AestheticCar = ({ isMoving, isIdling }) => {
+/* ═══════════════════════════════════════════════════════
+   SPLASH SCREEN — shown only on the FIRST visit per
+   browser session while the Render backend cold-starts.
+   Disappears as soon as the backend responds.
+   ═══════════════════════════════════════════════════════ */
+const SplashScreen = ({ onReady }) => {
+  const [dots, setDots] = useState('');
+  const [fadingOut, setFadingOut] = useState(false);
+
+  /* Animated dots */
+  useEffect(() => {
+    const id = setInterval(() => setDots(d => d.length >= 3 ? '' : d + '.'), 500);
+    return () => clearInterval(id);
+  }, []);
+
+  /* When parent signals ready, fade out then unmount */
+  useEffect(() => {
+    if (onReady === true && !fadingOut) {
+      setFadingOut(true);
+    }
+  }, [onReady, fadingOut]);
+
   return (
     <motion.div
-      animate={(isMoving || isIdling) ? { y: [0, -3, 0] } : { y: 0 }}
-      transition={{ repeat: Infinity, duration: isMoving ? 0.3 : 0.1, ease: 'linear' }}
-      className="relative"
-      style={{ width: '220px', height: '80px', pointerEvents: 'none' }}
+      initial={{ opacity: 1 }}
+      animate={fadingOut ? { opacity: 0 } : { opacity: 1 }}
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        fontFamily: '"Montserrat", sans-serif',
+      }}
     >
-       <svg width="220" height="80" viewBox="0 0 220 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="10%">
-              <stop offset="0%" stopColor="#ff8c00" />
-              <stop offset="100%" stopColor="#e65c00" />
-            </linearGradient>
-            <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#333" />
-              <stop offset="100%" stopColor="#0a0a0a" />
-            </linearGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
+      <style>{`
+        @keyframes splashPulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%      { transform: scale(1.06); opacity: 0.85; }
+        }
+        @keyframes splashBar {
+          0%   { width: 0%; }
+          100% { width: 100%; }
+        }
+        @keyframes splashDot {
+          0%, 80%, 100% { transform: scale(0); opacity: 0; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
 
-          {/* Shadow */}
-          <ellipse cx="110" cy="74" rx="95" ry="6" fill="rgba(0,0,0,0.2)" />
+      {/* Logo Mark */}
+      <div style={{
+        width: 72, height: 72, borderRadius: 18,
+        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 8px 30px rgba(245, 158, 11, 0.35)',
+        animation: 'splashPulse 2s ease-in-out infinite',
+        marginBottom: 28,
+      }}>
+        <span style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>D</span>
+      </div>
 
-          {/* Body */}
-          <path d="M 20 66 L 205 66 C 215 66, 218 55, 218 50 C 218 45, 215 40, 205 38 C 180 32, 160 22, 140 18 C 120 14, 90 14, 70 20 C 50 26, 30 35, 18 45 C 15 50, 15 66, 20 66 Z" fill="url(#bodyGrad)" />
-          
-          {/* Lower grille/skirt */}
-          <path d="M 20 66 L 205 66 C 210 66, 208 68, 205 68 L 20 68 Z" fill="#222" />
+      {/* Brand name */}
+      <h1 style={{
+        fontSize: '2rem', fontWeight: 900,
+        color: '#fff', letterSpacing: '-0.02em',
+        margin: 0,
+      }}>
+        Drive<span style={{ color: '#f59e0b' }}>Bid</span>Rent
+      </h1>
 
-          {/* Window */}
-          <path d="M 72 23 C 90 18, 115 18, 135 22 C 145 25, 150 32, 160 36 L 80 36 C 75 32, 72 28, 72 23 Z" fill="url(#glassGrad)" />
+      {/* Progress bar */}
+      <div style={{
+        width: 200, height: 3, borderRadius: 2,
+        background: 'rgba(255,255,255,0.08)',
+        marginTop: 28, overflow: 'hidden',
+      }}>
+        <div style={{
+          height: '100%', borderRadius: 2,
+          background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+          animation: 'splashBar 2.5s ease-in-out infinite',
+        }} />
+      </div>
 
-          {/* Headlight */}
-          <path d="M 200 40 C 205 40, 215 42, 218 45 L 200 45 Z" fill="#fff9cc" filter="url(#glow)"/>
+      {/* Status text */}
+      <p style={{
+        marginTop: 18, fontSize: '0.8125rem',
+        color: 'rgba(255,255,255,0.4)', fontWeight: 600,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+        minWidth: 200, textAlign: 'center',
+      }}>
+        Connecting to server{dots}
+      </p>
 
-          {/* Taillight */}
-          <path d="M 18 45 L 25 45 C 25 48, 25 50, 16 50 Z" fill="#ff0000" filter="url(#glow)"/>
-          
-          {/* Spoiler */}
-          <path d="M 20 38 L 45 28 L 50 32 L 25 42 Z" fill="#111" />
-       </svg>
-
-       {/* Wheels */}
-       {[35, 155].map((leftVal, i) => (
-         <div key={i} style={{ position: 'absolute', bottom: 2, left: leftVal, width: 34, height: 34 }}>
-             <motion.div
-               style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: '#111', border: '4px solid #222', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-               animate={isMoving ? { rotate: 360 } : { rotate: 0 }}
-               transition={{ repeat: Infinity, duration: 0.35, ease: "linear" }}
-             >
-                <div style={{ width: '100%', height: '3px', backgroundColor: '#777' }} />
-                <div style={{ width: '3px', height: '100%', backgroundColor: '#777', position: 'absolute' }} />
-                <div style={{ width: '100%', height: '3px', backgroundColor: '#777', position: 'absolute', transform: 'rotate(45deg)' }} />
-                <div style={{ width: '3px', height: '100%', backgroundColor: '#777', position: 'absolute', transform: 'rotate(45deg)' }} />
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff8c00', position: 'absolute' }} />
-             </motion.div>
-         </div>
-       ))}
-
-       {/* Dust */}
-       <AnimatePresence>
-         {isMoving && (
-           <motion.div
-             initial={{ opacity: 0, x: 0, scale: 0.5 }}
-             animate={{ opacity: [0, 1, 0], x: -60, scale: 2.5 }}
-             transition={{ repeat: Infinity, duration: 0.6 }}
-             style={{ position: 'absolute', bottom: 10, left: -20, width: 12, height: 12, borderRadius: '50%', background: '#cbd5e1', filter: 'blur(2px)' }}
-           />
-         )}
-       </AnimatePresence>
+      {/* Three bouncing dots */}
+      <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#f59e0b',
+            animation: `splashDot 1.4s ease-in-out ${i * 0.16}s infinite`,
+          }} />
+        ))}
+      </div>
     </motion.div>
   );
 };
 
-const LoadingScreen = ({ loadingState }) => {
-  const [sequenceStage, setSequenceStage] = useState(0); 
-
-  useEffect(() => {
-    if (loadingState === 'dispensing') {
-       let t = [];
-       // Stage 0: Car is already at 15vw (Left).
-       t.push(setTimeout(() => setSequenceStage(1), 300));   // Drop Logo
-       t.push(setTimeout(() => setSequenceStage(2), 1200));  // Drive to Center
-       t.push(setTimeout(() => setSequenceStage(3), 2400));  // Drop Nav Links
-       t.push(setTimeout(() => setSequenceStage(4), 3300));  // Drive to Right
-       t.push(setTimeout(() => setSequenceStage(5), 4500));  // Drop Auth
-       t.push(setTimeout(() => setSequenceStage(6), 5500));  // Leave
-       
-       return () => t.forEach(clearTimeout);
-    }
-  }, [loadingState]);
-
-  const isMoving = sequenceStage === 2 || sequenceStage === 4 || sequenceStage === 6 || loadingState === 'drivingIn';
-  const isIdling = !isMoving && sequenceStage < 6;
-
-  let carLeft = '15vw'; // Start position during drivingIn and idling
-  if (sequenceStage >= 2 && sequenceStage < 4) carLeft = '50vw';
-  if (sequenceStage >= 4 && sequenceStage < 6) carLeft = '85vw';
-  if (sequenceStage >= 6) carLeft = '150vw';
-
-  const dispenseStageTarget = {
-     0: 0,
-     1: 1, // Logo visible
-     2: 1, 
-     3: 2, // Nav visible
-     4: 2, 
-     5: 3, // Auth visible
-     6: 3, 
-  }[sequenceStage] || 0;
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: '#f8fafc', zIndex: 9999, overflow: 'hidden' }}>
-        <motion.div
-           initial={{ left: '-50vw', top: '50%', x: '-50%', y: '-50%' }}
-           animate={{
-             left: carLeft
-           }}
-           transition={{ 
-             duration: 1.2,
-             ease: sequenceStage >= 6 ? "easeIn" : "easeInOut"
-           }}
-           style={{ position: 'absolute', zIndex: 100 }}
-        >
-           <AestheticCar isMoving={isMoving} isIdling={isIdling || loadingState === 'dispensing'} />
-
-           {/* Hidden Stack INSIDE car */}
-           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', gap: '0px', pointerEvents: 'none' }}>
-              {dispenseStageTarget < 1 && <motion.div layoutId="logo" style={{ opacity: 0, fontSize: '2rem' }}>DriveBidRent</motion.div>}
-              {dispenseStageTarget < 2 && <motion.div layoutId="buy" style={{ opacity: 0 }}>Buy</motion.div>}
-              {dispenseStageTarget < 2 && <motion.div layoutId="sell" style={{ opacity: 0 }}>Sell</motion.div>}
-              {dispenseStageTarget < 2 && <motion.div layoutId="rent" style={{ opacity: 0 }}>Rent</motion.div>}
-              {dispenseStageTarget < 2 && <motion.div layoutId="auction" style={{ opacity: 0 }}>Auction</motion.div>}
-              {dispenseStageTarget < 3 && <motion.div layoutId="login" style={{ opacity: 0 }}>Login</motion.div>}
-              {dispenseStageTarget < 3 && <motion.div layoutId="signup" style={{ opacity: 0 }}>Sign Up</motion.div>}
-           </div>
-        </motion.div>
-
-        {/* Real Navbar Frame for dispensing */}
-        <header className="navbar" style={{ boxShadow: 'none', background: 'transparent' }}>
-           <div className="logo" style={{ width: '250px' }}>
-             {dispenseStageTarget >= 1 && (
-               <motion.div 
-                 layoutId="logo" 
-                 transition={{ type: "spring", stiffness: 100 }}
-                 style={{ display: 'inline-block' }}
-               >
-                 DriveBidRent
-               </motion.div>
-             )}
-           </div>
-
-           <nav>
-             <ul style={{ display: 'flex', gap: '35px', listStyle: 'none', margin: 0, padding: 0 }}>
-               <li style={{ width: '45px', display: 'flex', justifyContent: 'center' }}>
-                 {dispenseStageTarget >= 2 && <motion.div layoutId="buy" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Buy</motion.div>}
-               </li>
-               <li style={{ width: '45px', display: 'flex', justifyContent: 'center' }}>
-                 {dispenseStageTarget >= 2 && <motion.div layoutId="sell" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Sell</motion.div>}
-               </li>
-               <li style={{ width: '55px', display: 'flex', justifyContent: 'center' }}>
-                 {dispenseStageTarget >= 2 && <motion.div layoutId="rent" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Rent</motion.div>}
-               </li>
-               <li style={{ width: '80px', display: 'flex', justifyContent: 'center' }}>
-                 {dispenseStageTarget >= 2 && <motion.div layoutId="auction" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Auction</motion.div>}
-               </li>
-             </ul>
-           </nav>
-
-           <div className="auth-buttons" style={{ display: 'flex', gap: '10px' }}>
-              <div style={{ width: '80px', height: '40px' }}>
-                 {dispenseStageTarget >= 3 && (
-                   <motion.div layoutId="login" transition={{ type: "spring", stiffness: 100 }} style={{ padding: '8px 15px', border: '1px solid #ff6b00', color: '#ff6b00', borderRadius: '5px', fontWeight: 700, fontSize: '16px', display: 'inline-block' }}>
-                     Login
-                   </motion.div>
-                 )}
-              </div>
-              <div style={{ width: '100px', height: '40px' }}>
-                 {dispenseStageTarget >= 3 && (
-                   <motion.div layoutId="signup" transition={{ type: "spring", stiffness: 100 }} style={{ padding: '8px 15px', background: '#ff6b00', color: 'white', borderRadius: '5px', fontWeight: 700, fontSize: '16px', display: 'inline-block' }}>
-                     Sign Up
-                   </motion.div>
-                 )}
-              </div>
-           </div>
-        </header>
-
-        <AnimatePresence>
-          {loadingState !== 'ready' && sequenceStage < 6 && (
-            <motion.div
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -20 }}
-               transition={{ duration: 0.3 }}
-               style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', fontFamily: '"Montserrat", sans-serif', color: '#ff6b00', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}
-            >
-               Preparing your experience...
-            </motion.div>
-          )}
-        </AnimatePresence>
-    </div>
-  );
-};
 
 const HomePage = () => {
   const [topRentals, setTopRentals] = useState([]);
   const [topAuctions, setTopAuctions] = useState([]);
-  const [loadingState, setLoadingState] = useState('drivingIn');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { success, error } = useSelector((state) => state.auth);
+
+  /* ── Splash state ─────────────────────────────────
+     Only show splash on the FIRST visit of the session
+     (cold-start scenario for Render backend).
+     ────────────────────────────────────────────────── */
+  const alreadyLoaded = sessionStorage.getItem('dbr_splash_done') === '1';
+  const [showSplash, setShowSplash] = useState(!alreadyLoaded);
+  const [backendReady, setBackendReady] = useState(false);
+  const splashMinShown = useRef(false);
 
   // Show logout success or other auth messages
   useEffect(() => {
@@ -266,26 +173,22 @@ const HomePage = () => {
       }
     };
 
-    const minDriveInTime = new Promise(resolve => setTimeout(resolve, 1500));
-    
-    Promise.all([fetchHomeData(), minDriveInTime]).then(() => {
-      if (!isMounted) return;
-      setLoadingState('dispensing');
-      setTimeout(() => {
-        if (!isMounted) return;
-        setLoadingState('leaving');
-        setTimeout(() => {
-          if (!isMounted) return;
-          setLoadingState('ready');
-        }, 1200);
-      }, 5500); // 5500ms allows the full staged cross-screen sequence
-    });
+    /* Show splash for at least 1.2s so it doesn't just flash */
+    const minTime = new Promise(resolve => setTimeout(() => {
+      splashMinShown.current = true;
+      resolve();
+    }, 1200));
 
-    setTimeout(() => {
-      if (isMounted) {
-        setLoadingState((prev) => prev === 'drivingIn' ? 'idling' : prev);
-      }
-    }, 1500);
+    Promise.all([fetchHomeData(), minTime]).then(() => {
+      if (!isMounted) return;
+      setBackendReady(true);
+      /* Mark session so splash won't show again on navigation back */
+      sessionStorage.setItem('dbr_splash_done', '1');
+      /* Give the fade-out animation 500ms then unmount */
+      setTimeout(() => {
+        if (isMounted) setShowSplash(false);
+      }, 550);
+    });
 
     return () => { isMounted = false; };
   }, []);
@@ -783,10 +686,8 @@ const HomePage = () => {
         }
       `}</style>
 
-      {loadingState !== 'ready' ? (
-        <LoadingScreen loadingState={loadingState} />
-      ) : (
-        <>
+      {showSplash && <SplashScreen onReady={backendReady} />}
+
           <header className="navbar">
             <div className="logo">DriveBidRent</div>
             <nav>
@@ -931,8 +832,6 @@ const HomePage = () => {
 
         <Footer />
           </motion.div>
-        </>
-      )}
     </>
   );
 };

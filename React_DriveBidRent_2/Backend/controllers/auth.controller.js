@@ -168,19 +168,7 @@ const authController = {
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
-      console.log('Login attempt for email:', email);
-
       const user = await User.findOne({ email });
-      console.log('User found:', user ? 'YES' : 'NO');
-      if (user) {
-        console.log('User data:', {
-          id: user._id,
-          userType: user.userType,
-          firstName: user.firstName,
-          email: user.email,
-          approved_status: user.approved_status
-        });
-      }
 
       if (!user || !(await user.comparePassword(password))) {
         return res.status(401).json({ success: false, message: "Invalid email or password" });
@@ -226,8 +214,6 @@ const authController = {
         city: user.city || '',
         state: user.state || ''
       };
-
-      console.log('Sending response with user:', responseUser);
 
       return res.json({
         success: true,

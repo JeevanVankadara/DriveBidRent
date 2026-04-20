@@ -82,8 +82,8 @@
   .superadmin-main-content {
     margin-left: 0;
     padding-top: 60px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   .premium-page-header,
@@ -99,34 +99,27 @@
   .superadmin-main-content {
     margin-left: 0;
     padding-top: 60px;
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .superadmin-main-content section {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 
   .premium-page-header,
   .premium-chart-container,
   .premium-stat-card,
   .premium-performer-card {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
-  .grid-cols-2,
-  .grid-cols-3,
-  .grid-cols-4,
-  .md\:grid-cols-2,
-  .md\:grid-cols-3,
-  .md\:grid-cols-4,
-  .lg\:grid-cols-2,
-  .lg\:grid-cols-3,
-  .lg\:grid-cols-4 {
-    grid-template-columns: 1fr !important;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   .premium-stat-card,
   .premium-chart-container,
   .premium-performer-card {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .premium-page-header {
@@ -140,27 +133,72 @@
   }
 
   .premium-page-subtitle {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
   }
 }
 
-/* Modal responsiveness */
-.fixed.inset-0 .max-w-4xl,
-.fixed.inset-0 .max-w-md {
-  width: 98vw !important;
-  max-width: 98vw !important;
-  margin: 0 auto;
+/* Force grid collapse on smaller screens */
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
-@media (max-width: 600px) {
+@media (min-width: 641px) and (max-width: 1023px) {
+  .grid.lg\\:grid-cols-3,
+  .grid.lg\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
 
-  .fixed.inset-0 .max-w-4xl,
-  .fixed.inset-0 .max-w-md {
-    padding: 0.5rem !important;
+/* Modal positioning - full viewport overlay above sidebar */
+.fixed.inset-0 {
+  z-index: 55;
+}
+
+.fixed.inset-0 .max-w-md,
+.fixed.inset-0 .max-w-lg,
+.fixed.inset-0 .max-w-2xl,
+.fixed.inset-0 .max-w-3xl,
+.fixed.inset-0 .max-w-4xl {
+  margin: 0 auto;
+  max-height: 90vh;
+}
+
+@media (max-width: 640px) {
+  .fixed.inset-0 .max-w-md,
+  .fixed.inset-0 .max-w-lg,
+  .fixed.inset-0 .max-w-2xl,
+  .fixed.inset-0 .max-w-3xl,
+  .fixed.inset-0 .max-w-4xl {
+    width: 95vw !important;
+    max-width: 95vw !important;
     border-radius: 1rem !important;
   }
+
+  .fixed.inset-0 .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
 }
 
+/* Recharts responsive sizing */
+@media (max-width: 640px) {
+  .recharts-responsive-container {
+    min-height: 250px;
+  }
+}
+
+/* Table responsive */
+@media (max-width: 768px) {
+  .superadmin-main-content table {
+    font-size: 0.8rem;
+  }
+  
+  .superadmin-main-content table th,
+  .superadmin-main-content table td {
+    padding: 0.5rem 0.4rem;
+  }
+}
 
 
 
