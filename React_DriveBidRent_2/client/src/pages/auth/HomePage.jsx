@@ -4,12 +4,223 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { clearSuccess, clearError } from '../../redux/slices/authSlice';
 import axiosInstance from '../../utils/axiosInstance.util';
-import Footer from '../components/Footer'
+import Footer from '../components/Footer';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const AestheticCar = ({ isMoving, isIdling }) => {
+  return (
+    <motion.div
+      animate={(isMoving || isIdling) ? { y: [0, -3, 0] } : { y: 0 }}
+      transition={{ repeat: Infinity, duration: isMoving ? 0.3 : 0.1, ease: 'linear' }}
+      className="relative"
+      style={{ width: '220px', height: '80px', pointerEvents: 'none' }}
+    >
+       <svg width="220" height="80" viewBox="0 0 220 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="10%">
+              <stop offset="0%" stopColor="#ff8c00" />
+              <stop offset="100%" stopColor="#e65c00" />
+            </linearGradient>
+            <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#333" />
+              <stop offset="100%" stopColor="#0a0a0a" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Shadow */}
+          <ellipse cx="110" cy="74" rx="95" ry="6" fill="rgba(0,0,0,0.2)" />
+
+          {/* Body */}
+          <path d="M 20 66 L 205 66 C 215 66, 218 55, 218 50 C 218 45, 215 40, 205 38 C 180 32, 160 22, 140 18 C 120 14, 90 14, 70 20 C 50 26, 30 35, 18 45 C 15 50, 15 66, 20 66 Z" fill="url(#bodyGrad)" />
+          
+          {/* Lower grille/skirt */}
+          <path d="M 20 66 L 205 66 C 210 66, 208 68, 205 68 L 20 68 Z" fill="#222" />
+
+          {/* Window */}
+          <path d="M 72 23 C 90 18, 115 18, 135 22 C 145 25, 150 32, 160 36 L 80 36 C 75 32, 72 28, 72 23 Z" fill="url(#glassGrad)" />
+
+          {/* Headlight */}
+          <path d="M 200 40 C 205 40, 215 42, 218 45 L 200 45 Z" fill="#fff9cc" filter="url(#glow)"/>
+
+          {/* Taillight */}
+          <path d="M 18 45 L 25 45 C 25 48, 25 50, 16 50 Z" fill="#ff0000" filter="url(#glow)"/>
+          
+          {/* Spoiler */}
+          <path d="M 20 38 L 45 28 L 50 32 L 25 42 Z" fill="#111" />
+       </svg>
+
+       {/* Wheels */}
+       {[35, 155].map((leftVal, i) => (
+         <div key={i} style={{ position: 'absolute', bottom: 2, left: leftVal, width: 34, height: 34 }}>
+             <motion.div
+               style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: '#111', border: '4px solid #222', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               animate={isMoving ? { rotate: 360 } : { rotate: 0 }}
+               transition={{ repeat: Infinity, duration: 0.35, ease: "linear" }}
+             >
+                <div style={{ width: '100%', height: '3px', backgroundColor: '#777' }} />
+                <div style={{ width: '3px', height: '100%', backgroundColor: '#777', position: 'absolute' }} />
+                <div style={{ width: '100%', height: '3px', backgroundColor: '#777', position: 'absolute', transform: 'rotate(45deg)' }} />
+                <div style={{ width: '3px', height: '100%', backgroundColor: '#777', position: 'absolute', transform: 'rotate(45deg)' }} />
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff8c00', position: 'absolute' }} />
+             </motion.div>
+         </div>
+       ))}
+
+       {/* Dust */}
+       <AnimatePresence>
+         {isMoving && (
+           <motion.div
+             initial={{ opacity: 0, x: 0, scale: 0.5 }}
+             animate={{ opacity: [0, 1, 0], x: -60, scale: 2.5 }}
+             transition={{ repeat: Infinity, duration: 0.6 }}
+             style={{ position: 'absolute', bottom: 10, left: -20, width: 12, height: 12, borderRadius: '50%', background: '#cbd5e1', filter: 'blur(2px)' }}
+           />
+         )}
+       </AnimatePresence>
+    </motion.div>
+  );
+};
+
+const LoadingScreen = ({ loadingState }) => {
+  const [sequenceStage, setSequenceStage] = useState(0); 
+
+  useEffect(() => {
+    if (loadingState === 'dispensing') {
+       let t = [];
+       // Stage 0: Car is already at 15vw (Left).
+       t.push(setTimeout(() => setSequenceStage(1), 300));   // Drop Logo
+       t.push(setTimeout(() => setSequenceStage(2), 1200));  // Drive to Center
+       t.push(setTimeout(() => setSequenceStage(3), 2400));  // Drop Nav Links
+       t.push(setTimeout(() => setSequenceStage(4), 3300));  // Drive to Right
+       t.push(setTimeout(() => setSequenceStage(5), 4500));  // Drop Auth
+       t.push(setTimeout(() => setSequenceStage(6), 5500));  // Leave
+       
+       return () => t.forEach(clearTimeout);
+    }
+  }, [loadingState]);
+
+  const isMoving = sequenceStage === 2 || sequenceStage === 4 || sequenceStage === 6 || loadingState === 'drivingIn';
+  const isIdling = !isMoving && sequenceStage < 6;
+
+  let carLeft = '15vw'; // Start position during drivingIn and idling
+  if (sequenceStage >= 2 && sequenceStage < 4) carLeft = '50vw';
+  if (sequenceStage >= 4 && sequenceStage < 6) carLeft = '85vw';
+  if (sequenceStage >= 6) carLeft = '150vw';
+
+  const dispenseStageTarget = {
+     0: 0,
+     1: 1, // Logo visible
+     2: 1, 
+     3: 2, // Nav visible
+     4: 2, 
+     5: 3, // Auth visible
+     6: 3, 
+  }[sequenceStage] || 0;
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: '#f8fafc', zIndex: 9999, overflow: 'hidden' }}>
+        <motion.div
+           initial={{ left: '-50vw', top: '50%', x: '-50%', y: '-50%' }}
+           animate={{
+             left: carLeft
+           }}
+           transition={{ 
+             duration: 1.2,
+             ease: sequenceStage >= 6 ? "easeIn" : "easeInOut"
+           }}
+           style={{ position: 'absolute', zIndex: 100 }}
+        >
+           <AestheticCar isMoving={isMoving} isIdling={isIdling || loadingState === 'dispensing'} />
+
+           {/* Hidden Stack INSIDE car */}
+           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', gap: '0px', pointerEvents: 'none' }}>
+              {dispenseStageTarget < 1 && <motion.div layoutId="logo" style={{ opacity: 0, fontSize: '2rem' }}>DriveBidRent</motion.div>}
+              {dispenseStageTarget < 2 && <motion.div layoutId="buy" style={{ opacity: 0 }}>Buy</motion.div>}
+              {dispenseStageTarget < 2 && <motion.div layoutId="sell" style={{ opacity: 0 }}>Sell</motion.div>}
+              {dispenseStageTarget < 2 && <motion.div layoutId="rent" style={{ opacity: 0 }}>Rent</motion.div>}
+              {dispenseStageTarget < 2 && <motion.div layoutId="auction" style={{ opacity: 0 }}>Auction</motion.div>}
+              {dispenseStageTarget < 3 && <motion.div layoutId="login" style={{ opacity: 0 }}>Login</motion.div>}
+              {dispenseStageTarget < 3 && <motion.div layoutId="signup" style={{ opacity: 0 }}>Sign Up</motion.div>}
+           </div>
+        </motion.div>
+
+        {/* Real Navbar Frame for dispensing */}
+        <header className="navbar" style={{ boxShadow: 'none', background: 'transparent' }}>
+           <div className="logo" style={{ width: '250px' }}>
+             {dispenseStageTarget >= 1 && (
+               <motion.div 
+                 layoutId="logo" 
+                 transition={{ type: "spring", stiffness: 100 }}
+                 style={{ display: 'inline-block' }}
+               >
+                 DriveBidRent
+               </motion.div>
+             )}
+           </div>
+
+           <nav>
+             <ul style={{ display: 'flex', gap: '35px', listStyle: 'none', margin: 0, padding: 0 }}>
+               <li style={{ width: '45px', display: 'flex', justifyContent: 'center' }}>
+                 {dispenseStageTarget >= 2 && <motion.div layoutId="buy" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Buy</motion.div>}
+               </li>
+               <li style={{ width: '45px', display: 'flex', justifyContent: 'center' }}>
+                 {dispenseStageTarget >= 2 && <motion.div layoutId="sell" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Sell</motion.div>}
+               </li>
+               <li style={{ width: '55px', display: 'flex', justifyContent: 'center' }}>
+                 {dispenseStageTarget >= 2 && <motion.div layoutId="rent" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Rent</motion.div>}
+               </li>
+               <li style={{ width: '80px', display: 'flex', justifyContent: 'center' }}>
+                 {dispenseStageTarget >= 2 && <motion.div layoutId="auction" transition={{ type: "spring", stiffness: 100 }} style={{ fontSize: '1.3rem', fontWeight: 600, color: '#333333', whiteSpace: 'nowrap' }}>Auction</motion.div>}
+               </li>
+             </ul>
+           </nav>
+
+           <div className="auth-buttons" style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ width: '80px', height: '40px' }}>
+                 {dispenseStageTarget >= 3 && (
+                   <motion.div layoutId="login" transition={{ type: "spring", stiffness: 100 }} style={{ padding: '8px 15px', border: '1px solid #ff6b00', color: '#ff6b00', borderRadius: '5px', fontWeight: 700, fontSize: '16px', display: 'inline-block' }}>
+                     Login
+                   </motion.div>
+                 )}
+              </div>
+              <div style={{ width: '100px', height: '40px' }}>
+                 {dispenseStageTarget >= 3 && (
+                   <motion.div layoutId="signup" transition={{ type: "spring", stiffness: 100 }} style={{ padding: '8px 15px', background: '#ff6b00', color: 'white', borderRadius: '5px', fontWeight: 700, fontSize: '16px', display: 'inline-block' }}>
+                     Sign Up
+                   </motion.div>
+                 )}
+              </div>
+           </div>
+        </header>
+
+        <AnimatePresence>
+          {loadingState !== 'ready' && sequenceStage < 6 && (
+            <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -20 }}
+               transition={{ duration: 0.3 }}
+               style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', fontFamily: '"Montserrat", sans-serif', color: '#ff6b00', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}
+            >
+               Preparing your experience...
+            </motion.div>
+          )}
+        </AnimatePresence>
+    </div>
+  );
+};
 
 const HomePage = () => {
   const [topRentals, setTopRentals] = useState([]);
   const [topAuctions, setTopAuctions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingState, setLoadingState] = useState('drivingIn');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { success, error } = useSelector((state) => state.auth);
@@ -41,6 +252,7 @@ const HomePage = () => {
 
   // fetch home data on mount
   useEffect(() => {
+    let isMounted = true;
     const fetchHomeData = async () => {
       try {
         const response = await axiosInstance.get('/home/data');
@@ -50,12 +262,31 @@ const HomePage = () => {
         }
       } catch (err) {
         console.error('Error fetching home data:', err);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchHomeData();
+    const minDriveInTime = new Promise(resolve => setTimeout(resolve, 1500));
+    
+    Promise.all([fetchHomeData(), minDriveInTime]).then(() => {
+      if (!isMounted) return;
+      setLoadingState('dispensing');
+      setTimeout(() => {
+        if (!isMounted) return;
+        setLoadingState('leaving');
+        setTimeout(() => {
+          if (!isMounted) return;
+          setLoadingState('ready');
+        }, 1200);
+      }, 5500); // 5500ms allows the full staged cross-screen sequence
+    });
+
+    setTimeout(() => {
+      if (isMounted) {
+        setLoadingState((prev) => prev === 'drivingIn' ? 'idling' : prev);
+      }
+    }, 1500);
+
+    return () => { isMounted = false; };
   }, []);
 
   const handleAuth = (path) => {
@@ -66,8 +297,6 @@ const HomePage = () => {
     // Simple check - in full app, use a protected route or store
     return document.cookie.includes('jwt=');
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <>
@@ -168,9 +397,11 @@ const HomePage = () => {
           position: absolute;
           top: 0;
           left: 0;
-          z-index: -1;
+          z-index: 0;
         }
         .hero-content {
+          position: relative;
+          z-index: 10;
           color: #333333;
           max-width: 600px;
         }
@@ -550,35 +781,40 @@ const HomePage = () => {
         }
       `}</style>
 
-      <header className="navbar">
-        <div className="logo">DriveBidRent</div>
-        <nav>
-          <ul>
-            <li><a onClick={() => navigate('#auctions')}>Buy</a></li>
-            <li><a onClick={() => navigate('#join-us')}>Sell</a></li>
-            <li><a onClick={() => navigate('#rentals')}>Rent</a></li>
-            <li><a onClick={() => navigate('#auctions')}>Auction</a></li>
-          </ul>
-        </nav>
-        <div className="auth-buttons">
-          <button className="login" onClick={() => handleAuth('/login')}>Login</button>
-          <button className="signup" onClick={() => handleAuth('/signup')}>
-            Sign Up
-          </button>
-        </div>
-      </header>
+      {loadingState !== 'ready' ? (
+        <LoadingScreen loadingState={loadingState} />
+      ) : (
+        <>
+          <header className="navbar">
+            <div className="logo">DriveBidRent</div>
+            <nav>
+              <ul>
+                <li><a onClick={() => navigate('#auctions')}>Buy</a></li>
+                <li><a onClick={() => navigate('#join-us')}>Sell</a></li>
+                <li><a onClick={() => navigate('#rentals')}>Rent</a></li>
+                <li><a onClick={() => navigate('#auctions')}>Auction</a></li>
+              </ul>
+            </nav>
+            <div className="auth-buttons">
+              <button className="login" onClick={() => handleAuth('/login')}>Login</button>
+              <button className="signup" onClick={() => handleAuth('/signup')}>
+                Sign Up
+              </button>
+            </div>
+          </header>
 
-      <section className="hero">
-        <img
-          src="/css/photos/mainPhoto.png"
-          alt="Car Banner"
-          className="hero-img"
-        />
-        <div className="hero-content">
-          <h1>Find the Perfect Car for You</h1>
-          <p>Buy, Sell, Rent, and Auction vehicles with ease.</p>
-        </div>
-      </section>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <section className="hero">
+              <img
+                src="/css/photos/mainPhoto.png"
+                alt="Car Banner"
+                className="hero-img"
+              />
+              <div className="hero-content">
+                <h1>Find the Perfect Car for You</h1>
+                <p>Buy, Sell, Rent, and Auction vehicles with ease.</p>
+              </div>
+            </section>
 
       <section className="about">
         <h2>Welcome to DriveBidRent</h2>
@@ -692,6 +928,9 @@ const HomePage = () => {
       </section>
 
         <Footer />
+          </motion.div>
+        </>
+      )}
     </>
   );
 };
