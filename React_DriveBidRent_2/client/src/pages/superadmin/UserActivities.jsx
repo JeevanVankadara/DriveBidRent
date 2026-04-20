@@ -1,7 +1,7 @@
 // client/src/pages/superadmin/UserActivities.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance.util";
 import LoadingSpinner from "../components/LoadingSpinner";
 import superadminServices from "../../services/superadmin.services";
 
@@ -92,9 +92,7 @@ const UserActivities = () => {
   const fetchUserActivities = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/superadmin/user-activities?userType=${userType}&page=${currentPage}&limit=20`, { 
-        withCredentials: true 
-      });
+      const res = await axiosInstance.get(`/superadmin/user-activities?userType=${userType}&page=${currentPage}&limit=20`);
       if (res.data.success) {
         setUsers(res.data.data.users);
         setPagination(res.data.data.pagination);
@@ -112,7 +110,7 @@ const UserActivities = () => {
   const fetchUserDetails = async (userId) => {
     setDetailsLoading(true);
     try {
-      const res = await axios.get(`/api/superadmin/user-details/${userId}`, { withCredentials: true });
+      const res = await axiosInstance.get(`/superadmin/user-details/${userId}`);
       if (res.data.success) {
         setUserDetails(res.data.data);
       }
