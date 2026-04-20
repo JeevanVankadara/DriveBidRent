@@ -78,17 +78,20 @@ app.use('/api/inspection-chat', inspectionChatRoutes);
 // API documentation
 setupSwagger(app);
 
-// Test report — viewable at http://localhost:8000/test-report
-app.get('/test-report', (req, res) => {
-  const reportPath = path.join(__dirname, 'test-report.html');
+
+// Combined test report (Backend + Frontend) — viewable at http://localhost:8000/test-reports
+app.get('/test-reports', (req, res) => {
+  const reportPath = path.join(__dirname, 'combined-test-report.html');
   import('fs').then(fs => {
     if (fs.existsSync(reportPath)) {
+      res.removeHeader('Content-Security-Policy');
+      res.setHeader('Content-Security-Policy', "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;");
       res.sendFile(reportPath);
     } else {
       res.status(404).send(`
         <div style="font-family:sans-serif;text-align:center;padding:60px;color:#666">
-          <h2>Test report not generated yet</h2>
-          <p>Run <code style="background:#f4f4f4;padding:4px 10px;border-radius:4px">npm run test:report</code> in the Backend directory first.</p>
+          <h2>Combined test report not generated yet</h2>
+          <p>Run <code style="background:#f4f4f4;padding:4px 10px;border-radius:4px">npm run test:all:report</code> in the Backend directory first.</p>
         </div>
       `);
     }

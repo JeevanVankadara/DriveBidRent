@@ -2,7 +2,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // === PUBLIC ROUTES ===
-import HomePage from './pages/auth/HomePage';
+import HomePage from ;
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import AuctionManagerSignup from './pages/auth/auctionManagersignup';
