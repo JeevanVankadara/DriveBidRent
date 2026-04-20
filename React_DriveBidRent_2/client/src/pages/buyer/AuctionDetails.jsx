@@ -39,7 +39,6 @@ export default function AuctionDetails() {
     };
     
     fetchAuctionDetails(true);
-    fetchAuctionDetails(true);
     
     // Setup Socket.io for real-time bid updates
     const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'https://drivebidrent.onrender.com';
@@ -163,7 +162,7 @@ export default function AuctionDetails() {
 
   const calculateMinBid = () => {
     if (!auction) return 0;
-    return currentBid ? currentBid.bidAmount + 2000 : auction.startingBid;
+    return currentBid?.bidAmount ? currentBid.bidAmount + 2000 : (auction.startingBid || 0);
   };
 
   const handleBidAmountChange = (value) => {
@@ -314,26 +313,28 @@ export default function AuctionDetails() {
             <div className="ad-stat">
               <span className="ad-stat__label">Current Bid</span>
               <span className="ad-stat__value ad-stat__value--highlight">
-                ₹{currentBid ? currentBid.bidAmount.toLocaleString() : auction.startingBid.toLocaleString()}
+                ₹{currentBid?.bidAmount ? currentBid.bidAmount.toLocaleString() : (auction.startingBid || 0).toLocaleString()}
               </span>
             </div>
             <div className="ad-stat__divider" />
             <div className="ad-stat">
               <span className="ad-stat__label">Starting Bid</span>
-              <span className="ad-stat__value">₹{auction.startingBid.toLocaleString()}</span>
+              <span className="ad-stat__value">₹{(auction.startingBid || 0).toLocaleString()}</span>
             </div>
             <div className="ad-stat__divider" />
             <div className="ad-stat">
               <span className="ad-stat__label">Condition</span>
-              <span className="ad-stat__value ad-stat__value--green">{auction.condition}</span>
+              <span className="ad-stat__value ad-stat__value--green">{auction.condition || 'N/A'}</span>
             </div>
             <div className="ad-stat__divider" />
             <div className="ad-stat">
               <span className="ad-stat__label">Auction Date</span>
               <span className="ad-stat__value">
-                {new Date(auction.auctionDate).toLocaleDateString('en-IN', {
-                  day: 'numeric', month: 'short', year: 'numeric'
-                })}
+                {auction.auctionDate
+                  ? new Date(auction.auctionDate).toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'short', year: 'numeric'
+                    })
+                  : 'TBD'}
               </span>
             </div>
           </div>
@@ -362,7 +363,7 @@ export default function AuctionDetails() {
               </div>
               <div className="ad-spec">
                 <span className="ad-spec__label">Mileage</span>
-                <span className="ad-spec__value">{auction.mileage?.toLocaleString()} km</span>
+                <span className="ad-spec__value">{(auction.mileage || 0).toLocaleString()} km</span>
               </div>
               <div className="ad-spec">
                 <span className="ad-spec__label">Seller</span>
@@ -473,14 +474,14 @@ export default function AuctionDetails() {
               </div>
               {/* Mechanic Section */}
               {auction.assignedMechanic && (
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-gray-500 font-medium text-sm flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-600">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: '#f9fafb', borderRadius: '0.5rem', marginBottom: '0.75rem' }}>
+                  <span style={{ color: '#6b7280', fontWeight: 500, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: 16, height: 16, color: '#ea580c' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.492-3.053c.227-.277.467-.567.725-.841m-3.217 3.894l-2.852 2.853m-1.5-1.5l2.852-2.853m-1.5-1.5l2.852-2.853M8.25 12l2.852-2.853M15 11.25L12.75 9l-3-3m0 0l-1.5 1.5m1.5-1.5L7.5 4.5M3 12h.008v.008H3V12zm0 3h.008v.008H3V15zm0 3h.008v.008H3V18zm0 3h.008v.008H3V21zm3-9h.008v.008H6V12zm0 3h.008v.008H6V15zm0 3h.008v.008H6V18zm0 3h.008v.008H6V21z" />
                     </svg>
                     Verified By
                   </span>
-                  <p className="text-gray-900">
+                  <p style={{ color: '#111827', fontWeight: 600, margin: 0 }}>
                     {auction.assignedMechanic.firstName} {auction.assignedMechanic.lastName}
                   </p>
                 </div>
@@ -560,7 +561,7 @@ export default function AuctionDetails() {
                 <div className="ad-bid-card__current">
                   <span className="ad-bid-card__current-label">Current Highest Bid</span>
                   <span className="ad-bid-card__current-value">
-                    {currentBid ? `₹${currentBid.bidAmount.toLocaleString()}` : 'No bids yet'}
+                    {currentBid?.bidAmount ? `₹${currentBid.bidAmount.toLocaleString()}` : 'No bids yet'}
                   </span>
                 </div>
 
