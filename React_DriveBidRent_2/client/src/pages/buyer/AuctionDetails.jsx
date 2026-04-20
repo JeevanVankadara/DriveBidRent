@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import './AuctionDetails.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { getAuctionById, placeBid, createOrGetChatForAuction } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -305,8 +306,9 @@ export default function AuctionDetails() {
       </section>
 
       <div className="ad-content">
-        {/* Left Column */}
-        <div className="ad-content__left">
+        <ErrorBoundary>
+          {/* Left Column */}
+          <div className="ad-content__left">
 
           {/* Quick Stats Bar */}
           <div className="ad-stats">
@@ -615,8 +617,9 @@ export default function AuctionDetails() {
               </button>
               <p className="ad-bid-card__contact-hint">Schedule a viewing or chat with the seller</p>
             </div>
+            </div>
           </div>
-        </div>
+        </ErrorBoundary>
       </div>
     </div>
   );
