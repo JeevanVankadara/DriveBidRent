@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken';
 import AuctionManager from '../models/AuctionManager.js';
 
-vdrbbrb
+
 
 const auctionManagerMiddleware = async (req, res, next) => {
   let token = req.cookies.jwt || (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
