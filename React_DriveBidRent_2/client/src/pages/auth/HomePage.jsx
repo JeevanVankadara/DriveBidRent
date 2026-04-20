@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { clearSuccess, clearError } from '../../redux/slices/authSlice';
 import axiosInstance from '../../utils/axiosInstance.util';
 import Footer from '../components/Footer';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AestheticCar = ({ isMoving, isIdling }) => {
@@ -293,6 +294,7 @@ const HomePage = () => {
     navigate(path);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const isLoggedIn = () => {
     // Simple check - in full app, use a protected route or store
     return document.cookie.includes('jwt=');

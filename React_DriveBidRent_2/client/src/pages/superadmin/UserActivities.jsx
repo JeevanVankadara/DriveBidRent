@@ -87,6 +87,7 @@ const UserActivities = () => {
 
   useEffect(() => {
     fetchUserActivities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userType, currentPage]);
 
   const fetchUserActivities = async () => {

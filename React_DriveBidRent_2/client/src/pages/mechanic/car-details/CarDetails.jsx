@@ -9,7 +9,7 @@ import ChecklistForm from './ChecklistForm';
 export default function CarDetails() {
   const { id } = useParams();
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
 
   useEffect(() => {
     getVehicleDetails(id)

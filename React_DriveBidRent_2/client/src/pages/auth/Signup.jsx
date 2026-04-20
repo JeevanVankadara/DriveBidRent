@@ -8,7 +8,7 @@ import { signupUser, verifySignupOtp, cancelSignupOtp, clearError, clearSuccess 
 const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading, error, success, message, requireSignupOtpUI, signupEmail, isAuthenticated, redirect: authRedirect } = useSelector((state) => state.auth);
+  const { loading, error, success, message, requireSignupOtpUI, signupEmail, redirect: authRedirect } = useSelector((state) => state.auth);
   
   const [otp, setOtp] = useState("");
 
@@ -154,7 +154,7 @@ const Signup = () => {
     }
 
     // Remove confirmPassword before sending to backend
-    const { confirmPassword, ...signupData } = formData;
+    const { confirmPassword: _confirmPassword, ...signupData } = formData;
     dispatch(clearError());
     dispatch(clearSuccess());
     dispatch(signupUser(signupData));

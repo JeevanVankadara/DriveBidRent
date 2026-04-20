@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRentalById, bookRental, createCheckoutSession } from '../../services/buyer.services';
+import { getRentalById, createCheckoutSession } from '../../services/buyer.services';
 import DatePickerModal from './components/modals/DatePickerModal';
 import PaymentModal from './components/modals/PaymentModal';
 import ProcessingModal from './components/modals/ProcessingModal';
@@ -21,6 +21,7 @@ export default function BookRental() {
 
   useEffect(() => {
     fetchRentalDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchRentalDetails = async () => {
@@ -41,7 +42,7 @@ export default function BookRental() {
     setShowPaymentModal(true);
   };
 
-  const handlePayment = async (paymentMethod) => {
+  const handlePayment = async (_paymentMethod) => {
     setShowPaymentModal(false);
     setShowProcessingModal(true);
 

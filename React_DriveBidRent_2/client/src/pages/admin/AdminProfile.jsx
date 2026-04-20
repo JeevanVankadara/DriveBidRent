@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+
 import toast from 'react-hot-toast';
 import adminServices from "../../services/admin.services";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -7,7 +7,7 @@ import useProfile from "../../hooks/useProfile";
 
 const AdminProfile = () => {
   const { profile: admin, loading, refresh } = useProfile();
-  const [error, setError] = useState("");
+  const [error, _setError] = useState("");
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -15,7 +15,7 @@ const AdminProfile = () => {
   });
   const [passwordStrength, setPasswordStrength] = useState("");
   const [passwordMatch, setPasswordMatch] = useState("");
-  const navigate = useNavigate();
+
 
 
   const handleInputChange = (e) => {
@@ -72,7 +72,7 @@ const AdminProfile = () => {
       } else {
         toast.error(res.message || "Password update failed");
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error("An error occurred. Please try again.");
     }
   };

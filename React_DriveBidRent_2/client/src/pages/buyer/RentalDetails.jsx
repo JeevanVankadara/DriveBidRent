@@ -1,7 +1,7 @@
 // client/src/pages/buyer/RentalDetails.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getRentalById, bookRental, createOrGetChatForRental, addReview, getReviews, checkCanReview, createCheckoutSession } from '../../services/buyer.services';
+import { getRentalById, createOrGetChatForRental, addReview, getReviews, checkCanReview, createCheckoutSession } from '../../services/buyer.services';
 import DatePickerModal from './components/modals/DatePickerModal';
 import PaymentModal from './components/modals/PaymentModal';
 import ProcessingModal from './components/modals/ProcessingModal';
@@ -19,7 +19,7 @@ export default function RentalDetails() {
     const [showDateModal, setShowDateModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [showProcessingModal, setShowProcessingModal] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showSuccessModal, _setShowSuccessModal] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [canReview, setCanReview] = useState(false);
@@ -34,6 +34,7 @@ export default function RentalDetails() {
         fetchRentalDetails();
         fetchReviews();
         checkReviewEligibility();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchRentalDetails = async () => {
@@ -112,7 +113,7 @@ export default function RentalDetails() {
         setTimeout(() => setShowPaymentModal(true), 300);
     };
 
-    const handlePayment = async (paymentMethod) => {
+    const handlePayment = async (_paymentMethod) => {
         setShowPaymentModal(false);
         setShowProcessingModal(true);
 

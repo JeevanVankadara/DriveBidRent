@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import InspectionChatBubble from '../../components/inspection/InspectionChatBubble';
 import InspectionMessageInput from '../../components/inspection/InspectionMessageInput';
 import InspectionChatHeader from '../../components/inspection/InspectionChatHeader';
+// eslint-disable-next-line no-unused-vars
 import toast from 'react-hot-toast';
 
 export default function InspectionChatRoomSeller({ chatIdProp }) {

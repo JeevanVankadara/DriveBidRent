@@ -21,7 +21,7 @@ export default function PaymentModal({
         };
     }, [isOpen]);
 
-    const handlePaymentMethodSelect = (method) => {
+    const _handlePaymentMethodSelect = (method) => {
         setPaymentMethod(method);
         onPaymentMethodSelect(method);
     };

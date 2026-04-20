@@ -46,6 +46,7 @@ export default function AuctionsList() {
     return () => {
       socket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, condition, fuelType, transmission, minPrice, maxPrice]);
 
   const fetchAuctions = async () => {

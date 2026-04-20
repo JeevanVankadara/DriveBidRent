@@ -1,5 +1,5 @@
 // client/src/pages/mechanic/profile/Profile.jsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { changePassword } from '../../../services/mechanic.services';
 import useProfile from '../../../hooks/useProfile';

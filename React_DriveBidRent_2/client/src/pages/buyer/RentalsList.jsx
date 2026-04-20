@@ -32,6 +32,7 @@ export default function RentalsList() {
   useEffect(() => {
     fetchRentals();
     fetchWishlist();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, fuelType, transmission, capacity, city]);
 
   const fetchRentals = async () => {

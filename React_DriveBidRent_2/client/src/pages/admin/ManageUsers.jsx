@@ -64,7 +64,7 @@ const ManageUsers = () => {
     setShowAll(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const handleAction = async (action, id, type) => {
+  const handleAction = async (action, id, _type) => {
     try {
       let res;
       if (action === 'approve') {

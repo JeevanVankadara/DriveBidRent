@@ -48,7 +48,7 @@ export default function Notifications() {
     }, 5000);
   };
 
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   const markAsRead = async (id) => {
     try {

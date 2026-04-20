@@ -160,7 +160,7 @@ const Analytics = () => {
                   tickFormatter={(value) => value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown'}
                 />
                 <Tooltip 
-                  formatter={(value, name, props) => [value, 'Users']}
+                  formatter={(value, _name, props) => [value, 'Users']}
                   labelFormatter={(value) => value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown'}
                 />
                 <Legend />

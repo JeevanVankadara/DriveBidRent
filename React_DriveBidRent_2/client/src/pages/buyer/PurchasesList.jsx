@@ -6,7 +6,6 @@ import { ShoppingBag, Car, History, CreditCard } from 'lucide-react';
 import {
   getPurchases,
   getAuctionPaymentDetails,
-  completeAuctionPayment,
   createCheckoutSession
 } from '../../services/buyer.services';
 import PaymentModal from './components/modals/PaymentModal';
@@ -49,7 +48,7 @@ export default function PurchasesList() {
     }
   };
 
-  const handlePayment = async (paymentMethod) => {
+  const handlePayment = async (_paymentMethod) => {
     try {
       setShowPaymentModal(false);
       const sessionData = await createCheckoutSession({

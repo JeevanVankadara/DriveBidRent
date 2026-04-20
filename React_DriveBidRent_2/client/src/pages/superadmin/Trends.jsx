@@ -34,7 +34,7 @@ const Trends = () => {
   if (error) return <div className="text-center text-red-700 mt-8">{error}</div>;
 
   // Prepare growth data for visualization
-  const growthData = [
+  const _growthData = [
     { name: 'User Signups', current: data.growth.signups.current, previous: data.growth.signups.previous, growth: parseFloat(data.growth.signups.growth) },
     { name: 'Auctions', current: data.growth.auctions.current, previous: data.growth.auctions.previous, growth: parseFloat(data.growth.auctions.growth) },
     { name: 'Rentals', current: data.growth.rentals.current, previous: data.growth.rentals.previous, growth: parseFloat(data.growth.rentals.growth) },

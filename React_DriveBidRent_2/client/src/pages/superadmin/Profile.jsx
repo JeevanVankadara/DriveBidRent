@@ -56,10 +56,10 @@ const Profile = () => {
 
     setUpdating(true);
     try {
-      const res = await axios.post('/api/superadmin/update-password', {
+      const res = await axiosInstance.post('/superadmin/update-password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
-      }, { withCredentials: true });
+      });
 
       if (res.data.success) {
         toast.success("Password updated successfully!");

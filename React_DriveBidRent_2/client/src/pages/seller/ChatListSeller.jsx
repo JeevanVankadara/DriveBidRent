@@ -11,7 +11,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
   const storedUser = (() => {
     try { return JSON.parse(localStorage.getItem('user')); } catch (e) { return null; }
   })();
-  const currentUserId = storedUser?._id || storedUser?.id || null;
+  const _currentUserId = storedUser?._id || storedUser?.id || null;
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -240,7 +240,7 @@ export default function ChatListSeller({ onSelect, selectedId }) {
               const chatterName = getChatterName(chat);
               const vehicleName = chat.inspectionTask?.vehicleName || chat.rentalRequest?.vehicleName || chat.auctionRequest?.vehicleName || chat.title || 'Vehicle';
               const lastUpdated = chat.updatedAt || chat.createdAt;
-              const lastMessagePreview = getLastMessagePreview(chat);
+              const _lastMessagePreview = getLastMessagePreview(chat);
               
               const ChatItem = ({ children }) => onSelect ? (
                 <div

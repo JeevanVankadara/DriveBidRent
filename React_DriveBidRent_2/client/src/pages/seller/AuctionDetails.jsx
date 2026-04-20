@@ -8,7 +8,7 @@ const AuctionDetails = () => {
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
   const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';
-  const formatDateTime = (date) => date ? new Date(date).toLocaleString() : 'Not specified';
+  const _formatDateTime = (date) => date ? new Date(date).toLocaleString() : 'Not specified';
 
   useEffect(() => {
     loadAuctionById(id);

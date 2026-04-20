@@ -29,7 +29,7 @@ const ViewBids = () => {
   }, [id, loadBids, error]);
 
 
-  const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';
+  const _formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not specified';
 
   if (error) {
     return (

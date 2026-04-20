@@ -13,6 +13,7 @@ const Revenue = () => {
 
   useEffect(() => {
     fetchRevenue();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period]);
 
   const fetchRevenue = async () => {

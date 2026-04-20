@@ -9,14 +9,14 @@ import { logoutUser } from '../../../redux/slices/authSlice';
 import '../BuyerDashboard.css';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const [_user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { profile, loading: profileLoading, error: profileError, refresh } = useProfile();
+  const { profile, loading: _profileLoading, error: _profileError, refresh: _refresh } = useProfile();
 
   useEffect(() => {
     const loadData = async () => {
@@ -62,6 +62,7 @@ export default function Navbar() {
 
     window.addEventListener('notificationsSeen', handler);
     return () => window.removeEventListener('notificationsSeen', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // update chat unread badge when a chat is marked read

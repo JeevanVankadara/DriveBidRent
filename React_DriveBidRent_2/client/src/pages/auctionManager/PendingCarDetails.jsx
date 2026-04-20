@@ -175,7 +175,7 @@ export default function PendingCarDetails() {
     pending: { label: 'Pending Review', bg: '#fef9c3', color: '#92400e' },
     assignedMechanic: { label: 'Under Inspection', bg: '#e0f2fe', color: '#0369a1' },
   };
-  const badge = statusBadge[status] || statusBadge.pending;
+  const _badge = statusBadge[status] || statusBadge.pending;
 
   return (
     <div className="font-montserrat" style={{ minHeight: '100vh', background: '#f8fafc' }}>

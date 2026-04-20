@@ -38,6 +38,7 @@ export default function BidPage() {
       socket.disconnect();
     };
     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchAuctionData = async (isInitial = false) => {

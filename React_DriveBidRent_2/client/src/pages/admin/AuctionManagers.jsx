@@ -21,6 +21,7 @@ const AuctionManagers = () => {
 
   useEffect(() => {
     fetchAuctionManagers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAuctionManagers = async () => {

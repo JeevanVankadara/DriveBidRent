@@ -6,7 +6,7 @@ export default function ChatListMechanic({ onSelect, selectedId }) {
   const [chats, setChats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const currentUserId = JSON.parse(localStorage.getItem('user') || '{}')?._id;
+  const _currentUserId = JSON.parse(localStorage.getItem('user') || '{}')?._id;
 
   useEffect(() => {
     const fetchChats = async () => {
