@@ -2,7 +2,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // === PUBLIC ROUTES ===
-import HomePage from './pages/auth/HomePage';
+import HomePage from ;
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import AuctionManagerSignup from './pages/auth/auctionManagersignup';
@@ -45,7 +45,7 @@ import PurchasesList from './pages/buyer/PurchasesList';
 import PurchaseDetails from './pages/buyer/PurchaseDetails';
 import MyBids from './pages/buyer/MyBids';
 import Wishlist from './pages/buyer/Wishlist';
-import BuyerProfile from './pages/buyer/Profile';          
+import BuyerProfile from './pages/buyer/Profile';
 import Notifications from './pages/buyer/Notifications';
 import AboutUs from './pages/buyer/AboutUs';
 import ChatListBuyer from './pages/buyer/ChatListBuyer';
@@ -59,14 +59,14 @@ import SellerLayout from './pages/seller/SellerLayout';
 import SellerDashboard from './pages/seller/Dashboard';
 import AddAuction from './pages/seller/AddAuction';
 import AddRental from './pages/seller/AddRental';
-import SellerProfile from './pages/seller/Profile';           
+import SellerProfile from './pages/seller/Profile';
 import ViewAuctions from './pages/seller/ViewAuctions';
 import ViewBids from './pages/seller/ViewBids';
 import ViewEarnings from './pages/seller/ViewEarnings';
 import ViewRentals from './pages/seller/ViewRentals';
 import UpdateRental from './pages/seller/UpdateRental';
 import RentalDetailsAlt from './pages/seller/RentalDetailsAlt';
-import AuctionDetailsSeller from './pages/seller/AuctionDetails';  
+import AuctionDetailsSeller from './pages/seller/AuctionDetails';
 import ChatListSeller from './pages/seller/ChatListSeller';
 import ChatRoomSeller from './pages/seller/ChatRoomSeller';
 import ChatPageSeller from './pages/seller/ChatPageSeller';
@@ -105,7 +105,7 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      
+
       {/* === HIDDEN AUCTION MANAGER ROUTES === */}
       <Route path="/secret-signup" element={<AuctionManagerSignup />} />
       <Route path="/secret-login" element={<AuctionManagerLogin />} />
