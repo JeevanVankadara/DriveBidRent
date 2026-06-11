@@ -5,6 +5,7 @@ import sellerMiddleware from '../middlewares/seller.middleware.js';
 
 // Controllers
 import { postAddAuction } from '../controllers/sellerControllers/addAuction.controller.js';
+import { estimateAuctionPrice } from '../controllers/sellerControllers/priceEstimator.controller.js';
 import { postAddRental } from '../controllers/sellerControllers/addRental.controller.js';
 import { getAuctionDetail } from '../controllers/sellerControllers/auctionDetail.controller.js';
 import { getProfile, updateProfile, updatePreferences, changePassword } from '../controllers/sellerControllers/profile.controller.js';
@@ -20,6 +21,9 @@ const router = express.Router();
 
 // Apply seller authentication middleware to all routes
 router.use(sellerMiddleware);
+
+// POST: Estimate auction pricing from seller-entered vehicle details
+router.post('/auction-price-estimate', estimateAuctionPrice);
 
 // POST: Add auction with multiple document uploads
 router.post('/add-auction', upload.fields([

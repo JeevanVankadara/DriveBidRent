@@ -249,6 +249,10 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_token
 
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
+
+# Optional: AI vehicle auction price estimator
+OPENAI_API_KEY=sk-your_openai_api_key
+OPENAI_PRICE_ESTIMATOR_MODEL=gpt-5.4-mini
 ```
 
 #### Client (`client/.env`)

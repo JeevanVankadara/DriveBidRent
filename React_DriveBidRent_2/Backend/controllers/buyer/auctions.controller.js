@@ -128,6 +128,7 @@ export const getSingleAuction = async (req, res) => {
       auction_stopped: false  // Only show ongoing auctions
     })
       .populate('sellerId', 'firstName lastName email phone city state')
+      .populate('assignedMechanic', 'firstName lastName email phone city state')
       .lean();
 
     if (!auction) {

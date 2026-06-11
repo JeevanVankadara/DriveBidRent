@@ -2,6 +2,34 @@
 import AuctionRequest from '../../models/AuctionRequest.js';
 import { uploadToCloudinary } from '../../utils/fileUpload.js';
 
+const parseAiPriceEstimate = (value) => {
+  if (!value) return undefined;
+
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    const confidence = ['low', 'medium', 'high'].includes(parsed.confidence) ? parsed.confidence : undefined;
+    return {
+      recommendedStartingBid: Number(parsed.recommendedStartingBid) || undefined,
+      reservePrice: Number(parsed.reservePrice) || undefined,
+      priceRange: {
+        low: Number(parsed.priceRange?.low) || undefined,
+        high: Number(parsed.priceRange?.high) || undefined
+      },
+      confidence,
+      reasons: Array.isArray(parsed.reasons) ? parsed.reasons.slice(0, 4) : [],
+      marketNotes: parsed.marketNotes || '',
+      source: parsed.source || 'unknown',
+      acceptedBySeller: reqBoolean(parsed.acceptedBySeller),
+      estimatedAt: parsed.estimatedAt ? new Date(parsed.estimatedAt) : new Date()
+    };
+  } catch (error) {
+    console.warn('[Add Auction] Failed to parse AI price estimate:', error.message);
+    return undefined;
+  }
+};
+
+const reqBoolean = (value) => value === true || value === 'true' || value === 'yes';
+
 export const postAddAuction = async (req, res) => {
   console.log('📋 [Add Auction] ========================================');
   console.log('📋 [Add Auction] Request received');
@@ -162,7 +190,9 @@ export const postAddAuction = async (req, res) => {
       transmission: req.body['transmission'],
       condition: req.body['vehicle-condition'],
       auctionDate: req.body['auction-date'],
+      purchaseDate: req.body['purchase-date'] || null,
       expectedBid: parseFloat(req.body['starting-bid']),  // seller's expected amount
+      aiPriceEstimate: parseAiPriceEstimate(req.body['ai-price-estimate']),
       
       // Documentation
       vehicleDocumentation,

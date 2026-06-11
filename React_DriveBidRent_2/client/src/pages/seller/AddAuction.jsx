@@ -12,6 +12,12 @@ const formatSize = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+const formatINR = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return 'N/A';
+  return `Rs. ${amount.toLocaleString('en-IN')}`;
+};
+
 // Custom single-file upload field (persists display across section switches)
 const FileUploadField = ({ label, name, accept, file, onChange, required, hint }) => {
   const inputRef = useRef(null);
@@ -163,6 +169,7 @@ const AddAuction = () => {
     'fuel-type': '',
     'transmission': '',
     'vehicle-condition': '',
+    'purchase-date': '',
     'auction-date': '',
     'starting-bid': '',
     vehicleImages: [],
@@ -225,9 +232,30 @@ const AddAuction = () => {
 
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [priceEstimate, setPriceEstimate] = useState(null);
+  const [isEstimating, setIsEstimating] = useState(false);
+  const [estimateError, setEstimateError] = useState('');
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
+    const estimateFields = new Set([
+      'vehicle-name',
+      'car-type',
+      'vehicle-year',
+      'vehicle-mileage',
+      'fuel-type',
+      'transmission',
+      'vehicle-condition',
+      'purchase-date',
+      'auction-date',
+      'registration-state',
+      'ownership-type',
+      'previous-insurance-claims',
+      'accident-history',
+      'number-of-accidents',
+      'major-repairs',
+      'service-history',
+    ]);
     
     if (type === 'file') {
       if (name === 'vehicleImage') {
@@ -253,6 +281,11 @@ const AddAuction = () => {
         [name]: value,
       }));
     }
+
+    if (estimateFields.has(name)) {
+      setPriceEstimate(null);
+      setEstimateError('');
+    }
   };
 
   const validate = () => {
@@ -268,6 +301,9 @@ const AddAuction = () => {
     if (!formData['fuel-type']) return 'Select fuel type';
     if (!formData['transmission']) return 'Select transmission';
     if (!formData['vehicle-condition']) return 'Select condition';
+    if (!formData['purchase-date']) return 'Select vehicle buying date';
+    if (new Date(formData['purchase-date']) > new Date())
+      return 'Buying date cannot be in the future';
     if (!formData['auction-date']) return 'Select auction date';
     if (new Date(formData['auction-date']) < new Date().setHours(0, 0, 0, 0))
       return 'Auction date must be today or later';
@@ -307,6 +343,75 @@ const AddAuction = () => {
     return null;
   };
 
+  const validateEstimateInputs = () => {
+    if (formData['vehicle-name'].trim().length < 2) return 'Enter vehicle name before estimating';
+    if (!formData['car-type']) return 'Select car type before estimating';
+    if (!formData['vehicle-year']) return 'Enter manufacturing year before estimating';
+    if (!formData['vehicle-mileage']) return 'Enter mileage before estimating';
+    if (!formData['fuel-type']) return 'Select fuel type before estimating';
+    if (!formData['transmission']) return 'Select transmission before estimating';
+    if (!formData['vehicle-condition']) return 'Select condition before estimating';
+    if (!formData['purchase-date']) return 'Select vehicle buying date before estimating';
+    if (new Date(formData['purchase-date']) > new Date()) return 'Buying date cannot be in the future';
+    return null;
+  };
+
+  const handleEstimatePrice = async () => {
+    const estimateInputError = validateEstimateInputs();
+    if (estimateInputError) {
+      setEstimateError(estimateInputError);
+      toast.error(estimateInputError);
+      return;
+    }
+
+    setIsEstimating(true);
+    setEstimateError('');
+
+    try {
+      const res = await axiosInstance.post('/seller/auction-price-estimate', {
+        vehicleName: formData['vehicle-name'],
+        carType: formData['car-type'],
+        year: formData['vehicle-year'],
+        mileage: formData['vehicle-mileage'],
+        fuelType: formData['fuel-type'],
+        transmission: formData['transmission'],
+        condition: formData['vehicle-condition'],
+        purchaseDate: formData['purchase-date'],
+        auctionDate: formData['auction-date'],
+        registrationState: formData['registration-state'],
+        ownershipType: formData['ownership-type'],
+        previousInsuranceClaims: formData['previous-insurance-claims'],
+        accidentHistory: formData['accident-history'],
+        numberOfAccidents: formData['number-of-accidents'],
+        majorRepairs: formData['major-repairs'],
+        serviceHistory: formData['service-history'],
+      });
+
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || 'Failed to estimate price');
+      }
+
+      const estimate = {
+        ...res.data.data,
+        acceptedBySeller: true,
+        estimatedAt: new Date().toISOString(),
+      };
+
+      setPriceEstimate(estimate);
+      setFormData((prev) => ({
+        ...prev,
+        'starting-bid': String(estimate.recommendedStartingBid || ''),
+      }));
+      toast.success('Auction price estimate generated');
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || 'Failed to estimate price';
+      setEstimateError(message);
+      toast.error(message);
+    } finally {
+      setIsEstimating(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const err = validate();
@@ -332,6 +437,14 @@ const AddAuction = () => {
         data.append(key, value);
       }
     });
+
+    if (priceEstimate) {
+      const selectedAmount = Number(formData['starting-bid']);
+      data.append('ai-price-estimate', JSON.stringify({
+        ...priceEstimate,
+        acceptedBySeller: selectedAmount === Number(priceEstimate.recommendedStartingBid) || selectedAmount === Number(priceEstimate.reservePrice),
+      }));
+    }
     
     // Log submitted documentation fields for debugging
     console.log('📋 [AddAuction] Submitting with documentation fields:', {
@@ -656,19 +769,18 @@ const AddAuction = () => {
 
                 <div>
                   <label className="block font-semibold text-gray-700 mb-2">
-                    Expected Bid / Amount (₹) <span className="text-red-500">*</span>
+                    Buying Date <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="number"
-                    name="starting-bid"
-                    value={formData['starting-bid']}
+                    type="date"
+                    name="purchase-date"
+                    value={formData['purchase-date']}
                     onChange={handleChange}
-                    min="0"
-                    placeholder="e.g., 350000"
+                    max={new Date().toISOString().split('T')[0]}
                     required
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Enter the minimum price you expect to receive for your vehicle. The auction manager will set the actual starting bid.</p>
+                  <p className="text-xs text-gray-500 mt-1">Used by the AI estimator along with vehicle age, mileage, and history.</p>
                 </div>
               </div>
             </div>
@@ -1347,6 +1459,122 @@ const AddAuction = () => {
                       />
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* AI Price Estimate */}
+              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-5">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                      <i className="fas fa-magic mr-2 text-orange-500"></i>
+                      AI Auction Price Estimate
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Generate a suggested opening amount from the vehicle details, buying date, mileage, condition, and accident history.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleEstimatePrice}
+                    disabled={isEstimating}
+                    className="px-5 py-2.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-orange-600 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isEstimating ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        Estimating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-bolt mr-2"></i>
+                        Estimate Price
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {estimateError && (
+                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm font-medium">
+                    {estimateError}
+                  </div>
+                )}
+
+                {priceEstimate && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                    <div className="bg-white border border-slate-200 rounded-lg p-4">
+                      <p className="text-xs font-bold uppercase text-slate-500 mb-1">Suggested Opening Amount</p>
+                      <p className="text-2xl font-black text-orange-600">{formatINR(priceEstimate.recommendedStartingBid)}</p>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-lg p-4">
+                      <p className="text-xs font-bold uppercase text-slate-500 mb-1">Reserve Price</p>
+                      <p className="text-2xl font-black text-green-700">{formatINR(priceEstimate.reservePrice)}</p>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-lg p-4">
+                      <p className="text-xs font-bold uppercase text-slate-500 mb-1">Likely Range</p>
+                      <p className="text-base font-extrabold text-slate-900">
+                        {formatINR(priceEstimate.priceRange?.low)} - {formatINR(priceEstimate.priceRange?.high)}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">Confidence: {priceEstimate.confidence}</p>
+                    </div>
+                  </div>
+                )}
+
+                {priceEstimate?.reasons?.length > 0 && (
+                  <div className="mb-5 bg-white border border-slate-200 rounded-lg p-4">
+                    <p className="text-sm font-bold text-slate-800 mb-2">Why this price?</p>
+                    <ul className="space-y-1 text-sm text-slate-600">
+                      {priceEstimate.reasons.map((reason, index) => (
+                        <li key={index}>- {reason}</li>
+                      ))}
+                    </ul>
+                    {priceEstimate.marketNotes && (
+                      <p className="text-xs text-slate-500 mt-3">{priceEstimate.marketNotes}</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-2">
+                      Seller Expected Auction Amount (Rs.) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="starting-bid"
+                      value={formData['starting-bid']}
+                      onChange={handleChange}
+                      min="1"
+                      step="1000"
+                      placeholder="Generate estimate or enter manually"
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      This is saved as the seller expected amount. The auction manager still approves the final auction floor price.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {priceEstimate && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setFormData((prev) => ({ ...prev, 'starting-bid': String(priceEstimate.recommendedStartingBid || '') }))}
+                          className="px-4 py-2 bg-orange-100 text-orange-700 font-bold rounded-lg hover:bg-orange-200 transition-colors"
+                        >
+                          Use Opening Amount
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData((prev) => ({ ...prev, 'starting-bid': String(priceEstimate.reservePrice || '') }))}
+                          className="px-4 py-2 bg-green-100 text-green-700 font-bold rounded-lg hover:bg-green-200 transition-colors"
+                        >
+                          Use Reserve Price
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 

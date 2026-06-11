@@ -141,7 +141,6 @@ const AuctionDetails = () => {
                       <p className="text-2xl font-bold text-green-600">
                         ₹{auction.startingBid.toLocaleString('en-IN')}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">Minimum bid set by Auction Manager</p>
                     </div>
                   )}
                   {auction.started_auction !== 'no' && (

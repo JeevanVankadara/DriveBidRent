@@ -17,6 +17,21 @@ const auctionRequestSchema = new mongoose.Schema({
   transmission: { type: String, required: true },
   expectedBid: { type: Number, required: true },  // Seller's expected sale amount
   startingBid: { type: Number },                   // Set by Auction Manager on approval (auction floor)
+  purchaseDate: { type: Date },
+  aiPriceEstimate: {
+    recommendedStartingBid: { type: Number },
+    reservePrice: { type: Number },
+    priceRange: {
+      low: { type: Number },
+      high: { type: Number }
+    },
+    confidence: { type: String, enum: ['low', 'medium', 'high'] },
+    reasons: [{ type: String }],
+    marketNotes: { type: String },
+    source: { type: String },
+    acceptedBySeller: { type: Boolean, default: false },
+    estimatedAt: { type: Date }
+  },
   auctionDate: { type: Date, required: true },
   status: { 
     type: String, 

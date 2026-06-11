@@ -38,6 +38,7 @@ import {
   createCheckoutSession,
   verifySession
 } from '../controllers/buyer/payment.controller.js';
+import buyerRagChatbotRoutes from '../features/buyerRagChatbot/buyerRag.routes.js';
 import Notification from '../models/Notification.js';
 
 const router = Router();
@@ -48,6 +49,7 @@ router.get('/auctions', buyerMiddleware, getAuctions);
 router.get('/rentals', buyerMiddleware, getRentals);
 router.get('/auctions/:id', buyerMiddleware, getSingleAuction);
 router.get('/rentals/:id', buyerMiddleware, getSingleRental);
+router.use('/rag-chatbot', buyerMiddleware, buyerRagChatbotRoutes);
 
 // === DASHBOARD & NAVIGATION (Legacy EJS support) ===
 router.get('/buyer_dashboard', buyerMiddleware, async (req, res) => {
