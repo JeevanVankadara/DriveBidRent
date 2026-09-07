@@ -2,7 +2,9 @@
 import { Outlet } from 'react-router-dom';
 import { Component } from 'react';
 import Navbar from './components/Navbar';
-import Footer from '../components/Footer';
+import Footer from '../../components/hub/HubFooter';
+import '../../styles/HubTheme.css';
+import '../../styles/HubDashboards.css';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -21,14 +23,11 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center p-8 bg-white rounded-lg shadow-lg">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
-            <p className="text-gray-600 mb-4">{this.state.error?.message || 'Unknown error'}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-gray-900 text-white px-6 py-2 rounded-xl hover:bg-amber-500 font-bold transition duration-300"
-            >
+        <div className="auctionmanager-layout min-h-screen flex items-center justify-center">
+          <div className="hub-surface-card text-center p-8">
+            <h1 className="hub-display text-2xl mb-4">Something went wrong</h1>
+            <p className="hub-text-muted mb-4">{this.state.error?.message || 'Unknown error'}</p>
+            <button onClick={() => window.location.reload()} className="hub-cta">
               Reload Page
             </button>
           </div>
@@ -43,9 +42,9 @@ class ErrorBoundary extends Component {
 export default function AuctionManagerLayout() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen flex flex-col font-montserrat">
+      <div className="auctionmanager-layout min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 pt-20 relative z-10 w-full">
+        <main className="flex-1 relative z-10 w-full">
           <Outlet />
         </main>
         <Footer />

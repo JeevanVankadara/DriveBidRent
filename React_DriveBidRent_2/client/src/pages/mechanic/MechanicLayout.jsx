@@ -1,14 +1,16 @@
 // client/src/pages/mechanic/MechanicLayout.jsx
 import { Outlet } from 'react-router-dom';
 import MechanicNavbar from './components/MechanicNavbar';
-import MechanicFooter from '../components/Footer';
+import MechanicFooter from '../../components/hub/HubFooter';
 import './MechanicDashboard.css';
+import '../../styles/HubTheme.css';
+import '../../styles/HubDashboards.css';
 
 export default function MechanicLayout() {
   return (
     <div className="mechanic-layout min-h-screen flex flex-col">
       <MechanicNavbar />
-      <main className="flex-grow pt-20">
+      <main className="flex-grow relative" style={{ zIndex: 1 }}>
         <Outlet />   {/* All mechanic pages load here with their own spinners */}
       </main>
       <MechanicFooter />

@@ -4,7 +4,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import BuyerRagChatbot from '../../features/buyerRagChatbot/BuyerRagChatbot';
 import './BuyerDashboard.css';
-import './HubTheme.css';
+import '../../styles/HubTheme.css';
+import '../../styles/HubDashboards.css';
 
 export default function BuyerLayout() {
   const { pathname } = useLocation();

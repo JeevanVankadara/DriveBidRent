@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Footer from '../components/Footer';
+import Footer from '../../components/hub/HubFooter';
 import axiosInstance from '../../utils/axiosInstance.util';
+import '../../styles/HubTheme.css';
+import '../../styles/HubDashboards.css';
 
 const SellerLayout = () => {
   const [showLoginMessage, setShowLoginMessage] = useState(false);
@@ -30,21 +32,21 @@ const SellerLayout = () => {
   }, [navigate]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="seller-layout flex flex-col min-h-screen">
       <Navbar />
 
       {/* Login Message */}
       {showLoginMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
-            <p className="text-lg font-medium text-red-600">
+          <div className="hub-surface-card p-6 text-center max-w-sm w-full">
+            <p className="text-lg font-medium hub-text-primary">
               Please login to continue
             </p>
           </div>
         </div>
       )}
 
-      <main className="flex-grow pt-16 bg-gray-50">
+      <main className="flex-grow relative" style={{ zIndex: 1 }}>
         <Outlet />
       </main>
 

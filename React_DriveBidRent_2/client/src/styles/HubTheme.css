@@ -3,12 +3,17 @@
    Warm cream canvas, orange accents, deep midnight panels.
    All colors in oklch, copied verbatim from the Hub styles.css.
 
-   Scoped to .buyer-layout so no other section of the app is
-   affected. Loaded after BuyerDashboard.css, so it wins where
-   the two overlap.
+   Shared by every dashboard: buyer, seller, admin, superadmin,
+   mechanic and auction manager. Each layout imports this file
+   after its own legacy CSS, so it wins where the two overlap.
    ============================================================ */
 
-.buyer-layout {
+.buyer-layout,
+.seller-layout,
+.admin-layout,
+.superadmin-layout,
+.mechanic-layout,
+.auctionmanager-layout {
   --radius: 0.875rem;
   --background: oklch(0.955 0.033 76.5);
   --foreground: oklch(0.22 0.03 265);
@@ -32,6 +37,9 @@
   --rent-foreground: oklch(0.99 0.01 80);
   --border: oklch(0.87 0.045 75);
   --ring: oklch(0.7 0.19 47);
+  --success: oklch(0.58 0.14 155);
+  --success-foreground: oklch(0.99 0.01 80);
+  --warning: oklch(0.72 0.15 70);
 
   --gradient-flame: linear-gradient(135deg, oklch(0.74 0.18 55), oklch(0.66 0.2 38));
   --shadow-soft: 0 18px 40px -24px oklch(0.35 0.09 55 / 0.45);
@@ -43,6 +51,7 @@
   --radius-3xl: calc(var(--radius) + 12px);
 
   /* Flat cream canvas, replacing the old gradient + glow backdrop */
+  min-height: 100vh;
   background: var(--background);
   background-attachment: initial;
   color: var(--foreground);
@@ -51,7 +60,17 @@
 
 /* The old floating orange glows are not part of the Hub design */
 .buyer-layout::before,
-.buyer-layout::after {
+.buyer-layout::after,
+.seller-layout::before,
+.seller-layout::after,
+.admin-layout::before,
+.admin-layout::after,
+.superadmin-layout::before,
+.superadmin-layout::after,
+.mechanic-layout::before,
+.mechanic-layout::after,
+.auctionmanager-layout::before,
+.auctionmanager-layout::after {
   content: none;
 }
 
@@ -292,58 +311,84 @@
 }
 .hub-spec-value.is-highlight { color: var(--primary); }
 
-/* ========== NAVBAR (Hub look, existing features kept) ========== */
+/* ========== NAVBAR ==========
+   Self-contained, so the shared <HubNavbar /> looks identical in every
+   dashboard without depending on that the section own legacy CSS. */
 
-.buyer-layout .buyer-navbar {
+.hub-navbar {
   background-color: color-mix(in oklab, var(--cream) 90%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
   box-shadow: none;
 }
-.buyer-layout .buyer-navbar:hover {
+.hub-navbar:hover {
   background-color: color-mix(in oklab, var(--cream) 90%, transparent);
   box-shadow: none;
 }
 
-.buyer-layout .buyer-logo {
+.hub-logo {
   font-family: "Playfair Display", ui-serif, Georgia, serif;
   font-weight: 800;
   letter-spacing: -0.02em;
   background: none;
-  -webkit-background-clip: border-box;
   -webkit-text-fill-color: currentColor;
   background-clip: border-box;
   /* Midnight reads clearly on the cream navbar; orange blended into it */
   color: var(--midnight);
 }
-.buyer-layout .buyer-logo:hover {
+.hub-logo:hover {
   transform: none;
   filter: none;
 }
 /* A deeper orange for the logo accent only: --primary sits at 2.5:1 on the
    cream navbar, this clears WCAG AA at 5.2:1 while staying the brand hue.
    The rest of the theme keeps --primary unchanged. */
-.buyer-layout .buyer-logo .hub-logo-mid { color: oklch(0.52 0.19 42); }
+.hub-logo .hub-logo-mid { color: oklch(0.52 0.19 42); }
 
-.buyer-layout .buyer-nav-link {
+/* Role badge next to the logo (Seller, Admin, Mechanic, …) */
+.hub-role-chip {
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: oklch(0.52 0.19 42);
+  padding: 0.15rem 0.55rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hub-nav-link {
+  position: relative;
   font-size: 0.95rem;
   font-weight: 500;
   color: color-mix(in oklab, var(--foreground) 80%, transparent);
   padding: 0.25rem 0;
+  transition: color 200ms ease;
+  white-space: nowrap;
 }
-.buyer-layout .buyer-nav-link:hover { color: var(--primary); }
-.buyer-layout .buyer-nav-link.active {
+.hub-nav-link:hover { color: var(--primary); }
+.hub-nav-link.active {
   color: var(--primary);
   font-weight: 500;
 }
-.buyer-layout .buyer-nav-link::after {
-  height: 2px;
+.hub-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
   bottom: -4px;
+  height: 2px;
   width: 100%;
   background: var(--primary);
   border-radius: 9999px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms ease;
 }
+.hub-nav-link:hover::after,
+.hub-nav-link.active::after { transform: scaleX(1); }
 
 .hub-nav-profile {
   border-radius: var(--radius-xl);
@@ -356,6 +401,9 @@
 }
 .hub-nav-profile:hover {
   background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+.hub-nav-profile.active {
+  background-color: color-mix(in oklab, var(--primary) 12%, transparent);
 }
 
 .hub-nav-logout {
@@ -392,7 +440,8 @@
   color: color-mix(in oklab, var(--foreground) 85%, transparent);
   font-weight: 500;
 }
-.hub-mobile-link:hover { color: var(--primary); }
+.hub-mobile-link:hover,
+.hub-mobile-link.active { color: var(--primary); }
 
 /* ========== EMPTY STATE ========== */
 
@@ -533,7 +582,7 @@
   .hub-inline-spinner { animation-duration: 2s; }
 }
 
-/* Border-colour-only helper (pairs with Tailwind's `border` width class) */
+/* Border-colour-only helper (pairs with the Tailwind `border` width class) */
 .hub-border-c { border-color: var(--border); }
 
 /* Muted link that warms to the accent on hover */

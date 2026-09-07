@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
+import {
+  MainImageUploadField,
+  AdditionalImagesUploadField,
+} from './components/VehicleImageFields';
+import {
+  validateVehicleImages,
+  MIN_ADDITIONAL_IMAGES,
+  MAX_ADDITIONAL_IMAGES,
+} from './components/vehicleImageRules';
 
 const AddRental = () => {
   const navigate = useNavigate();
@@ -15,18 +24,26 @@ const AddRental = () => {
     'rental-cost': '',
     'driver-available': '',
     'driver-rate': '',
-    vehicleImage: null
+    mainImage: null,
+    additionalImages: []
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: files ? files[0] : value
-    }));
+    const { name, value, files, type } = e.target;
+
+    if (type === 'file') {
+      if (name === 'mainImage') {
+        setFormData(prev => ({ ...prev, mainImage: files[0] || null }));
+      } else if (name === 'additionalImages') {
+        setFormData(prev => ({ ...prev, additionalImages: Array.from(files) }));
+      }
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const validateForm = () => {
@@ -36,8 +53,14 @@ const AddRental = () => {
       setError('Vehicle name is required and should be at least 2 characters.');
       isValid = false;
     }
-    if (!formData.vehicleImage || !formData.vehicleImage.type.startsWith('image/')) {
-      setError('Please upload a valid image file.');
+    const imageError = validateVehicleImages(
+      formData.mainImage,
+      formData.additionalImages,
+      MIN_ADDITIONAL_IMAGES,
+      MAX_ADDITIONAL_IMAGES
+    );
+    if (imageError) {
+      setError(imageError);
       isValid = false;
     }
     const currentYear = new Date().getFullYear();
@@ -75,8 +98,14 @@ const AddRental = () => {
     if (!validateForm()) return;
     setIsSubmitting(true);
     const submitData = new FormData();
-    Object.keys(formData).forEach(key => {
-      submitData.append(key, formData[key]);
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === 'mainImage') {
+        if (value) submitData.append('mainImage', value);
+      } else if (key === 'additionalImages') {
+        value.forEach(file => submitData.append('additionalImages', file));
+      } else {
+        submitData.append(key, value);
+      }
     });
     try {
       const response = await axiosInstance.post('/seller/add-rental', submitData, {
@@ -125,15 +154,21 @@ const AddRental = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
             />
           </div>
-          <div>
-            <label className="block font-medium text-gray-700 mb-2">Vehicle Image</label>
-            <input 
-              type="file" 
-              name="vehicleImage" 
-              onChange={handleChange} 
-              required 
-              accept="image/*" 
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200" 
+          {/* Vehicle photos — main cover shot and side/additional shots are
+              collected separately so the listing always has a deliberate
+              cover image rather than whichever file came first. */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/60 space-y-5">
+            <h3 className="font-bold text-gray-800">Vehicle Photos</h3>
+            <MainImageUploadField
+              file={formData.mainImage}
+              onChange={handleChange}
+              label="Main Vehicle Image"
+            />
+            <AdditionalImagesUploadField
+              files={formData.additionalImages}
+              onChange={handleChange}
+              minCount={MIN_ADDITIONAL_IMAGES}
+              maxCount={MAX_ADDITIONAL_IMAGES}
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

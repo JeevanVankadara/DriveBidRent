@@ -9,13 +9,16 @@ const AuctionManagerLogin = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
 
     if (!email || !password) {
+      setFormError('Please fill in all fields');
       toast.error('Please fill in all fields');
       return;
     }
@@ -24,28 +27,37 @@ const AuctionManagerLogin = () => {
 
     try {
       const response = await auctionAuthServices.login({ email, password });
-      
-      if (response.success) {
-        // Check if account is approved
-        if (response.approved === false) {
-          setShowApprovalModal(true);
-          setLoading(false);
-          return;
-        }
 
-        toast.success(response.message || 'Login successful!');
-        setTimeout(() => {
-          navigate(response.redirect || '/auctionmanager/dashboard');
-        }, 800);
+      // Account exists but is still waiting on an admin
+      if (response.approved === false) {
+        setShowApprovalModal(true);
+        return;
       }
+
+      if (!response.success) {
+        // 2xx response that still reports a failure
+        setFormError(response.message || 'Login failed. Please try again.');
+        toast.error(response.message || 'Login failed. Please try again.');
+        return;
+      }
+
+      toast.success(response.message || 'Login successful!');
+      setTimeout(() => {
+        navigate(response.redirect || '/auctionmanager/dashboard');
+      }, 800);
     } catch (error) {
       console.error('Login error:', error);
-      
-      // Check if the error is about approval status
+
+      // Pending approval comes back as 403 with approved: false
       if (error.response?.data?.approved === false) {
         setShowApprovalModal(true);
       } else {
-        const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
+        const errorMessage =
+          error.response?.data?.message ||
+          (error.response
+            ? 'Login failed. Please try again.'
+            : 'Could not reach the server. Please check your connection and try again.');
+        setFormError(errorMessage);
         toast.error(errorMessage);
       }
     } finally {
@@ -55,6 +67,8 @@ const AuctionManagerLogin = () => {
 
   const handleInputChange = (setter) => (e) => {
     setter(e.target.value);
+    // Clear the previous failure as soon as the user starts correcting it
+    setFormError('');
   };
 
   return (
@@ -112,6 +126,16 @@ const AuctionManagerLogin = () => {
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {formError && (
+              <div
+                role="alert"
+                className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+              >
+                <i className="fas fa-exclamation-circle text-red-600 mt-0.5"></i>
+                <p className="text-sm text-red-700">{formError}</p>
+              </div>
+            )}
+
             <div>
               <label className="block text-gray-700 font-medium mb-1">Email Address</label>
               <div className="relative">

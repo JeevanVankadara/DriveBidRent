@@ -27,18 +27,21 @@ router.post('/auction-price-estimate', estimateAuctionPrice);
 
 // POST: Add auction with multiple document uploads
 router.post('/add-auction', upload.fields([
+  // Main photo and side/additional photos are separate fields now.
+  // 'vehicleImage' is still accepted so older clients keep working.
+  { name: 'mainImage', maxCount: 1 },
+  { name: 'additionalImages', maxCount: 5 },
   { name: 'vehicleImage', maxCount: 10 },
   { name: 'registration-certificate', maxCount: 1 },
-  { name: 'insurance-document', maxCount: 1 },
-  { name: 'fitness-certificate', maxCount: 1 },
-  { name: 'rc-transfer-form29', maxCount: 1 },
-  { name: 'rc-transfer-form30', maxCount: 1 },
-  { name: 'road-tax-receipt', maxCount: 1 },
-  { name: 'address-proof', maxCount: 1 }
+  { name: 'insurance-document', maxCount: 1 }
 ]), postAddAuction);
 
 // POST: Add rental
-router.post('/add-rental', upload.single('vehicleImage'), postAddRental);
+router.post('/add-rental', upload.fields([
+  { name: 'mainImage', maxCount: 1 },
+  { name: 'additionalImages', maxCount: 5 },
+  { name: 'vehicleImage', maxCount: 1 }
+]), postAddRental);
 
 // GET: Auction detail
 router.get('/auction-details/:id', getAuctionDetail);

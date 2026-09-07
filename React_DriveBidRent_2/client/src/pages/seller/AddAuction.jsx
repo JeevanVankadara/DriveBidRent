@@ -2,15 +2,17 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 import toast from 'react-hot-toast';
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-// Helper to format file size
-const formatSize = (bytes) => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
+import {
+  MainImageUploadField,
+  AdditionalImagesUploadField,
+} from './components/VehicleImageFields';
+import {
+  validateVehicleImages,
+  formatSize,
+  MAX_FILE_SIZE,
+  MIN_ADDITIONAL_IMAGES,
+  MAX_ADDITIONAL_IMAGES,
+} from './components/vehicleImageRules';
 
 const formatINR = (value) => {
   const amount = Number(value);
@@ -73,89 +75,6 @@ const FileUploadField = ({ label, name, accept, file, onChange, required, hint }
   );
 };
 
-// Custom multi-file upload field for vehicle images
-const MultiFileUploadField = ({ files, onChange, maxCount = 10 }) => {
-  const inputRef = useRef(null);
-  const hasFiles = files && files.length > 0;
-  const isOverCount = files.length > maxCount;
-  const oversizedFiles = files.filter(f => f.size > MAX_FILE_SIZE);
-  const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-
-  return (
-    <div className="md:col-span-2">
-      <label className="block font-semibold text-gray-700 mb-2">
-        Vehicle Images <span className="text-red-500">*</span>
-      </label>
-      <input
-        ref={inputRef}
-        type="file"
-        name="vehicleImage"
-        onChange={onChange}
-        accept="image/*"
-        multiple
-        className="hidden"
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        className={`w-full text-left border-2 border-dashed rounded-lg px-4 py-4 transition-colors ${
-          hasFiles
-            ? isOverCount || oversizedFiles.length > 0
-              ? 'border-red-400 bg-red-50'
-              : 'border-green-400 bg-green-50'
-            : 'border-gray-300 bg-gray-50 hover:border-orange-400 hover:bg-orange-50'
-        }`}
-      >
-        {hasFiles ? (
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-bold text-gray-800">
-                {files.length} image{files.length !== 1 ? 's' : ''} selected
-              </span>
-              <span className={`text-xs font-bold ${isOverCount ? 'text-red-600' : 'text-green-600'}`}>
-                {files.length}/{maxCount} max
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {files.map((f, i) => (
-                <span key={i} className={`inline-block text-xs px-2 py-0.5 rounded ${
-                  f.size > MAX_FILE_SIZE ? 'bg-red-100 text-red-700' : 'bg-white text-gray-600'
-                } border border-gray-200`}>
-                  {f.name.length > 20 ? f.name.slice(0, 17) + '...' : f.name}
-                  <span className="ml-1 font-semibold">{formatSize(f.size)}</span>
-                </span>
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Total: {formatSize(totalSize)} · Click to re-select images
-            </p>
-          </div>
-        ) : (
-          <div className="text-center py-2">
-            <p className="text-sm text-gray-400 font-medium">Click to select vehicle images</p>
-            <p className="text-xs text-gray-400 mt-1">Upload up to {maxCount} images (Front, Side, Interior, etc.)</p>
-          </div>
-        )}
-      </button>
-      {isOverCount && (
-        <p className="text-xs text-red-600 font-semibold mt-1">
-          Too many images! Maximum {maxCount} allowed. You selected {files.length}.
-        </p>
-      )}
-      {oversizedFiles.length > 0 && (
-        <p className="text-xs text-red-600 font-semibold mt-1">
-          {oversizedFiles.length} file(s) exceed the 10 MB limit.
-        </p>
-      )}
-      {hasFiles && !isOverCount && oversizedFiles.length === 0 && (
-        <p className="text-xs text-green-600 font-semibold mt-1">
-          All files OK — {files.length} image{files.length !== 1 ? 's' : ''} ready for upload
-        </p>
-      )}
-    </div>
-  );
-};
-
 const AddAuction = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('basic'); // basic, documents, history
@@ -172,19 +91,15 @@ const AddAuction = () => {
     'purchase-date': '',
     'auction-date': '',
     'starting-bid': '',
-    vehicleImages: [],
-    
+    mainImage: null,
+    additionalImages: [],
+
     // Registration & Ownership
     'registration-number': '',
     'registration-state': '',
     'ownership-type': '',
     'registration-certificate': null,
-    
-    // VIN & Chassis
-    'vin-number': '',
-    'chassis-number': '',
-    'engine-number': '',
-    
+
     // Insurance
     'insurance-status': '',
     'insurance-expiry-date': '',
@@ -200,34 +115,17 @@ const AddAuction = () => {
     'major-repairs': 'no',
     'repair-details': '',
     
-    // Legal & Transfer
-    'hypothecation-status': '',
-    'loan-provider': '',
-    'noc-available': 'no',
+    // Transfer
     'ready-for-transfer': 'yes',
-    
-    // Theft & Legal Check
-    'stolen-vehicle-check': '',
-    'police-noc': 'no',
-    'court-cases': 'no',
-    'court-case-details': '',
-    
-    
+
     // Service History
     'service-history': 'No Records',
     'last-service-date': '',
     'service-book-available': 'no',
-    
-    // Pollution & Fitness
+
+    // Pollution
     'pollution-certificate': '',
     'pollution-expiry-date': '',
-    'fitness-certificate': null,
-    'fitness-certificate-expiry': '',
-    
-    // Additional Documents
-    'rc-transfer-form29': null,
-    'road-tax-receipt': null,
-    'address-proof': null,
   });
 
   const [error, setError] = useState('');
@@ -258,11 +156,15 @@ const AddAuction = () => {
     ]);
     
     if (type === 'file') {
-      if (name === 'vehicleImage') {
-        // Multiple vehicle images
+      if (name === 'mainImage') {
         setFormData((prev) => ({
           ...prev,
-          vehicleImages: Array.from(files),
+          mainImage: files[0] || null,
+        }));
+      } else if (name === 'additionalImages') {
+        setFormData((prev) => ({
+          ...prev,
+          additionalImages: Array.from(files),
         }));
       } else {
         setFormData((prev) => ({
@@ -291,9 +193,16 @@ const AddAuction = () => {
   const validate = () => {
     // Basic Info Validation
     if (formData['vehicle-name'].trim().length < 2) return 'Vehicle name must be ≥ 2 chars';
-    if (!formData.vehicleImages || formData.vehicleImages.length === 0) return 'At least one vehicle image required';
-    if (formData.vehicleImages.some(f => !f.type.startsWith('image/'))) return 'All vehicle images must be valid image files';
-    if (formData.vehicleImages.length > 10) return 'Maximum 10 vehicle images allowed';
+
+    // One main photo, plus 1-5 additional photos
+    const imageError = validateVehicleImages(
+      formData.mainImage,
+      formData.additionalImages,
+      MIN_ADDITIONAL_IMAGES,
+      MAX_ADDITIONAL_IMAGES
+    );
+    if (imageError) return imageError;
+
     if (!formData['car-type']) return 'Select car type';
     if (formData['vehicle-year'] < 1900 || formData['vehicle-year'] > new Date().getFullYear())
       return 'Year must be 1900–current';
@@ -314,13 +223,7 @@ const AddAuction = () => {
       return 'Valid registration number required (min 4 characters)';
     if (!formData['registration-state']) return 'Registration state required';
     if (!formData['ownership-type']) return 'Ownership type required';
-    if (!formData['vin-number'] || formData['vin-number'].trim().length < 10) 
-      return 'Valid VIN number required (min 10 characters)';
-    if (!formData['chassis-number'] || formData['chassis-number'].trim().length < 5) 
-      return 'Valid chassis number required';
-    if (!formData['engine-number'] || formData['engine-number'].trim().length < 5) 
-      return 'Valid engine number required';
-    
+
     // Insurance Validation
     if (!formData['insurance-status']) return 'Insurance status required';
     if (formData['insurance-status'] === 'Valid' && !formData['insurance-expiry-date']) 
@@ -329,12 +232,8 @@ const AddAuction = () => {
       return 'Insurance type required';
     
     // Legal Validation
-    if (!formData['hypothecation-status']) return 'Hypothecation status required';
-    if (formData['hypothecation-status'] === 'Under Loan/Hypothecation' && !formData['loan-provider']) 
-      return 'Loan provider name required';
-    if (!formData['stolen-vehicle-check']) return 'Stolen vehicle check status required';
     if (!formData['ready-for-transfer']) return 'Transfer readiness status required';
-    
+
     // Pollution Validation
     if (!formData['pollution-certificate']) return 'Pollution certificate status required';
     if (formData['pollution-certificate'] === 'Valid' && !formData['pollution-expiry-date']) 
@@ -428,10 +327,13 @@ const AddAuction = () => {
     
     // Append all form data
     Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'vehicleImages') {
-        // Append multiple vehicle images under the 'vehicleImage' field name
+      if (key === 'mainImage') {
+        // Single main photo
+        if (value) data.append('mainImage', value);
+      } else if (key === 'additionalImages') {
+        // Side / additional photos, all under the same field name
         value.forEach((file) => {
-          data.append('vehicleImage', file);
+          data.append('additionalImages', file);
         });
       } else if (value !== null && value !== undefined) {
         data.append(key, value);
@@ -449,14 +351,14 @@ const AddAuction = () => {
     // Log submitted documentation fields for debugging
     console.log('📋 [AddAuction] Submitting with documentation fields:', {
       registrationNumber: formData['registration-number'],
-      vinNumber: formData['vin-number'],
-      chassisNumber: formData['chassis-number'],
       insuranceStatus: formData['insurance-status'],
       accidentHistory: formData['accident-history'],
       pollutionCertificate: formData['pollution-certificate'],
-      odometerReading: formData['odometer-reading'],
+      mainImage: formData.mainImage?.name,
+      additionalImages: formData.additionalImages.length,
     });
-    
+
+
     try {
       const res = await axiosInstance.post('/seller/add-auction', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -553,16 +455,20 @@ const AddAuction = () => {
           {/* Persistent File Upload Summary */}
           {(() => {
             const uploadedFiles = [];
-            if (formData.vehicleImages?.length > 0) {
-              uploadedFiles.push({ label: 'Vehicle Images', count: formData.vehicleImages.length, names: formData.vehicleImages.map(f => f.name), limit: 10 });
+            if (formData.mainImage) {
+              uploadedFiles.push({ label: 'Main Car Image', count: 1, names: [formData.mainImage.name], limit: 1 });
+            }
+            if (formData.additionalImages?.length > 0) {
+              uploadedFiles.push({
+                label: 'Additional Photos',
+                count: formData.additionalImages.length,
+                names: formData.additionalImages.map((f) => f.name),
+                limit: MAX_ADDITIONAL_IMAGES,
+              });
             }
             const docFields = [
               { key: 'registration-certificate', label: 'RC Certificate' },
               { key: 'insurance-document', label: 'Insurance Document' },
-              { key: 'fitness-certificate', label: 'Fitness Certificate' },
-              { key: 'rc-transfer-form29', label: 'RC Transfer Form 29' },
-              { key: 'road-tax-receipt', label: 'Road Tax Receipt' },
-              { key: 'address-proof', label: 'Address Proof' },
             ];
             docFields.forEach(({ key, label }) => {
               if (formData[key]) {
@@ -618,27 +524,26 @@ const AddAuction = () => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block font-semibold text-gray-700 mb-2">
-                    Vehicle Images <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="file"
-                    name="vehicleImage"
-                    onChange={handleChange}
-                    accept="image/*"
-                    multiple
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Upload up to 10 images of the vehicle (Front, Side, Interior, etc.)
-                    {formData.vehicleImages.length > 0 && (
-                      <span className="ml-2 font-semibold text-orange-600">
-                        {formData.vehicleImages.length} file(s) selected
-                      </span>
-                    )}
-                  </p>
+                {/* Vehicle photos — main cover shot and side/additional shots
+                    are collected separately so the listing always has a
+                    deliberate cover image rather than whichever file came first. */}
+                <div className="md:col-span-2 border border-gray-200 rounded-xl p-4 bg-gray-50/60">
+                  <h3 className="font-bold text-gray-800 mb-3">
+                    <i className="fas fa-camera mr-2 text-orange-600"></i>
+                    Vehicle Photos
+                  </h3>
+                  <div className="grid grid-cols-1 gap-5">
+                    <MainImageUploadField
+                      file={formData.mainImage}
+                      onChange={handleChange}
+                    />
+                    <AdditionalImagesUploadField
+                      files={formData.additionalImages}
+                      onChange={handleChange}
+                      minCount={MIN_ADDITIONAL_IMAGES}
+                      maxCount={MAX_ADDITIONAL_IMAGES}
+                    />
+                  </div>
                 </div>
 
                 <div className="md:col-span-2">
@@ -872,59 +777,6 @@ const AddAuction = () => {
                 </div>
               </div>
 
-              {/* VIN & Engine Details */}
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <h3 className="text-lg font-bold text-green-800 mb-4 flex items-center">
-                  <i className="fas fa-barcode mr-2"></i>
-                  VIN & Identification Numbers
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      VIN Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      name="vin-number"
-                      value={formData['vin-number']}
-                      onChange={handleChange}
-                      placeholder="17-digit VIN"
-                      required
-                      maxLength="17"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Vehicle Identification Number</p>
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Chassis Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      name="chassis-number"
-                      value={formData['chassis-number']}
-                      onChange={handleChange}
-                      placeholder="Chassis No."
-                      required
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Engine Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      name="engine-number"
-                      value={formData['engine-number']}
-                      onChange={handleChange}
-                      placeholder="Engine No."
-                      required
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Insurance Details */}
               <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
                 <h3 className="text-lg font-bold text-purple-800 mb-4 flex items-center">
@@ -1036,148 +888,31 @@ const AddAuction = () => {
                 </div>
               </div>
 
-              {/* Legal & Transfer Status */}
+              {/* Transfer Status */}
               <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                 <h3 className="text-lg font-bold text-yellow-800 mb-4 flex items-center">
                   <i className="fas fa-gavel mr-2"></i>
-                  Legal & Transfer Status
+                  Transfer Status
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Hypothecation Status <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="hypothecation-status"
-                      value={formData['hypothecation-status']}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Clear - No Loan">Clear - No Loan</option>
-                      <option value="Under Loan/Hypothecation">Under Loan/Hypothecation</option>
-                    </select>
-                  </div>
-
-                  {formData['hypothecation-status'] === 'Under Loan/Hypothecation' && (
-                    <>
-                      <div>
-                        <label className="block font-semibold text-gray-700 mb-2">
-                          Loan Provider (Bank/NBFC) <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          name="loan-provider"
-                          value={formData['loan-provider']}
-                          onChange={handleChange}
-                          placeholder="e.g., HDFC Bank"
-                          required
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            name="noc-available"
-                            checked={formData['noc-available'] === 'yes'}
-                            onChange={handleChange}
-                            className="w-4 h-4 text-orange-600 focus:ring-orange-500 rounded"
-                          />
-                          <span className="font-semibold text-gray-700">
-                            NOC (No Objection Certificate) Available from Bank?
-                          </span>
-                        </label>
-                      </div>
-                    </>
-                  )}
-
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Stolen Vehicle Verification <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="stolen-vehicle-check"
-                      value={formData['stolen-vehicle-check']}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Verified Clean">Verified Clean - Not Stolen</option>
-                      <option value="Not Verified">Not Verified</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center space-x-2 h-full items-end pb-2">
-                      <input
-                        type="checkbox"
-                        name="police-noc"
-                        checked={formData['police-noc'] === 'yes'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-orange-600 focus:ring-orange-500 rounded"
-                      />
-                      <span className="font-semibold text-gray-700">
-                        Police NOC Available?
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        name="court-cases"
-                        checked={formData['court-cases'] === 'yes'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-orange-600 focus:ring-orange-500 rounded"
-                      />
-                      <span className="font-semibold text-gray-700">
-                        Any Pending Court Cases Related to Vehicle?
-                      </span>
-                    </label>
-                  </div>
-
-                  {formData['court-cases'] === 'yes' && (
-                    <div className="md:col-span-2">
-                      <label className="block font-semibold text-gray-700 mb-2">
-                        Court Case Details
-                      </label>
-                      <textarea
-                        name="court-case-details"
-                        value={formData['court-case-details']}
-                        onChange={handleChange}
-                        rows="3"
-                        placeholder="Provide details about the court case"
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                  )}
-
-                  <div className="md:col-span-2">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        name="ready-for-transfer"
-                        checked={formData['ready-for-transfer'] === 'yes'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-orange-600 focus:ring-orange-500 rounded"
-                      />
-                      <span className="font-semibold text-gray-700">
-                        Vehicle is Ready for Ownership Transfer <span className="text-red-500">*</span>
-                      </span>
-                    </label>
-                  </div>
-                </div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="ready-for-transfer"
+                    checked={formData['ready-for-transfer'] === 'yes'}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-orange-600 focus:ring-orange-500 rounded"
+                  />
+                  <span className="font-semibold text-gray-700">
+                    Vehicle is Ready for Ownership Transfer <span className="text-red-500">*</span>
+                  </span>
+                </label>
               </div>
 
-              {/* Pollution & Additional Documents */}
+              {/* Pollution Certificate */}
               <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
                 <h3 className="text-lg font-bold text-teal-800 mb-4 flex items-center">
                   <i className="fas fa-leaf mr-2"></i>
-                  Pollution & Fitness Certificates
+                  Pollution Certificate
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1214,100 +949,6 @@ const AddAuction = () => {
                     </div>
                   )}
 
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Fitness Certificate (Commercial Vehicles)
-                    </label>
-                    <input
-                      type="file"
-                      name="fitness-certificate"
-                      onChange={handleChange}
-                      accept="application/pdf,image/*"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                    {formData['fitness-certificate'] && (
-                      <p className="text-xs text-green-600 font-semibold mt-1">
-                        Selected: {formData['fitness-certificate'].name}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Fitness Expiry Date (If Applicable)
-                    </label>
-                    <input
-                      type="date"
-                      name="fitness-certificate-expiry"
-                      value={formData['fitness-certificate-expiry']}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Transfer Forms & Documents */}
-              <div className="bg-gray-100 p-4 rounded-lg border border-gray-300">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                  <i className="fas fa-paperclip mr-2"></i>
-                  Additional Transfer Documents
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      RC Transfer Form 29
-                    </label>
-                    <input
-                      type="file"
-                      name="rc-transfer-form29"
-                      onChange={handleChange}
-                      accept="application/pdf,image/*"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                    {formData['rc-transfer-form29'] && (
-                      <p className="text-xs text-green-600 font-semibold mt-1">
-                        Selected: {formData['rc-transfer-form29'].name}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-1">Form 29 - Notice of Transfer</p>
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Road Tax Receipt
-                    </label>
-                    <input
-                      type="file"
-                      name="road-tax-receipt"
-                      onChange={handleChange}
-                      accept="application/pdf,image/*"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                    {formData['road-tax-receipt'] && (
-                      <p className="text-xs text-green-600 font-semibold mt-1">
-                        Selected: {formData['road-tax-receipt'].name}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-2">
-                      Address Proof (Aadhaar/DL/Passport)
-                    </label>
-                    <input
-                      type="file"
-                      name="address-proof"
-                      onChange={handleChange}
-                      accept="application/pdf,image/*"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500"
-                    />
-                    {formData['address-proof'] && (
-                      <p className="text-xs text-green-600 font-semibold mt-1">
-                        Selected: {formData['address-proof'].name}
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -1320,7 +961,7 @@ const AddAuction = () => {
                 Vehicle History & Condition
               </h2>
 
-              {/* Odometer Section */}
+              {/* Service History */}
               <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
                 <h3 className="text-lg font-bold text-indigo-800 mb-4 flex items-center">
                   <i className="fas fa-tachometer-alt mr-2"></i>

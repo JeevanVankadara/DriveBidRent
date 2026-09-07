@@ -235,13 +235,33 @@ export default function RentalDetails() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Main Content */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Vehicle Image */}
-                        <div className="overflow-hidden rounded-2xl hub-bg-card shadow-xl">
-                            <img
-                                src={rental.vehicleImage}
-                                alt={rental.vehicleName}
-                                className="w-full h-auto object-cover"
-                            />
+                        {/* Vehicle Images — main cover shot, then the side photos */}
+                        <div className="space-y-4">
+                            <div className="overflow-hidden rounded-2xl hub-bg-card shadow-xl">
+                                <img
+                                    src={rental.vehicleImage}
+                                    alt={rental.vehicleName}
+                                    className="w-full h-auto object-cover"
+                                />
+                            </div>
+
+                            {rental.additionalImages?.length > 0 && (
+                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                                    {rental.additionalImages.map((img, i) => (
+                                        <div
+                                            key={img}
+                                            className="overflow-hidden rounded-xl hub-bg-card shadow border hub-border-c"
+                                        >
+                                            <img
+                                                src={img}
+                                                alt={`${rental.vehicleName} photo ${i + 2}`}
+                                                className="w-full h-24 object-cover"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Specifications */}

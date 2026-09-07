@@ -298,7 +298,7 @@ export default function AuctionDetails() {
                     <SectionHeader
                       eyebrow="Overview"
                       title="Vehicle Specifications"
-                      description="Key details shared by the seller and verified during the auction workflow."
+                      description="Key details verified during the auction workflow."
                     />
                     <div className="ad-specs">
                       <InfoTile label="Year" value={auction.year} />
@@ -306,10 +306,6 @@ export default function AuctionDetails() {
                       <InfoTile label="Fuel type" value={titleCase(auction.fuelType)} />
                       <InfoTile label="Transmission" value={titleCase(auction.transmission)} />
                       <InfoTile label="Mileage" value={`${(auction.mileage || 0).toLocaleString('en-IN')} km`} />
-                      <InfoTile
-                        label="Seller"
-                        value={`${auction.seller?.firstName || auction.sellerId?.firstName || ''} ${auction.seller?.lastName || auction.sellerId?.lastName || ''}`.trim() || 'N/A'}
-                      />
                     </div>
                   </div>
                 )}

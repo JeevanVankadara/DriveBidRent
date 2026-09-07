@@ -30,6 +30,10 @@ const parseAiPriceEstimate = (value) => {
 
 const reqBoolean = (value) => value === true || value === 'true' || value === 'yes';
 
+// Vehicle photo rules: exactly one main photo, plus 1-5 side/additional photos.
+const MIN_ADDITIONAL_IMAGES = 1;
+const MAX_ADDITIONAL_IMAGES = 5;
+
 export const postAddAuction = async (req, res) => {
   console.log('📋 [Add Auction] ========================================');
   console.log('📋 [Add Auction] Request received');
@@ -37,19 +41,38 @@ export const postAddAuction = async (req, res) => {
   console.log('📋 [Add Auction] Body keys:', Object.keys(req.body));
   console.log('📋 [Add Auction] Documentation fields received:', {
     registrationNumber: req.body['registration-number'],
-    vinNumber: req.body['vin-number'],
-    chassisNumber: req.body['chassis-number'],
     insuranceStatus: req.body['insurance-status'],
     accidentHistory: req.body['accident-history'],
     pollutionCertificate: req.body['pollution-certificate'],
-    odometerReading: req.body['odometer-reading'],
   });
 
   try {
-    // Check for required vehicle image
-    if (!req.files || !req.files['vehicleImage'] || !req.files['vehicleImage'][0]) {
-      console.log('❌ [Add Auction] Vehicle image missing');
-      return res.status(400).json({ success: false, message: 'Vehicle image required' });
+    const files = req.files || {};
+
+    // The form posts the main photo and the side photos as separate fields.
+    // 'vehicleImage' is the old combined field — still accepted, with the
+    // first file treated as the main photo, so older clients keep working.
+    const legacyImages = files['vehicleImage'] || [];
+    const mainImageFile = files['mainImage']?.[0] || legacyImages[0] || null;
+    const additionalImageFiles = files['additionalImages'] || legacyImages.slice(1);
+
+    if (!mainImageFile) {
+      console.log('❌ [Add Auction] Main vehicle image missing');
+      return res.status(400).json({ success: false, message: 'Main vehicle image is required' });
+    }
+
+    if (additionalImageFiles.length < MIN_ADDITIONAL_IMAGES) {
+      return res.status(400).json({
+        success: false,
+        message: `At least ${MIN_ADDITIONAL_IMAGES} additional photo is required`
+      });
+    }
+
+    if (additionalImageFiles.length > MAX_ADDITIONAL_IMAGES) {
+      return res.status(400).json({
+        success: false,
+        message: `You can upload at most ${MAX_ADDITIONAL_IMAGES} additional photos`
+      });
     }
 
     // Helper function to upload single file
@@ -64,50 +87,30 @@ export const postAddAuction = async (req, res) => {
       }
     };
 
-    // Upload ALL vehicle images (supports multiple)
-    const vehicleImageFiles = req.files['vehicleImage'];
-    const vehicleImageUrls = [];
-    for (const file of vehicleImageFiles) {
+    const mainImageUrl = await uploadFile(mainImageFile, 'drivebidrent/vehicles');
+    if (!mainImageUrl) {
+      return res.status(500).json({ success: false, message: 'Failed to upload the main vehicle image' });
+    }
+
+    const additionalImageUrls = [];
+    for (const file of additionalImageFiles) {
       const url = await uploadFile(file, 'drivebidrent/vehicles');
-      if (url) vehicleImageUrls.push(url);
-    }
-    
-    if (vehicleImageUrls.length === 0) {
-      return res.status(500).json({ success: false, message: 'Failed to upload vehicle image(s)' });
+      if (url) additionalImageUrls.push(url);
     }
 
-    // First image is the primary (backward compat)
-    const mainImageUrl = vehicleImageUrls[0];
-    const additionalImageUrls = vehicleImageUrls.slice(1);
-    console.log(`✅ [Add Auction] Uploaded ${vehicleImageUrls.length} vehicle image(s)`);
+    if (additionalImageUrls.length === 0) {
+      return res.status(500).json({ success: false, message: 'Failed to upload the additional vehicle photos' });
+    }
 
-    // Upload all document files
-    const registrationCertUrl = req.files['registration-certificate'] 
-      ? await uploadFile(req.files['registration-certificate'][0], 'drivebidrent/documents/rc') 
+    console.log(`✅ [Add Auction] Uploaded main image + ${additionalImageUrls.length} additional image(s)`);
+
+    // Upload the remaining document files
+    const registrationCertUrl = files['registration-certificate']
+      ? await uploadFile(files['registration-certificate'][0], 'drivebidrent/documents/rc')
       : null;
-    
-    const insuranceDocUrl = req.files['insurance-document'] 
-      ? await uploadFile(req.files['insurance-document'][0], 'drivebidrent/documents/insurance') 
-      : null;
-    
-    const fitnessCertUrl = req.files['fitness-certificate'] 
-      ? await uploadFile(req.files['fitness-certificate'][0], 'drivebidrent/documents/fitness') 
-      : null;
-    
-    const form29Url = req.files['rc-transfer-form29'] 
-      ? await uploadFile(req.files['rc-transfer-form29'][0], 'drivebidrent/documents/forms') 
-      : null;
-    
-    const form30Url = req.files['rc-transfer-form30'] 
-      ? await uploadFile(req.files['rc-transfer-form30'][0], 'drivebidrent/documents/forms') 
-      : null;
-    
-    const roadTaxUrl = req.files['road-tax-receipt'] 
-      ? await uploadFile(req.files['road-tax-receipt'][0], 'drivebidrent/documents/tax') 
-      : null;
-    
-    const addressProofUrl = req.files['address-proof'] 
-      ? await uploadFile(req.files['address-proof'][0], 'drivebidrent/documents/kyc') 
+
+    const insuranceDocUrl = files['insurance-document']
+      ? await uploadFile(files['insurance-document'][0], 'drivebidrent/documents/insurance')
       : null;
 
     // Build vehicle documentation object
@@ -117,12 +120,7 @@ export const postAddAuction = async (req, res) => {
       registrationState: req.body['registration-state'],
       ownershipType: req.body['ownership-type'],
       registrationCertificate: registrationCertUrl,
-      
-      // VIN & Chassis
-      vinNumber: req.body['vin-number'],
-      chassisNumber: req.body['chassis-number'],
-      engineNumber: req.body['engine-number'],
-      
+
       // Insurance
       insuranceStatus: req.body['insurance-status'],
       insuranceExpiryDate: req.body['insurance-expiry-date'] || null,
@@ -138,38 +136,18 @@ export const postAddAuction = async (req, res) => {
       majorRepairs: req.body['major-repairs'] === 'yes',
       repairDetails: req.body['repair-details'] || '',
       
-      // Legal & Transfer
-      hypothecationStatus: req.body['hypothecation-status'],
-      loanProvider: req.body['loan-provider'] || '',
-      nocAvailable: req.body['noc-available'] === 'yes',
+      // Transfer readiness
       readyForTransfer: req.body['ready-for-transfer'] === 'yes',
-      
-      // Theft & Legal
-      stolenVehicleCheck: req.body['stolen-vehicle-check'],
-      policeNOC: req.body['police-noc'] === 'yes',
-      courtCases: req.body['court-cases'] === 'yes',
-      courtCaseDetails: req.body['court-case-details'] || '',
-      
-      // Odometer & Service
-      odometerReading: req.body['odometer-reading'] ? parseInt(req.body['odometer-reading']) : undefined,
-      odometerVerified: req.body['odometer-verified'] === 'yes',
-      odometerTampering: req.body['odometer-tampering'] || 'Unknown',
+
+      // Service
       serviceHistory: req.body['service-history'] || 'No Records',
       lastServiceDate: req.body['last-service-date'] || null,
       serviceBookAvailable: req.body['service-book-available'] === 'yes',
       
-      // Pollution & Fitness
+      // Pollution
       pollutionCertificate: req.body['pollution-certificate'],
       pollutionExpiryDate: req.body['pollution-expiry-date'] || null,
-      fitnessCertificate: fitnessCertUrl,
-      fitnessCertificateExpiry: req.body['fitness-certificate-expiry'] || null,
-      
-      // Additional Documents
-      rcTransferForm29: form29Url,
-      rcTransferForm30: form30Url,
-      roadTaxReceipt: roadTaxUrl,
-      addressProof: addressProofUrl,
-      
+
       // Verification Status (defaults)
       documentsVerified: false,
       verifiedBy: null,
@@ -208,8 +186,8 @@ export const postAddAuction = async (req, res) => {
     console.log('✅ [Add Auction] Vehicle Documentation saved:', {
       hasDocumentation: !!auction.vehicleDocumentation,
       registrationNumber: auction.vehicleDocumentation?.registrationNumber,
-      vinNumber: auction.vehicleDocumentation?.vinNumber,
       insuranceStatus: auction.vehicleDocumentation?.insuranceStatus,
+      images: 1 + (auction.additionalImages?.length || 0),
     });
     console.log('📋 [Add Auction] ========================================');
     

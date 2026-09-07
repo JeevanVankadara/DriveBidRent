@@ -6,10 +6,14 @@ const RentalRequestSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // Main photo of the vehicle. Kept under the original field name so existing
+  // rentals and every page that reads `vehicleImage` keep working unchanged.
   vehicleImage: {
     type: String,
     required: true
   },
+  // Side / additional photos: 1-5, collected separately on the rental form.
+  additionalImages: [{ type: String }],
   year: {
     type: Number,
     required: true

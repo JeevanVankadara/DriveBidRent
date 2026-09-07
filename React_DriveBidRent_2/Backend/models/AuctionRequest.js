@@ -139,9 +139,13 @@ const auctionRequestSchema = new mongoose.Schema({
     registrationCertificate: { type: String }, // File upload URL
     
     // VIN & Chassis Details
-    vinNumber: { type: String, required: true, unique: true },
-    chassisNumber: { type: String, required: true },
-    engineNumber: { type: String, required: true },
+    // No longer collected on the Add Auction form. Kept on the schema (optional)
+    // so records created before the form was simplified still read back intact.
+    // The unique index is sparse: without it, a second auction saved with no VIN
+    // would collide with the first on the null value.
+    vinNumber: { type: String, index: { unique: true, sparse: true } },
+    chassisNumber: { type: String },
+    engineNumber: { type: String },
     
     // Insurance
     insuranceStatus: { 
@@ -166,19 +170,19 @@ const auctionRequestSchema = new mongoose.Schema({
     repairDetails: { type: String },
     
     // Ownership Transfer & Legal
-    hypothecationStatus: { 
-      type: String, 
-      required: true,
+    // No longer collected on the form; optional for backward compatibility.
+    hypothecationStatus: {
+      type: String,
       enum: ['Clear - No Loan', 'Under Loan/Hypothecation']
     },
     loanProvider: { type: String }, // Bank name if under loan
     nocAvailable: { type: Boolean }, // No Objection Certificate
     readyForTransfer: { type: Boolean, default: true, required: true },
     
-    // Theft & Legal Check
-    stolenVehicleCheck: { 
-      type: String, 
-      required: true,
+    // Theft & Legal Check — no longer collected on the form; optional for
+    // backward compatibility with auctions created before the simplification.
+    stolenVehicleCheck: {
+      type: String,
       enum: ['Verified Clean', 'Not Verified']
     },
     policeNOC: { type: Boolean, default: false },

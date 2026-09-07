@@ -23,11 +23,25 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // A 401 from an auth endpoint means "those credentials were wrong", not
+    // "your session expired" — the login page has to stay put and show the
+    // message itself. Only a 401 from a protected resource is a dead session
+    // worth bouncing to the home page.
+    //
+    // This is deliberately checked on the request URL rather than on
+    // window.location: the old pathname check missed /secret-login and
+    // /secret-signup, because "/secret-login".includes("/login") is false.
+    const requestUrl = error.config?.url || '';
+    const isAuthRequest = requestUrl.includes('/auth/');
+
+    // Second guard: never bounce off a login/signup screen, whatever fired
+    // the request. Matches /login, /signup, /secret-login, /secret-signup.
+    const path = window.location.pathname;
+    const onAuthPage = /(login|signup)$/i.test(path);
+
+    if (error.response?.status === 401 && !isAuthRequest && !onAuthPage) {
       localStorage.setItem('loginMessage', 'Please login to continue');
-      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
-        window.location.href = '/';
-      }
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }
