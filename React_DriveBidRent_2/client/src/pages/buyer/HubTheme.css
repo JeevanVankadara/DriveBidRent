@@ -1,0 +1,541 @@
+/* ============================================================
+   DriveBidRent design system, ported from "Bid & Rent Hub".
+   Warm cream canvas, orange accents, deep midnight panels.
+   All colors in oklch, copied verbatim from the Hub styles.css.
+
+   Scoped to .buyer-layout so no other section of the app is
+   affected. Loaded after BuyerDashboard.css, so it wins where
+   the two overlap.
+   ============================================================ */
+
+.buyer-layout {
+  --radius: 0.875rem;
+  --background: oklch(0.955 0.033 76.5);
+  --foreground: oklch(0.22 0.03 265);
+  --cream: oklch(0.955 0.033 76.5);
+  --cream-deep: oklch(0.925 0.045 76);
+  --card: oklch(0.975 0.021 78);
+  --card-foreground: oklch(0.22 0.03 265);
+  --primary: oklch(0.7 0.19 47);
+  --primary-foreground: oklch(0.99 0.01 80);
+  --secondary: oklch(0.925 0.045 76);
+  --secondary-foreground: oklch(0.25 0.03 265);
+  --muted: oklch(0.93 0.035 78);
+  --muted-foreground: oklch(0.52 0.035 60);
+  --accent: oklch(0.9 0.06 70);
+  --accent-foreground: oklch(0.25 0.03 265);
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.985 0.01 80);
+  --midnight: oklch(0.19 0.03 264);
+  --midnight-foreground: oklch(0.96 0.02 80);
+  --rent: oklch(0.56 0.11 231);
+  --rent-foreground: oklch(0.99 0.01 80);
+  --border: oklch(0.87 0.045 75);
+  --ring: oklch(0.7 0.19 47);
+
+  --gradient-flame: linear-gradient(135deg, oklch(0.74 0.18 55), oklch(0.66 0.2 38));
+  --shadow-soft: 0 18px 40px -24px oklch(0.35 0.09 55 / 0.45);
+  --shadow-card: 0 10px 30px -18px oklch(0.35 0.09 55 / 0.55);
+
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  /* Flat cream canvas, replacing the old gradient + glow backdrop */
+  background: var(--background);
+  background-attachment: initial;
+  color: var(--foreground);
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* The old floating orange glows are not part of the Hub design */
+.buyer-layout::before,
+.buyer-layout::after {
+  content: none;
+}
+
+/* ========== TYPE UTILITIES (Hub equivalents) ========== */
+
+.hub-display {
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hub-accent-italic {
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.hub-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hub-surface-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* ========== COLOR HELPERS ========== */
+
+/* Page roots: let the .buyer-layout cream canvas show through */
+.hub-page { background: transparent; }
+
+.hub-text-primary { color: var(--primary); }
+.hub-text-muted { color: var(--muted-foreground); }
+.hub-text-rent { color: var(--rent); }
+.hub-text-foreground { color: var(--foreground); }
+.hub-text-midnight-fg { color: var(--midnight-foreground); }
+.hub-text-midnight-fg-80 { color: color-mix(in oklab, var(--midnight-foreground) 80%, transparent); }
+.hub-text-foreground-70 { color: color-mix(in oklab, var(--foreground) 70%, transparent); }
+.hub-text-foreground-70:hover { color: var(--primary); }
+
+.hub-bg-primary { background-color: var(--primary); color: var(--primary-foreground); }
+.hub-bg-primary-line { background-color: var(--primary); }
+.hub-bg-primary-soft { background-color: color-mix(in oklab, var(--primary) 12%, transparent); color: var(--primary); }
+.hub-bg-rent-soft { background-color: color-mix(in oklab, var(--rent) 12%, transparent); color: var(--rent); }
+.hub-bg-midnight { background-color: var(--midnight); color: var(--midnight-foreground); }
+.hub-bg-midnight-85 { background-color: color-mix(in oklab, var(--midnight) 85%, transparent); color: var(--midnight-foreground); }
+.hub-bg-card { background-color: var(--card); }
+.hub-bg-card-90 { background-color: color-mix(in oklab, var(--card) 90%, transparent); }
+.hub-bg-secondary { background-color: var(--secondary); }
+.hub-bg-secondary-50 { background-color: color-mix(in oklab, var(--secondary) 50%, transparent); }
+.hub-bg-rent { background-color: var(--rent); color: var(--rent-foreground); }
+
+.hub-border { border: 1px solid var(--border); }
+.hub-border-t { border-top: 1px solid var(--border); }
+.hub-shadow-soft { box-shadow: var(--shadow-soft); }
+
+/* ========== HERO ========== */
+
+.hub-hero-wrap { padding: 1rem 0.75rem 1.5rem; }
+@media (min-width: 1024px) { .hub-hero-wrap { padding: 1rem 2rem 1.5rem; } }
+
+.hub-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-3xl);
+}
+
+.hub-hero-img {
+  height: 520px;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (min-width: 1024px) { .hub-hero-img { height: 620px; } }
+
+.hub-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--midnight) 85%, transparent),
+    color-mix(in oklab, var(--midnight) 45%, transparent),
+    transparent
+  );
+}
+
+.hub-hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background-color: color-mix(in oklab, var(--midnight) 50%, transparent);
+  color: var(--midnight-foreground);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 200ms ease;
+}
+.hub-hero-arrow:hover {
+  background-color: color-mix(in oklab, var(--midnight) 75%, transparent);
+}
+
+.hub-hero-dot {
+  height: 4px;
+  border-radius: 9999px;
+  transition: all 300ms ease;
+  width: 2rem;
+  background-color: color-mix(in oklab, var(--midnight-foreground) 40%, transparent);
+}
+.hub-hero-dot.is-active {
+  width: 3rem;
+  background-color: var(--primary);
+}
+
+.hub-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: var(--radius-xl);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  transition: transform 200ms ease;
+}
+.hub-cta:hover { transform: translateY(-2px); }
+
+/* ========== BUTTONS ========== */
+
+.hub-btn-ghost {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 200ms ease;
+}
+.hub-btn-ghost:hover { background-color: var(--secondary); }
+
+.hub-btn-solid {
+  border-radius: var(--radius-xl);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: opacity 200ms ease;
+}
+.hub-btn-solid:hover { opacity: 0.9; }
+
+/* ========== VEHICLE CARD ========== */
+
+.hub-card {
+  overflow: hidden;
+  transition: transform 200ms ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.hub-card:hover { transform: translateY(-4px); }
+
+.hub-card-media {
+  position: relative;
+  margin: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.hub-card-img {
+  height: 11rem;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hub-card-badge {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hub-card-heart {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: color-mix(in oklab, var(--card) 90%, transparent);
+  color: var(--primary);
+  transition: background-color 200ms ease;
+}
+.hub-card-heart:hover {
+  background-color: var(--card);
+}
+
+.hub-spec {
+  flex: 1;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background-color: color-mix(in oklab, var(--secondary) 50%, transparent);
+  padding: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.hub-spec-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.hub-spec-value {
+  margin-top: 0.125rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.hub-spec-value.is-highlight { color: var(--primary); }
+
+/* ========== NAVBAR (Hub look, existing features kept) ========== */
+
+.buyer-layout .buyer-navbar {
+  background-color: color-mix(in oklab, var(--cream) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  box-shadow: none;
+}
+.buyer-layout .buyer-navbar:hover {
+  background-color: color-mix(in oklab, var(--cream) 90%, transparent);
+  box-shadow: none;
+}
+
+.buyer-layout .buyer-logo {
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background-clip: border-box;
+  /* Midnight reads clearly on the cream navbar; orange blended into it */
+  color: var(--midnight);
+}
+.buyer-layout .buyer-logo:hover {
+  transform: none;
+  filter: none;
+}
+/* A deeper orange for the logo accent only: --primary sits at 2.5:1 on the
+   cream navbar, this clears WCAG AA at 5.2:1 while staying the brand hue.
+   The rest of the theme keeps --primary unchanged. */
+.buyer-layout .buyer-logo .hub-logo-mid { color: oklch(0.52 0.19 42); }
+
+.buyer-layout .buyer-nav-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+  padding: 0.25rem 0;
+}
+.buyer-layout .buyer-nav-link:hover { color: var(--primary); }
+.buyer-layout .buyer-nav-link.active {
+  color: var(--primary);
+  font-weight: 500;
+}
+.buyer-layout .buyer-nav-link::after {
+  height: 2px;
+  bottom: -4px;
+  width: 100%;
+  background: var(--primary);
+  border-radius: 9999px;
+}
+
+.hub-nav-profile {
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
+  color: var(--primary);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 200ms ease;
+}
+.hub-nav-profile:hover {
+  background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+
+.hub-nav-logout {
+  border-radius: var(--radius-xl);
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  transition: opacity 200ms ease;
+}
+.hub-nav-logout:hover { opacity: 0.9; }
+
+.hub-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.hub-mobile-nav {
+  border-top: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: var(--cream);
+}
+.hub-mobile-link {
+  color: color-mix(in oklab, var(--foreground) 85%, transparent);
+  font-weight: 500;
+}
+.hub-mobile-link:hover { color: var(--primary); }
+
+/* ========== EMPTY STATE ========== */
+
+.hub-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  border-radius: var(--radius-3xl);
+  border: 2px dashed var(--border);
+  background-color: color-mix(in oklab, var(--secondary) 50%, transparent);
+}
+
+/* ========== FOOTER ========== */
+
+.hub-footer {
+  background-color: var(--midnight);
+  color: var(--midnight-foreground);
+  padding: 2.5rem 0;
+  text-align: center;
+}
+.hub-footer-title {
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 1.125rem;
+}
+.hub-footer-note {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: color-mix(in oklab, var(--midnight-foreground) 60%, transparent);
+}
+
+/* ========== HORIZONTAL FILTER BAR ========== */
+
+.hub-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.875rem;
+  padding: 1.25rem;
+}
+
+.hub-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  flex: 1 1 170px;
+  min-width: 140px;
+}
+
+.hub-field.is-narrow {
+  flex: 1 1 120px;
+  min-width: 110px;
+}
+
+.hub-field-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.hub-input,
+.hub-select {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.hub-input:focus,
+.hub-select:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+
+.hub-input::placeholder { color: var(--muted-foreground); }
+
+.hub-filter-clear {
+  flex: 0 0 auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
+  background-color: transparent;
+  color: var(--primary);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 200ms ease;
+}
+.hub-filter-clear:hover {
+  background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+
+.hub-result-count {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+/* ========== FILTER REFRESH LOADING ========== */
+
+.hub-grid-refreshing {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.hub-inline-spinner {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid color-mix(in oklab, var(--primary) 25%, transparent);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: hub-spin 0.8s linear infinite;
+  vertical-align: -2px;
+}
+
+@keyframes hub-spin {
+  to { transform: rotate(360deg); }
+}
+
+.hub-loading-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-inline-spinner { animation-duration: 2s; }
+}
+
+/* Border-colour-only helper (pairs with Tailwind's `border` width class) */
+.hub-border-c { border-color: var(--border); }
+
+/* Muted link that warms to the accent on hover */
+.hub-link-muted { color: var(--muted-foreground); }
+.hub-link-muted:hover { color: var(--primary); }

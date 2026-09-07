@@ -9,7 +9,7 @@ import {
   Heart
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
-import CarCard from './components/CarCard';
+import VehicleCard from './components/VehicleCard';
 import useWishlist from '../../hooks/useWishlist';
 import './BuyerDashboard.css';
 
@@ -290,7 +290,7 @@ export default function Wishlist() {
         .stat-pill:hover { background: rgba(255,255,255,0.12); }
       `}</style>
 
-      <div className="wl-root" style={{ background: '#f8fafc', minHeight: '100vh' }}>
+      <div className="wl-root" style={{ background: 'transparent', minHeight: '100vh' }}>
 
         {/* ── HERO ──────────────────────────────────────────────────── */}
         <section style={{
@@ -430,7 +430,7 @@ export default function Wishlist() {
                     const id = auction?._id || auction?.id || `auction-${idx}`;
                     return (
                       <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
-                        <CarCard
+                        <VehicleCard
                           item={auction}
                           type="auction"
                           isInWishlist={true}
@@ -474,7 +474,7 @@ export default function Wishlist() {
                     const id = rental?._id || rental?.id || `rental-${idx}`;
                     return (
                       <AnimatedCard key={id} isRemoving={removingIds.has(id)}>
-                        <CarCard
+                        <VehicleCard
                           item={rental}
                           type="rental"
                           returnPath="/buyer/wishlist"

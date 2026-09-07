@@ -166,16 +166,16 @@ export default function RentalDetails() {
 
     if (error || !rental) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-white px-4">
+            <div className="min-h-screen flex items-center justify-center hub-page px-4">
                 <div className="text-center max-w-md">
-                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <span className="text-3xl text-orange-500">!</span>
+                    <div className="w-20 h-20 hub-bg-primary-soft rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <span className="text-3xl hub-text-primary">!</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">{error || "Rental Not Found"}</h2>
-                    <p className="text-gray-600 mb-8">We couldn't find the rental you're looking for.</p>
+                    <h2 className="text-2xl font-bold hub-text-foreground mb-3">{error || "Rental Not Found"}</h2>
+                    <p className="hub-text-muted mb-8">We couldn't find the rental you're looking for.</p>
                     <button
                         onClick={redirectBack}
-                        className="bg-orange-500 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-600 transition shadow-md"
+                        className="hub-bg-primary px-8 py-3 rounded-lg font-medium hover:opacity-90 transition shadow-md"
                     >
                         Return to {originLabel}
                     </button>
@@ -185,30 +185,26 @@ export default function RentalDetails() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-            {/* Navigation */}
-            <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <button
-                        onClick={redirectBack}
-                        className="text-gray-600 hover:text-orange-600 font-medium flex items-center gap-2 transition-colors group"
-                    >
-                        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back to {originLabel}
-                    </button>
-                </div>
-            </div>
+        <div className="min-h-screen hub-page">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+                {/* Navigation */}
+                <button
+                    onClick={redirectBack}
+                    className="hub-link-muted font-medium flex items-center gap-2 transition-colors group mb-6"
+                >
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to {originLabel}
+                </button>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Vehicle Header */}
                 <div className="mb-8">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
                         <div>
-                            <h1 className="text-4xl font-bold text-gray-900 mb-3 leading-tight">{rental.vehicleName}</h1>
+                            <h1 className="text-4xl font-bold hub-text-foreground mb-3 leading-tight">{rental.vehicleName}</h1>
                             <div className="flex items-center gap-4 flex-wrap">
-                                <span className="text-3xl font-bold text-orange-600">₹{rental.costPerDay}<span className="text-base font-normal text-gray-600">/day</span></span>
+                                <span className="text-3xl font-bold hub-text-primary">₹{rental.costPerDay}<span className="text-base font-normal hub-text-muted">/day</span></span>
                                 {!isAvailable && (
                                     <span className="px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-semibold shadow-sm">
                                         Currently Unavailable
@@ -228,7 +224,7 @@ export default function RentalDetails() {
                                     scrollToCenter();
                                     setTimeout(() => setShowDateModal(true), 300);
                                 }}
-                                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-10 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                className="hub-bg-primary px-10 py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                             >
                                 Rent Now
                             </button>
@@ -240,7 +236,7 @@ export default function RentalDetails() {
                     {/* Left Column - Main Content */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Vehicle Image */}
-                        <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
+                        <div className="overflow-hidden rounded-2xl hub-bg-card shadow-xl">
                             <img
                                 src={rental.vehicleImage}
                                 alt={rental.vehicleName}
@@ -249,34 +245,34 @@ export default function RentalDetails() {
                         </div>
 
                         {/* Specifications */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Specifications</h2>
+                        <div className="hub-bg-card rounded-2xl shadow-lg p-8">
+                            <h2 className="text-2xl font-bold hub-text-foreground mb-6">Specifications</h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div className="bg-gradient-to-br from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                                    <p className="text-sm text-gray-600 mb-1.5 font-medium">Year</p>
-                                    <p className="font-bold text-gray-900 text-lg">{rental.year}</p>
+                                <div className="hub-bg-secondary-50 p-5 rounded-xl border hub-border-c">
+                                    <p className="text-sm hub-text-muted mb-1.5 font-medium">Year</p>
+                                    <p className="font-bold hub-text-foreground text-lg">{rental.year}</p>
                                 </div>
-                                <div className="bg-gradient-to-br from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                                    <p className="text-sm text-gray-600 mb-1.5 font-medium">Seating Capacity</p>
-                                    <p className="font-bold text-gray-900 text-lg">{rental.capacity} seats</p>
+                                <div className="hub-bg-secondary-50 p-5 rounded-xl border hub-border-c">
+                                    <p className="text-sm hub-text-muted mb-1.5 font-medium">Seating Capacity</p>
+                                    <p className="font-bold hub-text-foreground text-lg">{rental.capacity} seats</p>
                                 </div>
-                                <div className="bg-gradient-to-br from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                                    <p className="text-sm text-gray-600 mb-1.5 font-medium">Fuel Type</p>
-                                    <p className="font-bold text-gray-900 text-lg capitalize">{rental.fuelType}</p>
+                                <div className="hub-bg-secondary-50 p-5 rounded-xl border hub-border-c">
+                                    <p className="text-sm hub-text-muted mb-1.5 font-medium">Fuel Type</p>
+                                    <p className="font-bold hub-text-foreground text-lg capitalize">{rental.fuelType}</p>
                                 </div>
-                                <div className="bg-gradient-to-br from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                                    <p className="text-sm text-gray-600 mb-1.5 font-medium">Transmission</p>
-                                    <p className="font-bold text-gray-900 text-lg capitalize">{rental.transmission}</p>
+                                <div className="hub-bg-secondary-50 p-5 rounded-xl border hub-border-c">
+                                    <p className="text-sm hub-text-muted mb-1.5 font-medium">Transmission</p>
+                                    <p className="font-bold hub-text-foreground text-lg capitalize">{rental.transmission}</p>
                                 </div>
-                                <div className="bg-gradient-to-br from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                                    <p className="text-sm text-gray-600 mb-1.5 font-medium">Air Conditioning</p>
-                                    <p className={`font-bold text-lg ${rental.AC === 'available' ? 'text-green-600' : 'text-gray-900'}`}>
+                                <div className="hub-bg-secondary-50 p-5 rounded-xl border hub-border-c">
+                                    <p className="text-sm hub-text-muted mb-1.5 font-medium">Air Conditioning</p>
+                                    <p className={`font-bold text-lg ${rental.AC === 'available' ? 'text-green-600' : 'hub-text-foreground'}`}>
                                         {rental.AC === 'available' ? 'Available' : 'Not Available'}
                                     </p>
                                 </div>
-                                <div className="bg-gradient-to-br from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                                    <p className="text-sm text-gray-600 mb-1.5 font-medium">Driver Service</p>
-                                    <p className={`font-bold text-lg ${rental.driverAvailable ? 'text-green-600' : 'text-gray-900'}`}>
+                                <div className="hub-bg-secondary-50 p-5 rounded-xl border hub-border-c">
+                                    <p className="text-sm hub-text-muted mb-1.5 font-medium">Driver Service</p>
+                                    <p className={`font-bold text-lg ${rental.driverAvailable ? 'text-green-600' : 'hub-text-foreground'}`}>
                                         {rental.driverAvailable ? 'Available' : 'Not Available'}
                                     </p>
                                 </div>
@@ -284,13 +280,13 @@ export default function RentalDetails() {
                         </div>
 
                         {/* Reviews Section */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8">
+                        <div className="hub-bg-card rounded-2xl shadow-lg p-8">
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
+                                <h2 className="text-2xl font-bold hub-text-foreground">Customer Reviews</h2>
                                 {canReview && (
                                     <button
                                         onClick={() => setShowReviewModal(true)}
-                                        className="text-orange-600 hover:text-white hover:bg-orange-600 font-semibold border-2 border-orange-600 px-5 py-2.5 rounded-xl transition-all"
+                                        className="hub-filter-clear font-semibold"
                                     >
                                         Write a Review
                                     </button>
@@ -298,20 +294,20 @@ export default function RentalDetails() {
                             </div>
 
                             {reviews.length === 0 ? (
-                                <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
-                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <span className="text-gray-400 text-3xl">★</span>
+                                <div className="text-center py-16 hub-bg-secondary-50 rounded-xl border hub-border-c">
+                                    <div className="w-20 h-20 hub-bg-card rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <span className="hub-text-muted text-3xl">★</span>
                                     </div>
-                                    <p className="text-gray-700 font-semibold mb-2 text-lg">No reviews yet</p>
-                                    <p className="text-gray-500 text-sm">Be the first to share your experience</p>
+                                    <p className="hub-text-foreground font-semibold mb-2 text-lg">No reviews yet</p>
+                                    <p className="hub-text-muted text-sm">Be the first to share your experience</p>
                                 </div>
                             ) : (
                                 <div className="space-y-6">
                                     {reviews.map((review) => (
-                                        <div key={review._id} className="border-b border-gray-200 pb-6 last:border-b-0">
+                                        <div key={review._id} className="border-b hub-border-c pb-6 last:border-b-0">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div>
-                                                    <p className="font-bold text-gray-900 mb-2 text-lg">
+                                                    <p className="font-bold hub-text-foreground mb-2 text-lg">
                                                         {review.buyerId?.firstName} {review.buyerId?.lastName}
                                                     </p>
                                                     <div className="flex items-center gap-3">
@@ -319,19 +315,19 @@ export default function RentalDetails() {
                                                             {[...Array(5)].map((_, i) => (
                                                                 <span
                                                                     key={i}
-                                                                    className={`text-xl ${i < review.rating ? 'text-orange-500' : 'text-gray-300'}`}
+                                                                    className={`text-xl ${i < review.rating ? 'hub-text-primary' : 'hub-text-muted'}`}
                                                                 >
                                                                     ★
                                                                 </span>
                                                             ))}
                                                         </div>
-                                                        <span className="text-sm text-gray-500 font-medium">
+                                                        <span className="text-sm hub-text-muted font-medium">
                                                             {new Date(review.createdAt).toLocaleDateString()}
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                                            <p className="hub-text-foreground leading-relaxed">{review.comment}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -342,32 +338,32 @@ export default function RentalDetails() {
                     {/* Right Column - Sidebar */}
                     <div className="lg:col-span-1 space-y-6">
                         {/* Seller Information */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Host Information</h2>
+                        <div className="hub-bg-card rounded-2xl shadow-lg p-8 border hub-border-c">
+                            <h2 className="text-2xl font-bold hub-text-foreground mb-6">Host Information</h2>
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center">
-                                        <span className="text-2xl font-bold text-white">
+                                    <div className="w-16 h-16 hub-bg-primary rounded-full flex items-center justify-center">
+                                        <span className="text-2xl font-bold">
                                             {rental.seller.firstName?.charAt(0)}{rental.seller.lastName?.charAt(0)}
                                         </span>
                                     </div>
                                     <div>
-                                        <p className="font-bold text-gray-900 text-lg">{rental.seller.firstName} {rental.seller.lastName}</p>
-                                        <p className="text-gray-600 text-sm flex items-center gap-1">
+                                        <p className="font-bold hub-text-foreground text-lg">{rental.seller.firstName} {rental.seller.lastName}</p>
+                                        <p className="hub-text-muted text-sm flex items-center gap-1">
                                             {rental.seller.city}
                                         </p>
                                     </div>
                                 </div>
                                 
-                                <div className="space-y-4 pt-4 border-t border-gray-100">
+                                <div className="space-y-4 pt-4 border-t hub-border-c">
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Email Address</p>
-                                        <p className="text-gray-900 font-medium">{rental.seller.email}</p>
+                                        <p className="text-xs hub-text-muted mb-1.5 font-semibold uppercase tracking-wide">Email Address</p>
+                                        <p className="hub-text-foreground font-medium">{rental.seller.email}</p>
                                     </div>
                                     {rental.seller.phone && (
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Phone Number</p>
-                                            <p className="text-gray-900 font-medium">{rental.seller.phone}</p>
+                                            <p className="text-xs hub-text-muted mb-1.5 font-semibold uppercase tracking-wide">Phone Number</p>
+                                            <p className="hub-text-foreground font-medium">{rental.seller.phone}</p>
                                         </div>
                                     )}
                                 </div>
@@ -386,7 +382,7 @@ export default function RentalDetails() {
                                             alert('Unable to open chat.');
                                         }
                                     }}
-                                    className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3.5 rounded-xl font-semibold hover:from-gray-900 hover:to-black transition-all flex items-center justify-center gap-2"
+                                    className="w-full hub-bg-midnight py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                                 >
                                     Contact Host
                                 </button>
@@ -394,27 +390,27 @@ export default function RentalDetails() {
                         </div>
 
                         {/* Quick Facts */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Car Rental Details</h2>
+                        <div className="hub-bg-card rounded-2xl shadow-lg p-8 border hub-border-c">
+                            <h2 className="text-2xl font-bold hub-text-foreground mb-6">Car Rental Details</h2>
                             <div className="space-y-1">
-                                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                                    <span className="text-gray-600 font-medium">Daily Rate</span>
-                                    <span className="font-bold text-gray-900 text-lg">₹{rental.costPerDay}</span>
+                                <div className="flex justify-between items-center py-4 border-b hub-border-c">
+                                    <span className="hub-text-muted font-medium">Daily Rate</span>
+                                    <span className="font-bold hub-text-foreground text-lg">₹{rental.costPerDay}</span>
                                 </div>
-                                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                                    <span className="text-gray-600 font-medium">Driver Available</span>
+                                <div className="flex justify-between items-center py-4 border-b hub-border-c">
+                                    <span className="hub-text-muted font-medium">Driver Available</span>
                                     <span className={`font-bold text-lg ${rental.driverAvailable ? 'text-green-600' : 'text-red-600'}`}>
                                         {rental.driverAvailable ? 'Yes' : 'No'}
                                     </span>
                                 </div>
                                 {rental.driverAvailable && (
-                                    <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                                        <span className="text-gray-600 font-medium">Driver Rate</span>
-                                        <span className="font-bold text-gray-900 text-lg">₹{rental.driverRate}/day</span>
+                                    <div className="flex justify-between items-center py-4 border-b hub-border-c">
+                                        <span className="hub-text-muted font-medium">Driver Rate</span>
+                                        <span className="font-bold hub-text-foreground text-lg">₹{rental.driverRate}/day</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center py-4">
-                                    <span className="text-gray-600 font-medium">Vehicle Status</span>
+                                    <span className="hub-text-muted font-medium">Vehicle Status</span>
                                     <span className={`font-bold text-lg ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
                                         {isAvailable ? 'Available' : 'Unavailable'}
                                     </span>
@@ -433,7 +429,7 @@ export default function RentalDetails() {
                                         scrollToCenter();
                                         setTimeout(() => setShowDateModal(true), 300);
                                     }}
-                                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all mt-6"
+                                    className="w-full hub-bg-primary py-4 rounded-xl font-bold transition-all mt-6"
                                 >
                                     Book This Vehicle
                                 </button>

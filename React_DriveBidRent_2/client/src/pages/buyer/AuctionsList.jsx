@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import io from 'socket.io-client';
-import CarCard from './components/CarCard';
+import VehicleCard from './components/VehicleCard';
 import { getAuctions, getWishlist, addToWishlist, removeFromWishlist } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -10,6 +10,7 @@ export default function AuctionsList() {
   const [auctions, setAuctions] = useState([]);
   const [wishlist, setWishlist] = useState({ auctions: [], rentals: [] });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Extract filters from URL
@@ -40,7 +41,9 @@ export default function AuctionsList() {
     const socket = io(backendUrl, { withCredentials: true });
 
     socket.on('global_new_bid', () => {
-      fetchAuctions();
+      // silent: a bid from another user should refresh prices without
+      // dimming the grid the way a filter change does
+      fetchAuctions({ silent: true });
     });
 
     return () => {
@@ -49,7 +52,8 @@ export default function AuctionsList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, condition, fuelType, transmission, minPrice, maxPrice]);
 
-  const fetchAuctions = async () => {
+  const fetchAuctions = async ({ silent = false } = {}) => {
+    if (!silent) setRefreshing(true);
     try {
       const filters = {
         search: debouncedSearch,
@@ -66,6 +70,7 @@ export default function AuctionsList() {
       console.error('Error fetching auctions:', error);
     } finally {
       setLoading(false);
+      if (!silent) setRefreshing(false);
     }
   };
 
@@ -117,158 +122,133 @@ export default function AuctionsList() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-white">
-
-      {/* Hero Section */}
-      <section
-        className="relative h-96 md:h-[400px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center text-white"
-        style={{ backgroundImage: "url('/images/auctions-hero.jpg')", backgroundColor: '#1a1a1a' }}
-      >
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 px-6 max-w-4xl">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-            <span className="text-orange-500">Available</span> Auctions
-          </h1>
-          <p className="mt-6 text-xl md:text-2xl font-medium text-gray-200">
-            Find your dream car at the best price through our transparent auction system
-          </p>
-        </div>
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-transparent" />
-      </section>
+    <div className="min-h-screen hub-page">
 
       {/* Filters + Results */}
-      <section className="py-16 max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+      <section className="py-10 max-w-[1400px] mx-auto px-5 lg:px-10">
 
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-xl border border-orange-100 p-8 sticky top-24">
-              <h3 className="text-2xl font-bold text-orange-600 mb-6">Filter Auctions</h3>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Search by Name</label>
-                  <input
-                    type="text"
-                    name="search"
-                    value={search}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Honda Civic"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Condition</label>
-                  <select
-                    name="condition"
-                    value={condition}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="">All Conditions</option>
-                    <option value="excellent">Excellent</option>
-                    <option value="good">Good</option>
-                    <option value="fair">Fair</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Fuel Type</label>
-                  <select
-                    name="fuelType"
-                    value={fuelType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="">All Types</option>
-                    <option value="petrol">Petrol</option>
-                    <option value="diesel">Diesel</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Transmission</label>
-                  <select
-                    name="transmission"
-                    value={transmission}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="">All Types</option>
-                    <option value="manual">Manual</option>
-                    <option value="automatic">Automatic</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Min Price</label>
-                    <input
-                      type="number"
-                      name="minPrice"
-                      value={minPrice}
-                      onChange={handleInputChange}
-                      placeholder="₹0"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Max Price</label>
-                    <input
-                      type="number"
-                      name="maxPrice"
-                      value={maxPrice}
-                      onChange={handleInputChange}
-                      placeholder="₹50L"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={resetFilters}
-                  className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition"
-                >
-                  Clear All Filters
-                </button>
-              </div>
-            </div>
+        {/* Horizontal Filter Bar */}
+        <div className="hub-surface-card hub-filterbar">
+          <div className="hub-field" style={{ flex: '2 1 240px' }}>
+            <label className="hub-field-label" htmlFor="auctions-search">Search by Name</label>
+            <input
+              id="auctions-search"
+              type="text"
+              name="search"
+              value={search}
+              onChange={handleInputChange}
+              placeholder="e.g. Honda Civic"
+              className="hub-input"
+            />
           </div>
 
-          {/* Auctions Grid */}
-          <div className="lg:col-span-3">
-            <div className="mb-8 flex justify-between items-center">
-              <p className="text-xl font-semibold text-gray-700">
-                {auctions.length} {auctions.length === 1 ? 'auction' : 'auctions'} found
-              </p>
-            </div>
-
-            {auctions.length === 0 ? (
-              <div className="text-center py-20 bg-gray-50 rounded-2xl">
-                <p className="text-2xl text-gray-600 mb-6">No auctions found matching your criteria.</p>
-                <button
-                  onClick={resetFilters}
-                  className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg"
-                >
-                  Clear Filters & Show All
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {auctions.map(auction => (
-                  <CarCard
-                    key={auction._id}
-                    item={auction}
-                    type="auction"
-                    isInWishlist={wishlist.auctions?.some(item => item._id === auction._id)}
-                    onToggleWishlist={() => toggleWishlist(auction._id, 'auction')}
-                  />
-                ))}
-              </div>
-            )}
+          <div className="hub-field">
+            <label className="hub-field-label" htmlFor="auctions-condition">Condition</label>
+            <select
+              id="auctions-condition"
+              name="condition"
+              value={condition}
+              onChange={handleInputChange}
+              className="hub-select"
+            >
+              <option value="">All Conditions</option>
+              <option value="excellent">Excellent</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+            </select>
           </div>
+
+          <div className="hub-field">
+            <label className="hub-field-label" htmlFor="auctions-fuel">Fuel Type</label>
+            <select
+              id="auctions-fuel"
+              name="fuelType"
+              value={fuelType}
+              onChange={handleInputChange}
+              className="hub-select"
+            >
+              <option value="">All Types</option>
+              <option value="petrol">Petrol</option>
+              <option value="diesel">Diesel</option>
+            </select>
+          </div>
+
+          <div className="hub-field">
+            <label className="hub-field-label" htmlFor="auctions-transmission">Transmission</label>
+            <select
+              id="auctions-transmission"
+              name="transmission"
+              value={transmission}
+              onChange={handleInputChange}
+              className="hub-select"
+            >
+              <option value="">All Types</option>
+              <option value="manual">Manual</option>
+              <option value="automatic">Automatic</option>
+            </select>
+          </div>
+
+          <div className="hub-field is-narrow">
+            <label className="hub-field-label" htmlFor="auctions-min-price">Min Price</label>
+            <input
+              id="auctions-min-price"
+              type="number"
+              name="minPrice"
+              value={minPrice}
+              onChange={handleInputChange}
+              placeholder="₹0"
+              className="hub-input"
+            />
+          </div>
+
+          <div className="hub-field is-narrow">
+            <label className="hub-field-label" htmlFor="auctions-max-price">Max Price</label>
+            <input
+              id="auctions-max-price"
+              type="number"
+              name="maxPrice"
+              value={maxPrice}
+              onChange={handleInputChange}
+              placeholder="₹50L"
+              className="hub-input"
+            />
+          </div>
+
+          <button onClick={resetFilters} className="hub-filter-clear">
+            Clear All
+          </button>
         </div>
+
+        {/* Auctions Grid */}
+        <div className="mt-6 mb-6 hub-loading-row" aria-live="polite">
+          {refreshing && <span className="hub-inline-spinner" role="status" aria-label="Loading auctions" />}
+          <p className="hub-result-count">
+            {refreshing
+              ? 'Updating results...'
+              : `${auctions.length} ${auctions.length === 1 ? 'auction' : 'auctions'} found`}
+          </p>
+        </div>
+
+        {auctions.length === 0 ? (
+          <div className="hub-empty">
+            <p className="hub-text-muted text-center mb-6">No auctions found matching your criteria.</p>
+            <button onClick={resetFilters} className="hub-cta">
+              Clear Filters &amp; Show All
+            </button>
+          </div>
+        ) : (
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 ${refreshing ? 'hub-grid-refreshing' : ''}`} aria-busy={refreshing}>
+            {auctions.map(auction => (
+              <VehicleCard
+                key={auction._id}
+                item={auction}
+                type="auction"
+                isInWishlist={wishlist.auctions?.some(item => item._id === auction._id)}
+                onToggleWishlist={() => toggleWishlist(auction._id, 'auction')}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

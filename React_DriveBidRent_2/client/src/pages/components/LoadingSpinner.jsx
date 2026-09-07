@@ -7,7 +7,9 @@ const LoadingSpinner = () => {
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
-      backgroundColor: '#f4f4f4'
+      // transparent so the surrounding layout's background shows through
+      // (cream in the buyer section, page default elsewhere)
+      backgroundColor: 'transparent'
     }}>
       <div style={{
         border: '4px solid #f3f3f3',

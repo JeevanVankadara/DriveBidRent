@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import toast from 'react-hot-toast';
 import adminServices from "../../services/admin.services";
@@ -15,6 +15,57 @@ const AdminProfile = () => {
   });
   const [passwordStrength, setPasswordStrength] = useState("");
   const [passwordMatch, setPasswordMatch] = useState("");
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState({ doorNo: "", street: "", city: "", state: "" });
+
+  // Seed the form once the profile arrives, and whenever it is refreshed
+  useEffect(() => {
+    if (!admin) return;
+    setAddressForm({
+      doorNo: admin.doorNo || "",
+      street: admin.street || "",
+      city: admin.city || "",
+      state: admin.state || "",
+    });
+  }, [admin]);
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddressForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddressCancel = () => {
+    setAddressForm({
+      doorNo: admin?.doorNo || "",
+      street: admin?.street || "",
+      city: admin?.city || "",
+      state: admin?.state || "",
+    });
+    setEditingAddress(false);
+  };
+
+  const handleAddressSave = async () => {
+    if (!addressForm.city.trim() || !addressForm.state.trim()) {
+      toast.error("City and state are required");
+      return;
+    }
+    try {
+      setSavingAddress(true);
+      const result = await adminServices.updateAdminAddress(addressForm);
+      if (result?.success) {
+        toast.success(result.message || "Address updated successfully");
+        setEditingAddress(false);
+        refresh();
+      } else {
+        toast.error(result?.message || "Failed to update address");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to update address");
+    } finally {
+      setSavingAddress(false);
+    }
+  };
 
 
 
@@ -115,10 +166,85 @@ const AdminProfile = () => {
               <span className="read-only" style={{ padding: "0.75rem 0.5rem", border: "1px solid #eee", borderRadius: "0.5rem", background: "#f4f4f4", marginBottom: "1rem", color: "#666", display: "block" }}>{admin.phone}</span>
             </div>
             <div className="profile-details-item" style={{ marginBottom: "1rem", fontSize: "1.05rem" }}>
-              <strong style={{ display: "inline-block", width: "160px", fontWeight: 600, color: "#555" }}>Address:</strong>
-              <span className="read-only" style={{ padding: "0.75rem 0.5rem", border: "1px solid #eee", borderRadius: "0.5rem", background: "#f4f4f4", marginBottom: "1rem", color: "#666", display: "block" }}>
-                {admin.doorNo}, {admin.street}, {admin.city}, {admin.state}
-              </span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                <strong style={{ fontWeight: 600, color: "#555" }}>Address:</strong>
+                {!editingAddress && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingAddress(true)}
+                    style={{ background: "transparent", border: "1px solid #ff6b00", color: "#ff6b00", padding: "0.35rem 0.9rem", borderRadius: "0.5rem", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+
+              {editingAddress ? (
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: 600, color: "#555", fontSize: "0.85rem" }}>Door No</label>
+                  <input
+                    type="text"
+                    name="doorNo"
+                    value={addressForm.doorNo}
+                    onChange={handleAddressChange}
+                    placeholder="e.g. 12-3/A"
+                    style={{ width: "100%", padding: "0.6rem 0.5rem", border: "1px solid #ccc", borderRadius: "0.5rem", fontSize: "0.95rem", marginBottom: "0.75rem" }}
+                  />
+
+                  <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: 600, color: "#555", fontSize: "0.85rem" }}>Street</label>
+                  <input
+                    type="text"
+                    name="street"
+                    value={addressForm.street}
+                    onChange={handleAddressChange}
+                    placeholder="e.g. MG Road"
+                    style={{ width: "100%", padding: "0.6rem 0.5rem", border: "1px solid #ccc", borderRadius: "0.5rem", fontSize: "0.95rem", marginBottom: "0.75rem" }}
+                  />
+
+                  <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: 600, color: "#555", fontSize: "0.85rem" }}>City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={addressForm.city}
+                    onChange={handleAddressChange}
+                    placeholder="e.g. Kurnool"
+                    style={{ width: "100%", padding: "0.6rem 0.5rem", border: "1px solid #ccc", borderRadius: "0.5rem", fontSize: "0.95rem", marginBottom: "0.75rem" }}
+                  />
+
+                  <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: 600, color: "#555", fontSize: "0.85rem" }}>State</label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={addressForm.state}
+                    onChange={handleAddressChange}
+                    placeholder="e.g. Andhra Pradesh"
+                    style={{ width: "100%", padding: "0.6rem 0.5rem", border: "1px solid #ccc", borderRadius: "0.5rem", fontSize: "0.95rem", marginBottom: "0.75rem" }}
+                  />
+
+                  <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+                    <button
+                      type="button"
+                      onClick={handleAddressSave}
+                      disabled={savingAddress}
+                      style={{ flex: 1, background: "#ff6b00", color: "#fff", border: "none", padding: "0.65rem", borderRadius: "0.5rem", fontWeight: 600, cursor: savingAddress ? "not-allowed" : "pointer", opacity: savingAddress ? 0.7 : 1 }}
+                    >
+                      {savingAddress ? "Saving..." : "Save Address"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddressCancel}
+                      disabled={savingAddress}
+                      style={{ flex: 1, background: "transparent", color: "#666", border: "1px solid #ccc", padding: "0.65rem", borderRadius: "0.5rem", fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <span className="read-only" style={{ padding: "0.75rem 0.5rem", border: "1px solid #eee", borderRadius: "0.5rem", background: "#f4f4f4", marginBottom: "1rem", color: "#666", display: "block" }}>
+                  {[admin.doorNo, admin.street, admin.city, admin.state].filter(Boolean).join(", ") || "No address saved yet"}
+                </span>
+              )}
             </div>
           </div>
 

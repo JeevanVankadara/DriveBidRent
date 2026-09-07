@@ -138,7 +138,7 @@ export default function LiveAuctionRoom() {
     return () => clearInterval(timer);
   }, [auction]);
 
-  if (loading) return <div style={{ background: '#0f172a', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>;
+  if (loading) return <div style={{ background: 'var(--midnight)', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>;
   if (!auction) return <div className="live-auction-container"><div className="live-header"><h1 className="vehicle-title">Auction Not Found</h1></div></div>;
 
   const minBid = currentBid ? currentBid.bidAmount + 2000 : auction.startingBid;
@@ -175,7 +175,7 @@ export default function LiveAuctionRoom() {
           <div>
             <div className="live-badge"><span className="dot"></span> LIVE</div>
           </div>
-          <button className="action-btn" onClick={() => navigate(`/buyer/auctions/${id}`)} style={{ padding: '0.5rem 1rem', fontSize: '1rem', background: 'transparent', border: '1px solid #ff6b00' }}>
+          <button className="action-btn" onClick={() => navigate(`/buyer/auctions/${id}`)} style={{ padding: '0.5rem 1rem', fontSize: '1rem', background: 'transparent', border: '1px solid var(--primary)' }}>
             Exit Room
           </button>
         </header>
@@ -241,7 +241,7 @@ export default function LiveAuctionRoom() {
                     <span>₹{b.amount.toLocaleString()} ({b.time})</span>
                   </li>
                 ))}
-                {bidsHistory.length === 0 && <li className="bid-item" style={{color: '#94a3b8'}}>No bids yet</li>}
+                {bidsHistory.length === 0 && <li className="bid-item" style={{ color: 'color-mix(in oklab, var(--midnight-foreground) 62%, transparent)' }}>No bids yet</li>}
               </ul>
             </div>
           </div>

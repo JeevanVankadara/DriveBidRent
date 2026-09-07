@@ -2,10 +2,33 @@
 import RentalRequest from '../../models/RentalRequest.js';
 import AuctionRequest from '../../models/AuctionRequest.js';
 import AuctionBid from '../../models/AuctionBid.js';
+import redisClient from '../../utils/redisClient.js';
 
 // Controller for dashboard home with featured listings
 export const getDashboardHome = async (req, res) => {
   try {
+    // Featured listings are the same for every buyer, so one shared cache key
+    const cacheKey = 'dashboard:featured';
+    const startTime = Date.now();
+
+    // Check Redis Cache first
+    if (redisClient.isReady) {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        const responseTime = Date.now() - startTime;
+        console.log(`\x1b[32m[REDIS HIT]\x1b[0m  Key: ${cacheKey} | Time: ${responseTime}ms (served from Redis cache)\x1b[0m`);
+        return res.json({
+          success: true,
+          message: 'Dashboard data fetched successfully (Cached)',
+          cacheStatus: 'HIT',
+          responseTime: responseTime,
+          // user is never cached — always taken from the current request
+          data: { ...JSON.parse(cachedData), user: req.user }
+        });
+      }
+    }
+
+    // CACHE MISS — fetch from MongoDB Atlas
     const featuredRentals = await RentalRequest.find({ status: 'available' })
       .sort({ createdAt: -1 })
       .limit(3)
@@ -43,19 +66,24 @@ export const getDashboardHome = async (req, res) => {
       }));
     }
 
+    const responseData = { featuredRentals, featuredAuctions: featuredAuctionsWithBids };
+
+    // Save to Redis Cache with 90 second TTL
+    if (redisClient.isReady) {
+      await redisClient.setEx(cacheKey, 90, JSON.stringify(responseData));
+    }
+
+    const responseTime = Date.now() - startTime;
+    console.log(`\x1b[33m[REDIS MISS]\x1b[0m Key: ${cacheKey} | Time: ${responseTime}ms (fetched from MongoDB Atlas)\x1b[0m`);
+
     res.json({
       success: true,
       message: 'Dashboard data fetched successfully',
-      data: { featuredRentals, featuredAuctions: featuredAuctionsWithBids, user: req.user }
+      cacheStatus: 'MISS',
+      responseTime: responseTime,
+      data: { ...responseData, user: req.user }
     });
 
-    // res.render('buyer_dashboard/proj.ejs', {
-    //   featuredRentals,
-    //   featuredAuctions,
-    //   user: req.user,
-    //   error: null,
-    //   success: null
-    // });
   } catch (err) {
     console.error('Error fetching dashboard home:', err);
     res.status(500).json({
@@ -64,9 +92,5 @@ export const getDashboardHome = async (req, res) => {
       data: null
     });
 
-    // res.status(500).render('buyer_dashboard/error.ejs', {
-    //   user: req.user || {},
-    //   message: 'An error occurred while loading the dashboard'
-    // });
   }
 };

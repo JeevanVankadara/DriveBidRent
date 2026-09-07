@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import './AuctionDetails.css';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
-import { createOrGetChatForAuction, getAuctionById, placeBid } from '../../services/buyer.services';
+import { createOrGetChatForAuction, getAuctionById } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const formatINR = (value) => {
@@ -31,6 +31,12 @@ const titleCase = (value) => {
 const valueOrNA = (value) => {
   if (value === null || value === undefined || value === '') return 'N/A';
   return value;
+};
+
+const getOptimizedVehicleImageUrl = (url) => {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  if (url.includes('/upload/f_auto') || url.includes('/upload/q_auto')) return url;
+  return url.replace('/upload/', '/upload/f_auto,q_auto:best,c_limit,w_1600,h_1000/');
 };
 
 function SectionHeader({ eyebrow, title, description }) {
@@ -69,14 +75,13 @@ export default function AuctionDetails() {
   const navigate = useNavigate();
   const [auction, setAuction] = useState(null);
   const [currentBid, setCurrentBid] = useState(null);
-  const [bidAmount, setBidAmount] = useState('');
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isCurrentBidder, setIsCurrentBidder] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [documentsOpen, setDocumentsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('specs');
 
   const fetchAuctionDetails = useCallback(async (isInitial = false) => {
     try {
@@ -117,10 +122,10 @@ export default function AuctionDetails() {
   const images = useMemo(() => {
     if (!auction) return [];
     const imageSet = new Set();
-    if (auction.mainImage) imageSet.add(auction.mainImage);
-    if (auction.vehicleImage) imageSet.add(auction.vehicleImage);
-    (auction.additionalImages || []).forEach((img) => img && imageSet.add(img));
-    (auction.vehicleImages || []).forEach((img) => img && imageSet.add(img));
+    if (auction.mainImage) imageSet.add(getOptimizedVehicleImageUrl(auction.mainImage));
+    if (auction.vehicleImage) imageSet.add(getOptimizedVehicleImageUrl(auction.vehicleImage));
+    (auction.additionalImages || []).forEach((img) => img && imageSet.add(getOptimizedVehicleImageUrl(img)));
+    (auction.vehicleImages || []).forEach((img) => img && imageSet.add(getOptimizedVehicleImageUrl(img)));
     return Array.from(imageSet);
   }, [auction]);
 
@@ -139,7 +144,6 @@ export default function AuctionDetails() {
       .map(([label, url]) => ({ label, url }));
   }, [auction]);
 
-  const minBid = currentBid?.bidAmount ? currentBid.bidAmount + 2000 : (auction?.startingBid || 0);
   const visibleBid = currentBid?.bidAmount || auction?.startingBid || 0;
   const review = auction?.mechanicReview || {};
   const inspection = auction?.multipointInspection || {};
@@ -151,6 +155,7 @@ export default function AuctionDetails() {
     inspection.overallRating ||
     inspection.mechanicSummary
   );
+  const currentImage = images[currentImageIndex];
 
   const handlePrevImage = () => {
     if (!images.length) return;
@@ -160,59 +165,6 @@ export default function AuctionDetails() {
   const handleNextImage = () => {
     if (!images.length) return;
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const handleBidAmountChange = (value) => {
-    setBidAmount(value);
-    setError('');
-  };
-
-  const handleBidSubmit = async (e) => {
-    e.preventDefault();
-
-    if (isCurrentBidder) {
-      setError('You already have the current highest bid for this auction.');
-      return;
-    }
-
-    if (auction?.auction_stopped) {
-      setError('This auction has been stopped.');
-      return;
-    }
-
-    const bidValue = Number(bidAmount);
-    if (!Number.isFinite(bidValue) || bidValue <= 0) {
-      setError('Please enter a valid bid amount.');
-      return;
-    }
-
-    if (bidValue < minBid) {
-      setError(`Your bid must be at least ${formatINR(minBid)}.`);
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      setError('');
-      setSuccess('');
-      const result = await placeBid({ auctionId: id, bidAmount: bidValue });
-
-      if (!result.success) {
-        setError(result.message || 'Failed to place bid. Please try again.');
-        return;
-      }
-
-      setSuccess('Your bid has been placed successfully.');
-      setBidAmount('');
-      setCurrentBid({ bidAmount: bidValue });
-      setIsCurrentBidder(true);
-      fetchAuctionDetails(false);
-    } catch (err) {
-      console.error('Error placing bid:', err);
-      setError(err.response?.data?.message || 'An error occurred. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const handleContactSeller = async () => {
@@ -233,6 +185,12 @@ export default function AuctionDetails() {
     }
   };
 
+  const tabs = [
+    { id: 'specs', label: 'Specifications' },
+    { id: 'inspection', label: 'Inspection' },
+    ...(auction?.vehicleDocumentation ? [{ id: 'verification', label: 'Verification' }] : [])
+  ];
+
   if (loading) return <LoadingSpinner />;
 
   if (!auction) {
@@ -248,20 +206,24 @@ export default function AuctionDetails() {
     <div className="ad-page">
       <ErrorBoundary>
         <div className="ad-shell">
-          <button type="button" className="ad-back" onClick={() => navigate('/buyer/auctions')}>
-            Back to auctions
-          </button>
-
           <div className="ad-layout">
             <main className="ad-main">
               <section className="ad-gallery-card">
                 <div className="ad-gallery__hero">
                   {images.length ? (
-                    <img
-                      src={images[currentImageIndex]}
-                      alt={auction.vehicleName}
-                      className="ad-gallery__hero-img active"
-                    />
+                    <>
+                      <img
+                        src={currentImage}
+                        alt=""
+                        aria-hidden="true"
+                        className="ad-gallery__hero-bg"
+                      />
+                      <img
+                        src={currentImage}
+                        alt={auction.vehicleName}
+                        className="ad-gallery__hero-img active"
+                      />
+                    </>
                   ) : (
                     <div className="ad-gallery__placeholder">No vehicle image available</div>
                   )}
@@ -313,105 +275,107 @@ export default function AuctionDetails() {
                 <InfoTile label="Auction date" value={formatDate(auction.auctionDate)} />
               </section>
 
-              <section className="ad-card">
-                <SectionHeader
-                  eyebrow="Overview"
-                  title="Vehicle Specifications"
-                  description="Key details shared by the seller and verified during the auction workflow."
-                />
-                <div className="ad-specs">
-                  <InfoTile label="Year" value={auction.year} />
-                  <InfoTile label="Car type" value={titleCase(auction.carType)} />
-                  <InfoTile label="Fuel type" value={titleCase(auction.fuelType)} />
-                  <InfoTile label="Transmission" value={titleCase(auction.transmission)} />
-                  <InfoTile label="Mileage" value={`${(auction.mileage || 0).toLocaleString('en-IN')} km`} />
-                  <InfoTile
-                    label="Seller"
-                    value={`${auction.seller?.firstName || auction.sellerId?.firstName || ''} ${auction.seller?.lastName || auction.sellerId?.lastName || ''}`.trim() || 'N/A'}
-                  />
+              <section className="ad-card ad-tabs-card">
+                <div className="ad-tabs" role="tablist" aria-label="Vehicle information">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      id={`ad-tab-${tab.id}`}
+                      aria-selected={activeTab === tab.id}
+                      aria-controls={`ad-panel-${tab.id}`}
+                      className={`ad-tab ${activeTab === tab.id ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
-              </section>
 
-              <section className="ad-card ad-card--mechanic">
-                <SectionHeader
-                  eyebrow="Inspection"
-                  title="Mechanic Inspection Review"
-                  description="Review notes from the mechanic assigned to inspect this vehicle."
-                />
-
-                {hasMechanicReview ? (
-                  <>
-                    <div className="ad-review-summary">
-                      <InfoTile label="Mechanical condition" value={titleCase(review.mechanicalCondition)} tone="blue" />
-                      <InfoTile label="Body condition" value={titleCase(review.bodyCondition)} tone="blue" />
-                      <InfoTile label="Condition rating" value={titleCase(review.conditionRating)} tone="orange" />
-                      <InfoTile label="Overall rating" value={inspection.overallRating ? `${inspection.overallRating}/10` : 'N/A'} tone="green" />
+                {activeTab === 'specs' && (
+                  <div className="ad-tabpanel" role="tabpanel" id="ad-panel-specs" aria-labelledby="ad-tab-specs">
+                    <SectionHeader
+                      eyebrow="Overview"
+                      title="Vehicle Specifications"
+                      description="Key details shared by the seller and verified during the auction workflow."
+                    />
+                    <div className="ad-specs">
+                      <InfoTile label="Year" value={auction.year} />
+                      <InfoTile label="Car type" value={titleCase(auction.carType)} />
+                      <InfoTile label="Fuel type" value={titleCase(auction.fuelType)} />
+                      <InfoTile label="Transmission" value={titleCase(auction.transmission)} />
+                      <InfoTile label="Mileage" value={`${(auction.mileage || 0).toLocaleString('en-IN')} km`} />
+                      <InfoTile
+                        label="Seller"
+                        value={`${auction.seller?.firstName || auction.sellerId?.firstName || ''} ${auction.seller?.lastName || auction.sellerId?.lastName || ''}`.trim() || 'N/A'}
+                      />
                     </div>
-
-                    {(review.recommendations || inspection.mechanicSummary) && (
-                      <div className="ad-mechanic-note">
-                        <span>Mechanic notes</span>
-                        <p>{review.recommendations || inspection.mechanicSummary}</p>
-                      </div>
-                    )}
-
-                    <div className="ad-inspection-grid">
-                      <InspectionGroup title="Exterior" data={inspection.exterior} fields={['tiresCondition', 'paintCondition', 'scratches', 'dents', 'rust', 'notes']} />
-                      <InspectionGroup title="Interior" data={inspection.interior} fields={['seatsCondition', 'dashboardCondition', 'acWorks', 'electronicsWork', 'notes']} />
-                      <InspectionGroup title="Engine" data={inspection.engine} fields={['startupSmoothness', 'batteryHealth', 'fluidLeaks', 'abnormalNoise', 'notes']} />
-                      <InspectionGroup title="Test Drive" data={inspection.testDrive} fields={['brakesCondition', 'steeringFeel', 'suspension', 'transmissionShift', 'notes']} />
-                    </div>
-                  </>
-                ) : (
-                  <EmptyState
-                    title="Mechanic review is not available yet"
-                    text="The vehicle can still be inspected by the assigned mechanic before final auction approval."
-                  />
-                )}
-              </section>
-
-              {auction.vehicleDocumentation && (
-                <section className="ad-card ad-card--verification">
-                  <SectionHeader
-                    eyebrow="Verification"
-                    title="Vehicle Verification Report"
-                    description="Document and ownership checks submitted with this auction."
-                  />
-                  <VerificationReport docs={auction.vehicleDocumentation} assignedMechanic={auction.assignedMechanic} />
-                </section>
-              )}
-
-              <section className="ad-card">
-                <SectionHeader
-                  eyebrow="Documents"
-                  title="Vehicle Documents"
-                  description="Open seller-uploaded documents in a new tab."
-                />
-                {documents.length ? (
-                  <div className="ad-documents">
-                    {documents.map((doc) => (
-                      <a key={doc.label} href={doc.url} target="_blank" rel="noopener noreferrer" className="ad-doc-link">
-                        <span className="ad-doc-link__icon">DOC</span>
-                        <span>{doc.label}</span>
-                        <strong>Open</strong>
-                      </a>
-                    ))}
                   </div>
-                ) : (
-                  <EmptyState title="No documents available" text="No seller documents are attached to this auction yet." />
+                )}
+
+                {activeTab === 'inspection' && (
+                  <div className="ad-tabpanel" role="tabpanel" id="ad-panel-inspection" aria-labelledby="ad-tab-inspection">
+                    <SectionHeader
+                      eyebrow="Inspection"
+                      title="Mechanic Inspection Review"
+                      description="Review notes from the mechanic assigned to inspect this vehicle."
+                    />
+
+                    {hasMechanicReview ? (
+                      <>
+                        <div className="ad-review-summary">
+                          <InfoTile label="Mechanical condition" value={titleCase(review.mechanicalCondition)} tone="blue" />
+                          <InfoTile label="Body condition" value={titleCase(review.bodyCondition)} tone="blue" />
+                          <InfoTile label="Condition rating" value={titleCase(review.conditionRating)} tone="orange" />
+                          <InfoTile label="Overall rating" value={inspection.overallRating ? `${inspection.overallRating}/10` : 'N/A'} tone="green" />
+                        </div>
+
+                        {(review.recommendations || inspection.mechanicSummary) && (
+                          <div className="ad-mechanic-note">
+                            <span>Mechanic notes</span>
+                            <p>{review.recommendations || inspection.mechanicSummary}</p>
+                          </div>
+                        )}
+
+                        <div className="ad-inspection-grid">
+                          <InspectionGroup title="Exterior" data={inspection.exterior} fields={['tiresCondition', 'paintCondition', 'scratches', 'dents', 'rust', 'notes']} />
+                          <InspectionGroup title="Interior" data={inspection.interior} fields={['seatsCondition', 'dashboardCondition', 'acWorks', 'electronicsWork', 'notes']} />
+                          <InspectionGroup title="Engine" data={inspection.engine} fields={['startupSmoothness', 'batteryHealth', 'fluidLeaks', 'abnormalNoise', 'notes']} />
+                          <InspectionGroup title="Test Drive" data={inspection.testDrive} fields={['brakesCondition', 'steeringFeel', 'suspension', 'transmissionShift', 'notes']} />
+                        </div>
+                      </>
+                    ) : (
+                      <EmptyState
+                        title="Mechanic review is not available yet"
+                        text="The vehicle can still be inspected by the assigned mechanic before final auction approval."
+                      />
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'verification' && auction.vehicleDocumentation && (
+                  <div className="ad-tabpanel" role="tabpanel" id="ad-panel-verification" aria-labelledby="ad-tab-verification">
+                    <SectionHeader
+                      eyebrow="Verification"
+                      title="Vehicle Verification Report"
+                      description="Document and ownership checks submitted with this auction."
+                    />
+                    <VerificationReport docs={auction.vehicleDocumentation} assignedMechanic={auction.assignedMechanic} />
+                  </div>
                 )}
               </section>
+
             </main>
 
             <aside className="ad-side">
               <section className="ad-bid-card">
                 <div className="ad-bid-card__head">
                   <span>Live bidding</span>
-                  <h2>Place Your Bid</h2>
+                  <h2>Live Auction</h2>
                 </div>
 
                 {error && <div className="ad-bid-card__alert ad-bid-card__alert--error">{error}</div>}
-                {success && <div className="ad-bid-card__alert ad-bid-card__alert--success">{success}</div>}
 
                 <div className="ad-bid-card__current">
                   <span>Current highest bid</span>
@@ -427,29 +391,69 @@ export default function AuctionDetails() {
                 ) : auction.auction_stopped ? (
                   <div className="ad-bid-status ad-bid-status--danger">This auction has been stopped.</div>
                 ) : (
-                  <form onSubmit={handleBidSubmit} className="ad-bid-card__form">
-                    <label htmlFor="bidAmount">Your bid amount</label>
-                    <input
-                      id="bidAmount"
-                      type="number"
-                      value={bidAmount}
-                      onChange={(e) => handleBidAmountChange(e.target.value)}
-                      required
-                      min="0"
-                      step="1000"
-                      placeholder={`Minimum ${formatINR(minBid)}`}
-                    />
-                    <button type="submit" disabled={submitting}>
-                      {submitting ? 'Placing bid...' : 'Place Bid Now'}
-                    </button>
-                  </form>
+                  <p className="ad-bid-note">
+                    You can only bid in live auction room.
+                  </p>
                 )}
 
                 <div className="ad-bid-card__contact">
                   <button type="button" onClick={handleContactSeller} disabled={chatLoading}>
-                    {chatLoading ? 'Opening chat...' : 'Book Appointment / Contact Seller'}
+                    {chatLoading ? 'Opening chat...' : 'Contact Seller'}
                   </button>
-                  <p>Schedule a viewing or chat with the seller.</p>
+                  <p>Chat directly with the seller about this vehicle.</p>
+                </div>
+
+                <div className="ad-sidebar-documents">
+                  <h3>Documents ({documents.length})</h3>
+                  {documents.length ? (
+                    <>
+                      <button
+                        type="button"
+                        className={`ad-document-badge ${documentsOpen ? 'active' : ''}`}
+                        onClick={() => setDocumentsOpen((open) => !open)}
+                        aria-expanded={documentsOpen}
+                        aria-label={documentsOpen ? 'Hide vehicle documents' : 'Show vehicle documents'}
+                      >
+                        <span className="ad-document-previews" aria-hidden="true">
+                          {documents.slice(0, 3).map((doc, index) => (
+                            <span
+                              key={doc.label}
+                              className="ad-document-preview"
+                              style={{
+                                '--closed-x': `${(index - 1) * 6}px`,
+                                '--closed-rotate': `${(index - 1) * 2}deg`,
+                                '--hover-x': `${(index - 1) * 54}px`,
+                                '--hover-y': `${index === 1 ? -76 : -58}px`,
+                                '--hover-rotate': `${(index - 1) * 16}deg`,
+                                '--doc-z': index + 1
+                              }}
+                            >
+                              <span />
+                              <span />
+                              <span />
+                            </span>
+                          ))}
+                        </span>
+                        <span className="ad-folder-icon" aria-hidden="true">
+                          <span className="ad-folder-icon__tab" />
+                          <span className="ad-folder-icon__body" />
+                        </span>
+                      </button>
+
+                      {documentsOpen && (
+                        <div className="ad-document-file-list">
+                          {documents.map((doc, index) => (
+                            <a key={doc.label} href={doc.url} target="_blank" rel="noopener noreferrer" className="ad-document-file-row">
+                              <span>{String(index + 1).padStart(2, '0')}</span>
+                              <strong>{doc.label}</strong>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="ad-sidebar-documents__empty">No seller documents uploaded.</p>
+                  )}
                 </div>
               </section>
             </aside>

@@ -76,6 +76,10 @@ const adminServices = {
     const response = await axiosInstance.post("admin/update-admin-password", data);
     return response.data;
   },
+  updateAdminAddress: async (data) => {
+    const response = await axiosInstance.put("admin/admin-profile/address", data);
+    return response.data;
+  },
 };
 
 export default adminServices;

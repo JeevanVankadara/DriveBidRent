@@ -77,4 +77,47 @@ const updateAdminPassword = async (req, res) => {
   }
 };
 
-export default { getAdminProfile, updateAdminPassword };
+const updateAdminAddress = async (req, res) => {
+  try {
+    const adminUser = await User.findById(req.user._id);
+
+    if (!adminUser || adminUser.userType !== "admin") {
+      return res.status(404).json({
+        success: false,
+        message: "Admin user not found",
+        data: null,
+      });
+    }
+
+    // Only the address fields are editable here; name, email, phone and
+    // userType stay read-only.
+    const fields = ["doorNo", "street", "city", "state"];
+    for (const field of fields) {
+      if (req.body[field] !== undefined) {
+        adminUser[field] = String(req.body[field]).trim();
+      }
+    }
+
+    await adminUser.save();
+
+    res.json({
+      success: true,
+      message: "Address updated successfully",
+      data: {
+        doorNo: adminUser.doorNo,
+        street: adminUser.street,
+        city: adminUser.city,
+        state: adminUser.state,
+      },
+    });
+  } catch (err) {
+    console.error("Error updating admin address:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message || "Server error",
+      data: null,
+    });
+  }
+};
+
+export default { getAdminProfile, updateAdminPassword, updateAdminAddress };

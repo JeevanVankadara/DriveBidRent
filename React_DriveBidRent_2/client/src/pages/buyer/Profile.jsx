@@ -79,7 +79,11 @@ export default function Profile() {
       const result = await updateProfile(profileForm);
       if (result?.success) toast.success(result.message || 'Profile updated successfully!');
       else toast.error(result?.message || 'Failed to update profile.');
-    } catch (err) { toast.error(err?.message || 'An error occurred.'); }
+    } catch (err) {
+      // axios throws on 4xx; err.message is only "Request failed with status code 400".
+      // The server's real reason lives in err.response.data.message.
+      toast.error(err?.response?.data?.message || err?.message || 'An error occurred.');
+    }
   };
 
   const handlePasswordSubmit = async (e) => {
@@ -99,7 +103,11 @@ export default function Profile() {
         setPasswordStrength('hint');
         setConfirmMessage('');
       } else toast.error(result?.message || 'Failed to change password.');
-    } catch (err) { toast.error(err?.message || 'An error occurred.'); }
+    } catch (err) {
+      // axios throws on 4xx; err.message is only "Request failed with status code 400".
+      // The server's real reason lives in err.response.data.message.
+      toast.error(err?.response?.data?.message || err?.message || 'An error occurred.');
+    }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -119,7 +127,7 @@ export default function Profile() {
 
         .pf-root {
           min-height: 100vh;
-          background: linear-gradient(180deg, #fdfcf9 0%, #f8f5f0 100%);
+          background: transparent;
           padding: 48px 24px 80px;
         }
 

@@ -1,9 +1,10 @@
 // client/src/pages/buyer/BuyerLayout.jsx
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Footer from '../components/Footer';
+import Footer from './components/Footer';
 import BuyerRagChatbot from '../../features/buyerRagChatbot/BuyerRagChatbot';
 import './BuyerDashboard.css';
+import './HubTheme.css';
 
 export default function BuyerLayout() {
   const { pathname } = useLocation();

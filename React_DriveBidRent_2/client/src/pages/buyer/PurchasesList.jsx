@@ -87,7 +87,7 @@ export default function PurchasesList() {
           50%       { transform: translateY(-20px) scale(1.08); }
         }
 
-        .pl-root { font-family: 'Montserrat', sans-serif; min-height: 100vh; background: #faf8f5; }
+        .pl-root { font-family: 'Montserrat', sans-serif; min-height: 100vh; background: transparent; }
 
         /* ── HERO ── */
         .pl-hero {

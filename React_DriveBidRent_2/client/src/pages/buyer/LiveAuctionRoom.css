@@ -1,9 +1,9 @@
 /* client/src/pages/buyer/LiveAuctionRoom.css */
 .live-auction-container {
   min-height: 100vh;
-  background: #0f172a; /* Deep dark blue/black */
-  color: #f8fafc;
-  font-family: 'Inter', sans-serif;
+  background: var(--midnight); /* Deep dark blue/black */
+  color: var(--midnight-foreground);
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
   padding: 2rem;
   overflow-x: hidden;
   position: relative;
@@ -13,8 +13,8 @@
   content: '';
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: radial-gradient(circle at top right, rgba(255, 107, 0, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at bottom left, rgba(255, 107, 0, 0.1) 0%, transparent 40%);
+  background: radial-gradient(circle at top right, color-mix(in oklab, var(--primary) 15%, transparent) 0%, transparent 40%),
+              radial-gradient(circle at bottom left, color-mix(in oklab, var(--primary) 10%, transparent) 0%, transparent 40%);
   pointer-events: none;
   z-index: 0;
 }
@@ -31,7 +31,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 20%, transparent);
   padding-bottom: 1rem;
 }
 
@@ -64,7 +64,7 @@
 .vehicle-title {
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #ff8a3d 0%, #ff6b35 50%, #ff4500 100%);
+  background: var(--gradient-flame);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -86,7 +86,7 @@
 .card {
   background: rgba(30, 41, 59, 0.7);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 107, 0, 0.2);
+  border: 1px solid color-mix(in oklab, var(--primary) 20%, transparent);
   border-radius: 1rem;
   padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -98,7 +98,7 @@
   object-fit: cover;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
-  border: 2px solid rgba(255, 107, 0, 0.3);
+  border: 2px solid color-mix(in oklab, var(--primary) 30%, transparent);
 }
 
 .current-bid-box {
@@ -107,12 +107,12 @@
   padding: 1.5rem;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 1rem;
-  border: 1px solid rgba(255, 107, 0, 0.1);
+  border: 1px solid color-mix(in oklab, var(--primary) 10%, transparent);
 }
 
 .current-bid-label {
   font-size: 1rem;
-  color: #94a3b8;
+  color: color-mix(in oklab, var(--midnight-foreground) 62%, transparent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
@@ -121,15 +121,15 @@
 .current-bid-value {
   font-size: 3.5rem;
   font-weight: 900;
-  color: #ff6b00;
-  text-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+  color: var(--primary);
+  text-shadow: 0 0 20px color-mix(in oklab, var(--primary) 50%, transparent);
   transition: transform 0.2s;
 }
 
 .current-bid-value.flash {
   transform: scale(1.1);
-  color: #fff;
-  text-shadow: 0 0 30px #ff6b00;
+  color: var(--midnight-foreground);
+  text-shadow: 0 0 30px var(--primary);
 }
 
 .timer-box {
@@ -140,7 +140,7 @@
 }
 
 .time-unit {
-  background: #1e293b;
+  background: color-mix(in oklab, var(--midnight-foreground) 8%, var(--midnight));
   padding: 1rem;
   border-radius: 0.5rem;
   text-align: center;
@@ -156,7 +156,7 @@
 
 .time-label {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: color-mix(in oklab, var(--midnight-foreground) 62%, transparent);
   text-transform: uppercase;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .bid-item:first-child {
-  color: #ff6b00;
+  color: var(--primary);
   font-weight: bold;
 }
 
@@ -188,8 +188,8 @@
 }
 
 .bid-input {
-  background: #0f172a;
-  border: 1px solid rgba(255, 107, 0, 0.4);
+  background: var(--midnight);
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
   color: white;
   padding: 1rem;
   font-size: 1.5rem;
@@ -199,12 +199,12 @@
 }
 
 .bid-input:focus {
-  border-color: #ff6b00;
-  box-shadow: 0 0 15px rgba(255, 107, 0, 0.3);
+  border-color: var(--primary);
+  box-shadow: 0 0 15px color-mix(in oklab, var(--primary) 30%, transparent);
 }
 
 .action-btn {
-  background: linear-gradient(135deg, #ff8a3d 0%, #ff4500 100%);
+  background: var(--gradient-flame);
   color: white;
   border: none;
   padding: 1rem;
@@ -218,11 +218,11 @@
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: 0 10px 20px color-mix(in oklab, var(--primary) 40%, transparent);
 }
 
 .action-btn:disabled {
-  background: #475569;
+  background: color-mix(in oklab, var(--midnight-foreground) 40%, transparent);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -257,4 +257,14 @@
   font-weight: bold;
   text-align: center;
   margin-top: 1rem;
+}
+
+
+/* ========== HUB THEME ALIGNMENT ========== */
+
+.live-auction-container h1,
+.live-auction-container h2 {
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }

@@ -106,19 +106,19 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="buyer-navbar sticky top-0 z-50" style={{ marginBottom: '-8px' }}>
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-20">
+    <nav className="buyer-navbar sticky top-0 z-50">
+      <div className="max-w-[1400px] mx-auto px-5 lg:px-10">
+        <div className="flex justify-between items-center gap-6 h-16 sm:h-20">
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/buyer" className="buyer-logo text-xl sm:text-2xl lg:text-3xl font-black transition-transform duration-300 hover:scale-105">
-              DriveBidRent
+            <Link to="/buyer" className="buyer-logo text-2xl">
+              Drive<span className="hub-logo-mid">Bid</span>Rent
             </Link>
           </div>
 
           {/* Center Links */}
-          <div className="hidden lg:flex flex-1 justify-center space-x-2">
+          <div className="hidden lg:flex items-center gap-7">
             <Link
               to="/buyer/purchases"
               className={`buyer-nav-link ${isActive('/buyer/purchases') ? 'active' : ''}`}
@@ -143,7 +143,7 @@ export default function Navbar() {
             >
               Notifications
               {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/3 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse" aria-hidden="true">
+                <span className="hub-nav-badge ml-2" aria-hidden="true">
                   {unreadCount}
                 </span>
               )}
@@ -160,44 +160,39 @@ export default function Navbar() {
             >
               Chat
               {chatUnreadCount > 0 && (
-                <span className="ml-2 inline-flex items-center justify-center bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 shadow-lg animate-pulse">{chatUnreadCount}</span>
+                <span className="hub-nav-badge ml-2">{chatUnreadCount}</span>
               )}
             </Link>
           </div>
 
           {/* Right Side - Profile & Logout */}
-          <div className="flex items-center space-x-3">
-            <Link
-              to="/buyer/profile"
-              className="relative px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-orange-600 bg-orange-50/50 rounded-xl border border-orange-200/50 hover:bg-orange-100/80 hover:border-orange-300 hover:shadow-[0_4px_20px_rgba(255,107,0,0.15)] transition-all duration-300 hover:scale-105"
-            >
+          <div className="hidden lg:flex items-center gap-3">
+            <Link to="/buyer/profile" className="hub-nav-profile">
               Profile
             </Link>
 
-            <button
-              onClick={handleLogout}
-              className="relative overflow-hidden px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-xl shadow-[0_4px_20px_rgba(239,68,68,0.25)] hover:shadow-[0_6px_30px_rgba(239,68,68,0.35)] transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 group"
-            >
-              <span className="relative z-10">Logout</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <button onClick={handleLogout} className="hub-nav-logout">
+              Logout
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <div className="lg:hidden border-t border-gray-200 bg-gray-50 py-2 px-2">
-        <div className="flex flex-wrap justify-center gap-3 text-xs sm:text-sm">
-          <Link to="/buyer/purchases" className="text-gray-600 hover:text-orange-500 font-medium">Purchases</Link>
-          <Link to="/buyer/wishlist" className="text-gray-600 hover:text-orange-500 font-medium">Wishlist</Link>
-          <Link to="/buyer/my-bids" className="text-gray-600 hover:text-orange-500 font-medium">My Bids</Link>
-          <Link to="/buyer/notifications" className="text-gray-600 hover:text-orange-500 font-medium">
-            Notifications{unreadCount > 0 && <span className="ml-1 inline-flex items-center justify-center bg-red-500 text-white text-xs rounded-full h-4 w-4">{unreadCount}</span>}
+      <div className="lg:hidden hub-mobile-nav py-2 px-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
+          <Link to="/buyer/purchases" className="hub-mobile-link">Purchases</Link>
+          <Link to="/buyer/wishlist" className="hub-mobile-link">Wishlist</Link>
+          <Link to="/buyer/my-bids" className="hub-mobile-link">My Bids</Link>
+          <Link to="/buyer/notifications" className="hub-mobile-link">
+            Notifications{unreadCount > 0 && <span className="hub-nav-badge ml-1">{unreadCount}</span>}
           </Link>
-          <Link to="/buyer/chats" className="text-gray-600 hover:text-orange-500 font-medium">
-            Chat{chatUnreadCount > 0 && <span className="ml-1 inline-flex items-center justify-center bg-red-500 text-white text-xs rounded-full h-4 w-4">{chatUnreadCount}</span>}
+          <Link to="/buyer/chats" className="hub-mobile-link">
+            Chat{chatUnreadCount > 0 && <span className="hub-nav-badge ml-1">{chatUnreadCount}</span>}
           </Link>
-          <Link to="/buyer/about" className="text-gray-600 hover:text-orange-500 font-medium">About</Link>
+          <Link to="/buyer/about" className="hub-mobile-link">About</Link>
+          <Link to="/buyer/profile" className="hub-text-primary font-medium">Profile</Link>
+          <button onClick={handleLogout} className="hub-text-primary font-medium">Logout</button>
         </div>
       </div>
     </nav>

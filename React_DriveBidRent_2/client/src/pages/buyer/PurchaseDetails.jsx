@@ -28,7 +28,7 @@ export default function PurchaseDetails() {
 
   if (!purchase) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen hub-page">
         <div className="bg-white shadow-xl rounded-2xl p-10 text-center max-w-md">
           <h2 className="text-3xl font-bold text-orange-500 mb-3">Purchase not found</h2>
           <p className="text-gray-600 mb-6">We couldn’t locate the purchase you’re looking for.</p>
@@ -57,7 +57,7 @@ export default function PurchaseDetails() {
   } = purchase;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen hub-page">
       {/* Hero Section */}
       <section
         className="relative h-80 bg-cover bg-center flex flex-col items-center justify-center text-center text-white"

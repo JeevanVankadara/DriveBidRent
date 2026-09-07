@@ -171,7 +171,7 @@ export default function MyBids() {
         }
       `}</style>
 
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen hub-page">
         <section
           style={{
             position: 'relative',

@@ -36,5 +36,6 @@ router.get("/manage-earnings", isAdminLoggedin, manageEarningsControllers.getMan
 // Admin Profile
 router.get("/admin-profile", isAdminLoggedin, adminProfileControllers.getAdminProfile);
 router.post("/update-admin-password", isAdminLoggedin, adminProfileControllers.updateAdminPassword);
+router.put("/admin-profile/address", isAdminLoggedin, adminProfileControllers.updateAdminAddress);
 
 export default router;

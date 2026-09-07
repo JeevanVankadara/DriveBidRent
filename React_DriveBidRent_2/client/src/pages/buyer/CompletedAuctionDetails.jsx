@@ -35,7 +35,7 @@ export default function CompletedAuctionDetails() {
 
   if (error || !auction) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+      <div className="min-h-screen hub-page py-12">
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-2xl p-10 text-center border border-red-200">
             <h1 className="text-4xl font-bold text-red-600 mb-4">Error</h1>
@@ -57,7 +57,7 @@ export default function CompletedAuctionDetails() {
   // Safety checks
   if (!auctionData || !seller || !winner) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+      <div className="min-h-screen hub-page py-12">
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-2xl p-10 text-center border border-red-200">
             <h1 className="text-4xl font-bold text-red-600 mb-4">Error</h1>
@@ -75,7 +75,7 @@ export default function CompletedAuctionDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+    <div className="min-h-screen hub-page py-12">
       {/* Header with status badge */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <div className="flex justify-between items-start mb-6">
