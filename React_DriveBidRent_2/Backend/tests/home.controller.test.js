@@ -33,8 +33,9 @@ describe('homeController.getHomeData', () => {
     const topRentals = [{ _id: 'r1' }, { _id: 'r2' }];
     const topAuctions = [{ _id: 'a1' }, { _id: 'a2' }];
 
-    const rentalLimit = jest.fn().mockResolvedValue(topRentals);
-    const auctionLimit = jest.fn().mockResolvedValue(topAuctions);
+    // Both queries end in .lean(), so the mock chain has to go that far.
+    const rentalLimit = jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(topRentals) });
+    const auctionLimit = jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(topAuctions) });
 
     mockRentalFind.mockReturnValue({ sort: jest.fn().mockReturnValue({ limit: rentalLimit }) });
     mockAuctionFind.mockReturnValue({ sort: jest.fn().mockReturnValue({ limit: auctionLimit }) });
@@ -45,7 +46,13 @@ describe('homeController.getHomeData', () => {
     await homeController.getHomeData(req, res);
 
     expect(mockRentalFind).toHaveBeenCalledWith({ status: 'available' });
-    expect(mockAuctionFind).toHaveBeenCalledWith({ started_auction: 'yes' });
+    // The home page must only advertise auctions a buyer can actually bid on:
+    // approved, started, and not stopped — the same rule the buyer list uses.
+    expect(mockAuctionFind).toHaveBeenCalledWith({
+      status: 'approved',
+      started_auction: 'yes',
+      auction_stopped: false,
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({

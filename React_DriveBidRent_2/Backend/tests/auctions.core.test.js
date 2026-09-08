@@ -68,6 +68,15 @@ const findChain = (resolved) => ({
   lean: jest.fn().mockResolvedValue(resolved),
 });
 
+// getSingleAuction loads the last few bids as
+// find().sort().limit().populate().lean() — note the extra .limit().
+const recentBidsChain = (resolved) => ({
+  sort: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  populate: jest.fn().mockReturnThis(),
+  lean: jest.fn().mockResolvedValue(resolved),
+});
+
 describe('buyer auctions core features', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -178,6 +187,10 @@ describe('buyer auctions core features', () => {
         sort: jest.fn().mockReturnThis(),
         lean: jest.fn().mockResolvedValue({ buyerId: 'u2', bidAmount: 130000 }),
       });
+      // The endpoint also loads the last few bids for the live auction room:
+      // find().sort().limit().populate().lean()
+      mockBidFind.mockReturnValue(recentBidsChain([]));
+
       const req = { params: { id: 'a1' }, user: { _id: 'u1' } };
       const res = createRes();
 
@@ -189,6 +202,34 @@ describe('buyer auctions core features', () => {
           data: expect.objectContaining({ isCurrentBidder: false }),
         })
       );
+    });
+
+    it('returns the recent bids with each bidder full name', async () => {
+      mockAuctionFindOne.mockReturnValue(findChain({ _id: 'a1', sellerId: { _id: 's1' } }));
+      mockBidFindOne.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue({ buyerId: 'u2', bidAmount: 130000 }),
+      });
+      mockBidFind.mockReturnValue(
+        recentBidsChain([
+          { _id: 'b1', bidAmount: 130000, bidTime: '2026-01-01T10:00:00Z', buyerId: { _id: 'u2', firstName: 'Buyer', lastName: 'Two' } },
+          { _id: 'b2', bidAmount: 128000, bidTime: '2026-01-01T09:59:00Z', buyerId: { _id: 'u1', firstName: 'Buyer', lastName: 'One' } },
+          // a bid whose buyer was deleted must not blow up the response
+          { _id: 'b3', bidAmount: 126000, bidTime: '2026-01-01T09:58:00Z', buyerId: null },
+        ])
+      );
+
+      const req = { params: { id: 'a1' }, user: { _id: 'u1' } };
+      const res = createRes();
+
+      await getSingleAuction(req, res);
+
+      const payload = res.json.mock.calls[0][0];
+      expect(payload.data.recentBids).toEqual([
+        expect.objectContaining({ bidAmount: 130000, bidderName: 'Buyer Two' }),
+        expect.objectContaining({ bidAmount: 128000, bidderName: 'Buyer One' }),
+        expect.objectContaining({ bidAmount: 126000, bidderName: 'Anonymous' }),
+      ]);
     });
   });
 
