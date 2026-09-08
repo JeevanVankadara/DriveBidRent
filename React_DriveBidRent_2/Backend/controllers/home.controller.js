@@ -7,11 +7,20 @@ const homeController = {
     try {
       const topRentals = await RentalRequest.find({ status: 'available' })
         .sort({ createdAt: -1 })
-        .limit(4);
+        .limit(4)
+        .lean();
 
-      const topAuctions = await AuctionRequest.find({ started_auction: 'yes' })
-        .sort({ auctionDate: -1 })
-        .limit(4);
+      // Same definition of "live" the buyer auction list uses, so the home
+      // page can never advertise an auction that is stopped or not yet
+      // approved. Soonest first, so the most urgent auctions surface.
+      const topAuctions = await AuctionRequest.find({
+        status: 'approved',
+        started_auction: 'yes',
+        auction_stopped: false
+      })
+        .sort({ auctionDate: 1 })
+        .limit(4)
+        .lean();
 
       return res.status(200).json({
         success: true,

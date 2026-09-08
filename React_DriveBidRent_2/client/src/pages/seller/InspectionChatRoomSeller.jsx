@@ -170,7 +170,7 @@ export default function InspectionChatRoomSeller({ chatIdProp }) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white relative">
+    <div className="flex flex-col h-full hub-bg-card relative">
       <div className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
         <InspectionChatHeader
           carName={chat?.inspectionTask?.vehicleName || "Vehicle Inspection"}
@@ -189,9 +189,9 @@ export default function InspectionChatRoomSeller({ chatIdProp }) {
       
       <div 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc]/50 relative"
+        className="flex-1 overflow-y-auto px-4 py-5 hub-bg-secondary-50 relative"
       >
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-2">
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center min-h-[300px]">
               <div className="text-center p-8 bg-white border border-gray-100 rounded-3xl shadow-sm">
@@ -211,8 +211,7 @@ export default function InspectionChatRoomSeller({ chatIdProp }) {
                   <InspectionChatBubble 
                     key={m._id} 
                     message={m} 
-                    isOwn={isOwn} 
-                    className={isOwn ? 'ml-auto' : 'mr-auto'}
+                    isOwn={isOwn}
                   />
                 );
               })}

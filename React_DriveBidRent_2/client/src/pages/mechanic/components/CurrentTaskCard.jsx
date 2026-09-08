@@ -2,14 +2,12 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Calendar, Gauge, Car, ShieldCheck, ArrowRight } from 'lucide-react';
+import { getVehicleCoverImageUrl, getVehicleCoverImage } from '../../../utils/vehicleImage.util';
 
 export default function CurrentTaskCard({ vehicle }) {
   const [imgError, setImgError] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'https://drivebidrent.onrender.com';
-  const imgSrc = vehicle.vehicleImage?.startsWith('http')
-    ? vehicle.vehicleImage
-    : `${backendUrl}${vehicle.vehicleImage}`;
+  const imgSrc = getVehicleCoverImageUrl(vehicle);
 
   const s = {
     card: {
@@ -114,7 +112,7 @@ export default function CurrentTaskCard({ vehicle }) {
           <span style={s.pulseDot} />
           ASSIGNED
         </div>
-        {imgError || !vehicle.vehicleImage ? (
+        {imgError || !getVehicleCoverImage(vehicle) ? (
           <div style={s.placeholder}>
             <Car size={40} strokeWidth={1.2} />
             <span style={{ fontSize: 12, fontWeight: 600, marginTop: 8 }}>{vehicle.vehicleName}</span>

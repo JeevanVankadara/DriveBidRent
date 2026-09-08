@@ -92,30 +92,18 @@ const auctionRequestSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  mechanicReview: {
-    mechanicalCondition: String,
-    bodyCondition: String,
-    recommendations: String,
-    conditionRating: String
-  },
+  // === MECHANIC INSPECTION ===
+  // Deliberately small: three 1-5 ratings and a free-text note. The old
+  // nested exterior/interior/engine/testDrive checklist and the duplicated
+  // `mechanicReview` block were replaced by this.
   multipointInspection: {
-    exterior: {
-      paintCondition: Number, scratches: Boolean, dents: Boolean, rust: Boolean, tiresCondition: String, notes: String
-    },
-    interior: {
-      seatsCondition: String, dashboardCondition: String, acWorks: Boolean, electronicsWork: Boolean, notes: String
-    },
-    engine: {
-      fluidLeaks: Boolean, abnormalNoise: Boolean, startupSmoothness: String, batteryHealth: String, notes: String
-    },
-    testDrive: {
-      brakesCondition: String, steeringFeel: String, suspension: String, transmissionShift: String, notes: String
-    },
-    overallRating: Number,
-    isApprovedForAuction: Boolean,
-    mechanicSummary: String
+    interiorRating: { type: Number, min: 1, max: 5 },
+    engineRating: { type: Number, min: 1, max: 5 },
+    overallRating: { type: Number, min: 1, max: 5 },
+    additionalNotes: { type: String }
   },
-  
+
+
   // === INSPECTION & SCHEDULING SCHEMAS ===
   inspectionDate: { type: Date },
   inspectionTime: { type: String }, // e.g. "10:00 AM - 11:30 AM"

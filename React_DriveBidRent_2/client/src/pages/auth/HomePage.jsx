@@ -7,27 +7,27 @@ import axiosInstance from '../../utils/axiosInstance.util';
 import Footer from '../components/Footer';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import BrandLoader from '../../components/BrandLoader';
+
+/* Money formatter that tolerates a missing amount. An auction only gets its
+   startingBid when an auction manager approves it, so calling
+   .toLocaleString() straight on the value would throw and blank the page. */
+const formatINR = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return 'To be announced';
+  return `₹${amount.toLocaleString('en-IN')}`;
+};
 
 /* ═══════════════════════════════════════════════════════
    SPLASH SCREEN — shown only on the FIRST visit per
    browser session while the Render backend cold-starts.
-   Disappears as soon as the backend responds.
+   Fades out as soon as the backend responds.
    ═══════════════════════════════════════════════════════ */
 const SplashScreen = ({ onReady }) => {
-  const [dots, setDots] = useState('');
   const [fadingOut, setFadingOut] = useState(false);
 
-  /* Animated dots */
   useEffect(() => {
-    const id = setInterval(() => setDots(d => d.length >= 3 ? '' : d + '.'), 500);
-    return () => clearInterval(id);
-  }, []);
-
-  /* When parent signals ready, fade out then unmount */
-  useEffect(() => {
-    if (onReady === true && !fadingOut) {
-      setFadingOut(true);
-    }
+    if (onReady === true && !fadingOut) setFadingOut(true);
   }, [onReady, fadingOut]);
 
   return (
@@ -35,83 +35,9 @@ const SplashScreen = ({ onReady }) => {
       initial={{ opacity: 1 }}
       animate={fadingOut ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        fontFamily: '"Montserrat", sans-serif',
-      }}
+      style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
     >
-      <style>{`
-        @keyframes splashPulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50%      { transform: scale(1.06); opacity: 0.85; }
-        }
-        @keyframes splashBar {
-          0%   { width: 0%; }
-          100% { width: 100%; }
-        }
-        @keyframes splashDot {
-          0%, 80%, 100% { transform: scale(0); opacity: 0; }
-          40% { transform: scale(1); opacity: 1; }
-        }
-      `}</style>
-
-      {/* Logo Mark */}
-      <div style={{
-        width: 72, height: 72, borderRadius: 18,
-        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 8px 30px rgba(245, 158, 11, 0.35)',
-        animation: 'splashPulse 2s ease-in-out infinite',
-        marginBottom: 28,
-      }}>
-        <span style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>D</span>
-      </div>
-
-      {/* Brand name */}
-      <h1 style={{
-        fontSize: '2rem', fontWeight: 900,
-        color: '#fff', letterSpacing: '-0.02em',
-        margin: 0,
-      }}>
-        Drive<span style={{ color: '#f59e0b' }}>Bid</span>Rent
-      </h1>
-
-      {/* Progress bar */}
-      <div style={{
-        width: 200, height: 3, borderRadius: 2,
-        background: 'rgba(255,255,255,0.08)',
-        marginTop: 28, overflow: 'hidden',
-      }}>
-        <div style={{
-          height: '100%', borderRadius: 2,
-          background: 'linear-gradient(90deg, #f59e0b, #d97706)',
-          animation: 'splashBar 2.5s ease-in-out infinite',
-        }} />
-      </div>
-
-      {/* Status text */}
-      <p style={{
-        marginTop: 18, fontSize: '0.8125rem',
-        color: 'rgba(255,255,255,0.4)', fontWeight: 600,
-        letterSpacing: '0.08em', textTransform: 'uppercase',
-        minWidth: 200, textAlign: 'center',
-      }}>
-        Connecting to server{dots}
-      </p>
-
-      {/* Three bouncing dots */}
-      <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: '#f59e0b',
-            animation: `splashDot 1.4s ease-in-out ${i * 0.16}s infinite`,
-          }} />
-        ))}
-      </div>
+      <BrandLoader variant="full" ready={onReady === true} />
     </motion.div>
   );
 };
@@ -759,9 +685,16 @@ const HomePage = () => {
           <div className="auction-container">
             {topAuctions.map((auction) => (
               <div key={auction._id} className="auction-box">
-                <img src={auction.vehicleImage} alt={auction.vehicleName} />
+                {/* Auctions store the cover photo as `mainImage`; `vehicleImage`
+                    is only the rental field name, kept here as a fallback for
+                    any older record that still carries it. */}
+                <img
+                  src={auction.mainImage || auction.vehicleImage}
+                  alt={auction.vehicleName}
+                  loading="lazy"
+                />
                 <h3>{auction.vehicleName} ({auction.year})</h3>
-                <p>Starting Bid: ₹{auction.startingBid.toLocaleString('en-IN')}</p>
+                <p>Starting Bid: {formatINR(auction.startingBid)}</p>
                 <button className="bid-btn" onClick={() => handleAuth('/login')}>
                   Place Bid
                 </button>
@@ -784,9 +717,9 @@ const HomePage = () => {
           <div className="rental-container">
             {topRentals.map((rental) => (
               <div key={rental._id} className="rental-box">
-                <img src={rental.vehicleImage} alt={rental.vehicleName} />
+                <img src={rental.vehicleImage} alt={rental.vehicleName} loading="lazy" />
                 <h3>{rental.vehicleName} ({rental.year})</h3>
-                <p>₹{rental.costPerDay.toLocaleString('en-IN')}/day</p>
+                <p>{formatINR(rental.costPerDay)}/day</p>
                 <button className="rent-btn" onClick={() => handleAuth('/login')}>
                   Rent Now
                 </button>

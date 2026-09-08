@@ -37,9 +37,7 @@ export const submitInspection = async (req, res) => {
   try {
     const { auctionId } = req.params;
     
-    const {
-      exterior, interior, engine, testDrive, overallRating, isApprovedForAuction, mechanicSummary
-    } = req.body;
+    const { interiorRating, engineRating, overallRating, additionalNotes } = req.body;
 
     if (!req.user || !req.user._id) {
       return res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -54,21 +52,31 @@ export const submitInspection = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not assigned to you' });
     }
 
-    if (!exterior || !interior || !engine || !testDrive || overallRating === undefined || isApprovedForAuction === undefined || !mechanicSummary) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    // Three 1-5 ratings and a note. Validated here as well as on the form,
+    // since a client-side check is not a check.
+    const ratings = { interiorRating, engineRating, overallRating };
+    for (const [name, value] of Object.entries(ratings)) {
+      const n = Number(value);
+      if (!Number.isInteger(n) || n < 1 || n > 5) {
+        return res.status(400).json({
+          success: false,
+          message: `${name} must be a whole number from 1 to 5`
+        });
+      }
+    }
+
+    if (!additionalNotes || !String(additionalNotes).trim()) {
+      return res.status(400).json({ success: false, message: 'Additional notes are required' });
     }
 
     const updatePayload = {
       inspectionStatus: 'completed',
       reviewStatus: 'completed',
       multipointInspection: {
-        exterior, interior, engine, testDrive, overallRating, isApprovedForAuction, mechanicSummary
-      },
-      mechanicReview: {
-        mechanicalCondition: `Engine: ${engine.startupSmoothness}, Battery: ${engine.batteryHealth}`,
-        bodyCondition: `Paint: ${exterior.paintCondition}/10. Tires: ${exterior.tiresCondition}`,
-        recommendations: mechanicSummary,
-        conditionRating: `${overallRating}/10`
+        interiorRating: Number(interiorRating),
+        engineRating: Number(engineRating),
+        overallRating: Number(overallRating),
+        additionalNotes: String(additionalNotes).trim()
       }
     };
 

@@ -8,6 +8,5 @@ export const declinePendingTask = (id) => axiosInstance.post(`/mechanic/pending-
 export const getCurrentTasks = () => axiosInstance.get('/mechanic/current-tasks');
 export const getPastTasks = () => axiosInstance.get('/mechanic/past-tasks');
 export const getVehicleDetails = (id) => axiosInstance.get(`/mechanic/vehicle-details/${id}`);
-export const submitReview = (id, data) => axiosInstance.post(`/mechanic/submit-review/${id}`, data);
 export const getProfile = () => axiosInstance.get('/mechanic/profile');
 export const changePassword = (data) => axiosInstance.post('/mechanic/change-password', data);

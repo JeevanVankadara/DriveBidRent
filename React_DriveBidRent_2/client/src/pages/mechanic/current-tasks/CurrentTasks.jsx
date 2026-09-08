@@ -24,7 +24,7 @@ export default function CurrentTasks() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+    <div className="min-h-screen font-montserrat">
       {/* ── HERO — Premium dark banner ── */}
       <section style={{
         position: 'relative',

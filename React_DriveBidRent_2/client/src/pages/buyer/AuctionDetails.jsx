@@ -28,6 +28,15 @@ const titleCase = (value) => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+// Mechanic ratings are 1-5. Show the number plus a plain-English word so the
+// buyer does not have to guess what "3" means.
+const RATING_WORDS = { 1: 'Poor', 2: 'Below average', 3: 'Average', 4: 'Good', 5: 'Excellent' };
+const formatRating = (value) => {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1) return 'N/A';
+  return `${n}/5 - ${RATING_WORDS[n] || ''}`.trim().replace(/-$/, '').trim();
+};
+
 const valueOrNA = (value) => {
   if (value === null || value === undefined || value === '') return 'N/A';
   return value;
@@ -145,15 +154,9 @@ export default function AuctionDetails() {
   }, [auction]);
 
   const visibleBid = currentBid?.bidAmount || auction?.startingBid || 0;
-  const review = auction?.mechanicReview || {};
   const inspection = auction?.multipointInspection || {};
   const hasMechanicReview = Boolean(
-    review.mechanicalCondition ||
-    review.bodyCondition ||
-    review.recommendations ||
-    review.conditionRating ||
-    inspection.overallRating ||
-    inspection.mechanicSummary
+    inspection.overallRating || inspection.interiorRating || inspection.engineRating || inspection.additionalNotes
   );
   const currentImage = images[currentImageIndex];
 
@@ -321,25 +324,17 @@ export default function AuctionDetails() {
                     {hasMechanicReview ? (
                       <>
                         <div className="ad-review-summary">
-                          <InfoTile label="Mechanical condition" value={titleCase(review.mechanicalCondition)} tone="blue" />
-                          <InfoTile label="Body condition" value={titleCase(review.bodyCondition)} tone="blue" />
-                          <InfoTile label="Condition rating" value={titleCase(review.conditionRating)} tone="orange" />
-                          <InfoTile label="Overall rating" value={inspection.overallRating ? `${inspection.overallRating}/10` : 'N/A'} tone="green" />
+                          <InfoTile label="Interior condition" value={formatRating(inspection.interiorRating)} tone="blue" />
+                          <InfoTile label="Engine condition" value={formatRating(inspection.engineRating)} tone="blue" />
+                          <InfoTile label="Overall condition" value={formatRating(inspection.overallRating)} tone="green" />
                         </div>
 
-                        {(review.recommendations || inspection.mechanicSummary) && (
+                        {inspection.additionalNotes && (
                           <div className="ad-mechanic-note">
                             <span>Mechanic notes</span>
-                            <p>{review.recommendations || inspection.mechanicSummary}</p>
+                            <p>{inspection.additionalNotes}</p>
                           </div>
                         )}
-
-                        <div className="ad-inspection-grid">
-                          <InspectionGroup title="Exterior" data={inspection.exterior} fields={['tiresCondition', 'paintCondition', 'scratches', 'dents', 'rust', 'notes']} />
-                          <InspectionGroup title="Interior" data={inspection.interior} fields={['seatsCondition', 'dashboardCondition', 'acWorks', 'electronicsWork', 'notes']} />
-                          <InspectionGroup title="Engine" data={inspection.engine} fields={['startupSmoothness', 'batteryHealth', 'fluidLeaks', 'abnormalNoise', 'notes']} />
-                          <InspectionGroup title="Test Drive" data={inspection.testDrive} fields={['brakesCondition', 'steeringFeel', 'suspension', 'transmissionShift', 'notes']} />
-                        </div>
                       </>
                     ) : (
                       <EmptyState
@@ -456,28 +451,6 @@ export default function AuctionDetails() {
           </div>
         </div>
       </ErrorBoundary>
-    </div>
-  );
-}
-
-function InspectionGroup({ title, data, fields }) {
-  const entries = fields
-    .map((field) => [field, data?.[field]])
-    .filter(([, value]) => value !== undefined && value !== null && value !== '');
-
-  if (!entries.length) return null;
-
-  return (
-    <div className="ad-inspection-group">
-      <h3>{title}</h3>
-      <dl>
-        {entries.map(([field, value]) => (
-          <div key={field}>
-            <dt>{titleCase(field.replace(/([A-Z])/g, ' $1'))}</dt>
-            <dd>{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}</dd>
-          </div>
-        ))}
-      </dl>
     </div>
   );
 }

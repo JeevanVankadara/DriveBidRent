@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getVehicleCoverImage } from '../../utils/vehicleImage.util';
 
 const RentalChatHeader = ({ chat, otherUser, carName, rentalPeriod, onDeleteChat }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -39,7 +40,7 @@ const RentalChatHeader = ({ chat, otherUser, carName, rentalPeriod, onDeleteChat
       chat?.rentalRequest?.carImage,
       chat?.rentalRequest?.image,
       chat?.rentalRequest?.vehicleImages?.[0],
-      chat?.auctionRequest?.vehicleImage,
+      getVehicleCoverImage(chat?.auctionRequest),
       chat?.auctionRequest?.carImage,
       chat?.auctionRequest?.image,
       chat?.auctionRequest?.vehicleImages?.[0],

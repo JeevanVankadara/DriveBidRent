@@ -1,4 +1,5 @@
 import React from 'react';
+import { getVehicleCoverImage } from '../../utils/vehicleImage.util';
 
 const TrophyIcon = ({ className = 'w-3 h-3' }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
@@ -9,7 +10,7 @@ const TrophyIcon = ({ className = 'w-3 h-3' }) => (
 
 export default function ChatListItem({ chat, onClick, isSelected, viewerIsBuyer = false, currentUserId = null }) {
   // Determine image using chat.car images first, fallback to legacy fields
-  const imgSrc = chat.car?.images?.[0] || chat.rentalRequest?.vehiclePhotos?.[0] || chat.rentalRequest?.vehicleImage || chat.auctionRequest?.vehicleImage || chat.auctionRequest?.vehiclePhotos?.[0] || '/placeholder-car.jpg';
+  const imgSrc = chat.car?.images?.[0] || chat.rentalRequest?.vehiclePhotos?.[0] || chat.rentalRequest?.vehicleImage || getVehicleCoverImage(chat.auctionRequest) || chat.auctionRequest?.vehiclePhotos?.[0] || '/placeholder-car.jpg';
 
   // Build car title from car object when available, else fallback
   const carName = chat.car ? `${chat.car.make || ''} ${chat.car.model || ''} ${chat.car.year || ''}`.trim() : (chat.title || chat.rentalRequest?.vehicleName || chat.auctionRequest?.vehicleName || 'Vehicle');
@@ -35,7 +36,7 @@ export default function ChatListItem({ chat, onClick, isSelected, viewerIsBuyer 
         className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-all cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-orange-50' : ''}`}
       >
         <img 
-          src={chat.inspectionTask?.vehicleImage || '/placeholder-car.jpg'} 
+          src={getVehicleCoverImage(chat.inspectionTask) || '/placeholder-car.jpg'} 
           alt="car"
           className="w-14 h-14 rounded-full object-cover border-2 border-orange-500"
         />

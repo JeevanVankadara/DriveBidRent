@@ -1,340 +1,288 @@
 // client/src/pages/mechanic/dashboard/Dashboard.jsx
+//
+// Rebuilt on the shared Hub theme (cream canvas, Playfair headings, warm
+// cards) so the mechanic section matches the rest of the app. The previous
+// version was a dark navy hero with blurred orbs, which clashed badly once
+// every other dashboard moved to the cream palette.
 import { useEffect, useState } from 'react';
-import { getDashboard } from '../../../services/mechanic.services';
-import CurrentTaskCard from '../components/CurrentTaskCard';
-import PastTaskCard from '../components/PastTaskCard';
 import { Link } from 'react-router-dom';
+import { getDashboard } from '../../../services/mechanic.services';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import MechanicDashboardVisuals from './MechanicDashboardVisuals';
+import { getVehicleCoverImageUrl } from '../../../utils/vehicleImage.util';
 import {
-  Wrench, Settings, CheckCircle2, BarChart3, Search,
-  ClipboardList, AlertTriangle, Calendar, ArrowRight,
-  RefreshCw
+  Wrench, CheckCircle2, ClipboardList, AlertTriangle,
+  Calendar, ArrowRight, RefreshCw, Star,
 } from 'lucide-react';
+
+const formatDate = (value) =>
+  value
+    ? new Date(value).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null;
+
+/* ── Small building blocks ─────────────────────────────────────── */
+
+function StatTile({ icon, label, value, hint }) {
+  // Aliased to a capitalised local so JSX treats it as a component.
+  const Icon = icon;
+  return (
+    <div className="hub-surface-card p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="hub-eyebrow hub-text-muted">{label}</p>
+          <p className="hub-display text-3xl mt-1.5 hub-text-foreground">{value}</p>
+          {hint && <p className="text-xs hub-text-muted mt-1">{hint}</p>}
+        </div>
+        <span className="hub-bg-primary-soft rounded-xl p-2.5 shrink-0">
+          <Icon size={20} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Notice({ tone = 'primary', icon, title, children }) {
+  const Icon = icon;
+  const bg = tone === 'primary' ? 'hub-bg-primary-soft' : 'hub-bg-rent-soft';
+  return (
+    <div className={`${bg} rounded-2xl p-4 flex items-start gap-3`}>
+      <Icon size={20} className="shrink-0 mt-0.5" />
+      <div>
+        <p className="font-semibold text-sm">{title}</p>
+        <div className="text-sm mt-0.5 opacity-90">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function VehicleRow({ vehicle, cta, to, badge }) {
+  const image = getVehicleCoverImageUrl(vehicle);
+  const rating = vehicle.multipointInspection?.overallRating;
+
+  return (
+    <Link to={to} className="hub-surface-card p-3 flex items-center gap-4 hover:shadow-lg transition-shadow">
+      {image ? (
+        <img
+          src={image}
+          alt={vehicle.vehicleName}
+          className="h-20 w-28 rounded-xl object-cover shrink-0"
+          loading="lazy"
+        />
+      ) : (
+        <div className="h-20 w-28 rounded-xl hub-bg-secondary grid place-items-center shrink-0">
+          <Wrench size={20} className="hub-text-muted" />
+        </div>
+      )}
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="font-semibold hub-text-foreground truncate">{vehicle.vehicleName}</p>
+          {badge && <span className="hub-card-badge hub-bg-primary-soft !static">{badge}</span>}
+        </div>
+        <p className="text-sm hub-text-muted mt-0.5">
+          {vehicle.year} · {Number(vehicle.mileage || 0).toLocaleString('en-IN')} km · {vehicle.fuelType}
+        </p>
+        {rating ? (
+          <p className="text-sm hub-text-primary font-semibold mt-1 flex items-center gap-1">
+            <Star size={14} /> {rating}/5 overall
+          </p>
+        ) : vehicle.inspectionDate ? (
+          <p className="text-sm hub-text-muted mt-1 flex items-center gap-1">
+            <Calendar size={14} /> {formatDate(vehicle.inspectionDate)}
+            {vehicle.inspectionTime ? ` · ${vehicle.inspectionTime}` : ''}
+          </p>
+        ) : null}
+      </div>
+
+      <span className="hub-text-primary text-sm font-medium hidden sm:flex items-center gap-1 shrink-0">
+        {cta} <ArrowRight size={15} />
+      </span>
+    </Link>
+  );
+}
+
+function Section({ title, description, action, children }) {
+  return (
+    <section className="mt-10">
+      <div className="flex items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 className="hub-display text-2xl">{title}</h2>
+          {description && <p className="hub-text-muted text-sm mt-0.5">{description}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptyPanel({ icon, title, text }) {
+  const Icon = icon;
+  return (
+    <div className="hub-empty text-center">
+      <Icon size={26} className="hub-text-muted mb-3" />
+      <p className="font-semibold hub-text-foreground">{title}</p>
+      <p className="text-sm hub-text-muted mt-1 max-w-sm">{text}</p>
+    </div>
+  );
+}
+
+/* ── Page ──────────────────────────────────────────────────────── */
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     getDashboard()
-      .then(res => setData(res.data.data))
-      .catch(() => setData({}))
+      .then((res) => setData(res.data.data))
+      .catch(() => setFailed(true))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <LoadingSpinner />;
 
-  if (!data) {
+  if (failed || !data) {
     return (
-      <div style={{
-        minHeight: '80vh', display: 'flex',
-        alignItems: 'center', justifyContent: 'center', padding: 24,
-      }}>
-        <div style={{
-          background: '#fff', borderRadius: 24,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          padding: 48, textAlign: 'center', maxWidth: 400,
-          border: '1px solid #fecaca',
-        }}>
-          <div style={{
-            width: 64, height: 64, borderRadius: '50%',
-            background: '#fef2f2', color: '#ef4444',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 20px',
-          }}>
-            <AlertTriangle size={28} />
-          </div>
-          <p style={{ fontSize: 20, fontWeight: 800, color: '#111827', marginBottom: 8 }}>Connection Error</p>
-          <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 28 }}>Failed to load dashboard data</p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              width: '100%', padding: '14px 24px',
-              background: '#111827', color: '#fff',
-              border: 'none', borderRadius: 14,
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#3b82f6'}
-            onMouseLeave={e => e.currentTarget.style.background = '#111827'}
-          >
-            <RefreshCw size={15} /> Retry Connection
+      <div className="min-h-[70vh] grid place-items-center px-4">
+        <div className="hub-surface-card p-10 text-center max-w-sm">
+          <span className="hub-bg-primary-soft rounded-2xl p-3 inline-flex mb-4">
+            <AlertTriangle size={24} />
+          </span>
+          <h2 className="hub-display text-xl mb-1">Couldn&apos;t load your dashboard</h2>
+          <p className="text-sm hub-text-muted mb-6">
+            The server didn&apos;t respond. Check your connection and try again.
+          </p>
+          <button onClick={() => window.location.reload()} className="hub-cta w-full justify-center">
+            <RefreshCw size={16} /> Retry
           </button>
         </div>
       </div>
     );
   }
 
-  const { showApprovalPopup, displayedVehicles = [], completedTasks = [] } = data;
+  const {
+    user,
+    showApprovalPopup,
+    displayedVehicles = [],
+    assignedVehicles = [],
+    completedTasks = [],
+    allCompletedTasks = [],
+  } = data;
 
-  const upcomingInspections = displayedVehicles.filter(v => {
+  const assignedCount = assignedVehicles.length || displayedVehicles.length;
+  const completedCount = allCompletedTasks.length || completedTasks.length;
+
+  const ratings = allCompletedTasks
+    .map((t) => t.multipointInspection?.overallRating)
+    .filter((n) => Number.isFinite(n));
+  const avgRating = ratings.length
+    ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+    : '—';
+
+  const upcoming = displayedVehicles.filter((v) => {
     if (v.inspectionStatus !== 'scheduled' || !v.inspectionDate) return false;
-    const inspectDate = new Date(v.inspectionDate);
-    const now = new Date();
-    const diffHours = (inspectDate - now) / (1000 * 60 * 60);
-    return diffHours >= -24 && diffHours <= 48;
+    const hours = (new Date(v.inspectionDate) - new Date()) / 36e5;
+    return hours >= -24 && hours <= 48;
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+    <div className="min-h-screen">
+      <div className="max-w-5xl mx-auto px-5 lg:px-8 py-10">
 
-      {/* ── HERO SECTION ── */}
-      <section style={{
-        position: 'relative',
-        background: 'linear-gradient(135deg, #0c1220 0%, #111827 50%, #0c1628 100%)',
-        paddingTop: 80, paddingBottom: 60, overflow: 'hidden',
-      }}>
-        {/* Floating orbs */}
-        {[
-          { top: '20%', left: '5%', size: 200, color: 'rgba(59,130,246,0.08)' },
-          { top: '55%', left: '65%', size: 260, color: 'rgba(249,115,22,0.07)' },
-          { top: '10%', left: '80%', size: 130, color: 'rgba(16,185,129,0.05)' },
-        ].map((orb, i) => (
-          <div key={i} style={{
-            position: 'absolute', top: orb.top, left: orb.left,
-            width: orb.size, height: orb.size, borderRadius: '50%',
-            background: orb.color, filter: 'blur(40px)', pointerEvents: 'none',
-          }} />
-        ))}
-        {/* Dot grid */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }} />
+        <header>
+          <span className="hub-eyebrow hub-text-primary">Mechanic</span>
+          <h1 className="hub-display text-4xl mt-1">
+            {user?.firstName ? `Welcome back, ${user.firstName}` : 'Your workshop'}
+          </h1>
+          <p className="hub-text-muted mt-2">
+            Vehicles assigned to you for inspection, and the reports you have already filed.
+          </p>
+        </header>
 
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', position: 'relative' }}>
+        {(showApprovalPopup || upcoming.length > 0) && (
+          <div className="mt-6 space-y-3">
+            {showApprovalPopup && (
+              <Notice tone="primary" icon={AlertTriangle} title="Account under review">
+                An admin is verifying your profile. You&apos;ll get full access once approved.
+              </Notice>
+            )}
+            {upcoming.length > 0 && (
+              <Notice tone="rent" icon={Calendar} title="Inspection coming up">
+                {upcoming.map((v) => v.vehicleName).join(', ')} — scheduled within the next 48 hours.
+              </Notice>
+            )}
+          </div>
+        )}
 
-          {showApprovalPopup && (
-            <div style={{
-              marginBottom: 28, padding: '16px 20px',
-              background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)',
-              borderRadius: 16, display: 'flex', alignItems: 'flex-start', gap: 14,
-              backdropFilter: 'blur(8px)',
-            }}>
-              <div style={{
-                padding: 8, background: 'rgba(249,115,22,0.2)', borderRadius: 12,
-                color: '#fb923c', flexShrink: 0,
-              }}>
-                <AlertTriangle size={20} />
-              </div>
-              <div>
-                <h3 style={{ color: '#fb923c', fontWeight: 700, marginBottom: 4, fontSize: 14 }}>Account Under Review</h3>
-                <p style={{ color: '#94a3b8', fontSize: 13 }}>Your profile is being verified by the admin team. You'll receive full access once approved.</p>
-              </div>
-            </div>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+          <StatTile icon={ClipboardList} label="Assigned" value={assignedCount} hint="Waiting on your inspection" />
+          <StatTile icon={CheckCircle2} label="Completed" value={completedCount} hint="Reports filed" />
+          <StatTile icon={Star} label="Avg. rating given" value={avgRating} hint="Overall, out of 5" />
+        </div>
 
-          {upcomingInspections.length > 0 && (
-            <div style={{
-              marginBottom: 28, padding: '16px 20px',
-              background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)',
-              borderRadius: 16, display: 'flex', alignItems: 'flex-start', gap: 14,
-              position: 'relative', overflow: 'hidden',
-            }}>
-              <div style={{
-                position: 'absolute', top: 0, left: 0, width: 3,
-                height: '100%', background: '#3b82f6',
-              }} />
-              <div style={{
-                padding: 8, background: 'rgba(59,130,246,0.2)', borderRadius: 12,
-                color: '#60a5fa', flexShrink: 0,
-              }}>
-                <Calendar size={20} />
-              </div>
-              <div>
-                <h3 style={{ color: '#60a5fa', fontWeight: 700, marginBottom: 4, fontSize: 14 }}>
-                  Upcoming Inspections ({upcomingInspections.length})
-                </h3>
-                <p style={{ color: '#94a3b8', fontSize: 13, marginBottom: 10 }}>
-                  You have vehicle inspections scheduled soon.
-                </p>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {upcomingInspections.map(v => (
-                    <Link key={v._id} to={`/mechanic/car-details/${v._id}`}
-                      style={{
-                        padding: '4px 12px', background: 'rgba(255,255,255,0.1)',
-                        color: '#93c5fd', fontSize: 11, fontWeight: 700,
-                        borderRadius: 8, textDecoration: 'none',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        transition: 'background 0.2s',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    >
-                      {v.vehicleName}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Title + Stats row */}
-          <div style={{
-            display: 'flex', flexWrap: 'wrap',
-            alignItems: 'flex-end', justifyContent: 'space-between', gap: 32,
-          }}>
-            {/* Left: Title */}
-            <div>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.2)',
-                padding: '6px 14px', borderRadius: 100, marginBottom: 16,
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3b82f6', display: 'inline-block' }} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Mechanic Portal</span>
-              </div>
-              <h1 style={{
-                fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800, color: '#fff',
-                letterSpacing: '-1.5px', lineHeight: 1.05, marginBottom: 12,
-              }}>
-                Mechanic{' '}
-                <span style={{ color: '#3b82f6', fontStyle: 'italic' }}>Dashboard</span>
-              </h1>
-              <p style={{ color: '#94a3b8', fontSize: 15, maxWidth: 420, lineHeight: 1.7 }}>
-                Manage your assigned vehicle inspections and view completed reports.
-              </p>
-            </div>
-
-            {/* Right: Stat pills */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              {[
-                { count: displayedVehicles.length, label: 'Current Tasks', color: '#60a5fa', bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.3)', Icon: Settings },
-                { count: completedTasks.length, label: 'Completed', color: '#34d399', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', Icon: CheckCircle2 },
-                { count: displayedVehicles.length + completedTasks.length, label: 'Total Tasks', color: '#fbbf24', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', Icon: BarChart3 },
-              ].map((stat, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '16px 24px', borderRadius: 16,
-                  background: stat.bg, border: `1px solid ${stat.border}`,
-                }}>
-                  <div>
-                    <div style={{ fontSize: 32, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.count}</div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 }}>{stat.label}</div>
-                  </div>
-                  <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
-                  <stat.Icon size={18} color={stat.color} strokeWidth={1.8} />
-                </div>
+        <Section
+          title="Assigned to you"
+          description="Inspect the vehicle, then submit your report."
+          action={
+            assignedCount > 0 && (
+              <Link to="/mechanic/current-tasks" className="hub-btn-ghost whitespace-nowrap">
+                View all
+              </Link>
+            )
+          }
+        >
+          {displayedVehicles.length > 0 ? (
+            <div className="space-y-3">
+              {displayedVehicles.map((v) => (
+                <VehicleRow
+                  key={v._id}
+                  vehicle={v}
+                  to={`/mechanic/car-details/${v._id}`}
+                  cta="Inspect"
+                  badge={v.inspectionStatus === 'scheduled' ? 'Scheduled' : null}
+                />
               ))}
             </div>
-          </div>
-        </div>
-      </section>
+          ) : (
+            <EmptyPanel
+              icon={Wrench}
+              title="Nothing assigned right now"
+              text="When an auction manager assigns you a vehicle, it will show up here."
+            />
+          )}
+        </Section>
 
-      {/* ── CONTENT ── */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 16px 96px' }}>
-
-        {/* Visual Analytics */}
-        <MechanicDashboardVisuals currentTasks={displayedVehicles} completedTasks={completedTasks} />
-
-        {/* ── CURRENT ASSIGNMENTS ── */}
-        <section style={{ marginBottom: 64 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', marginBottom: 28,
-            padding: '0 8px',
-          }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827' }}>Current Assignments</h2>
-            {displayedVehicles.length > 0 && (
-              <Link to="/mechanic/current-tasks" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '10px 18px', background: '#f3f4f6',
-                color: '#374151', fontSize: 13, fontWeight: 700,
-                borderRadius: 12, textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; }}
-              >
-                View All <ArrowRight size={14} />
+        <Section
+          title="Recently completed"
+          description="Reports you have already submitted."
+          action={
+            completedCount > 0 && (
+              <Link to="/mechanic/past-tasks" className="hub-btn-ghost whitespace-nowrap">
+                View all
               </Link>
-            )}
-          </div>
-
-          {displayedVehicles.length === 0 ? (
-            <div style={{
-              background: '#fff', borderRadius: 24, padding: 48,
-              textAlign: 'center', border: '1px dashed #d1d5db',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%',
-                background: '#f9fafb', color: '#9ca3af',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 20,
-              }}>
-                <Search size={28} strokeWidth={1.5} />
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 6 }}>No vehicles assigned</h3>
-              <p style={{ color: '#6b7280', fontSize: 14 }}>You currently have no tasks assigned to you.</p>
+            )
+          }
+        >
+          {completedTasks.length > 0 ? (
+            <div className="space-y-3">
+              {completedTasks.map((v) => (
+                <VehicleRow
+                  key={v._id}
+                  vehicle={v}
+                  to={`/mechanic/car-details/${v._id}`}
+                  cta="View report"
+                />
+              ))}
             </div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-              gap: 24,
-            }}>
-              {displayedVehicles.map(v => <CurrentTaskCard key={v._id} vehicle={v} />)}
-            </div>
+            <EmptyPanel
+              icon={CheckCircle2}
+              title="No completed inspections yet"
+              text="Your submitted reports will be listed here."
+            />
           )}
-        </section>
-
-        {/* ── COMPLETED INSPECTIONS ── */}
-        <section style={{ marginBottom: 64 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', marginBottom: 28,
-            padding: '0 8px',
-          }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827' }}>Completed Inspections</h2>
-            {completedTasks.length > 0 && (
-              <Link to="/mechanic/past-tasks" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '10px 18px', background: '#f3f4f6',
-                color: '#374151', fontSize: 13, fontWeight: 700,
-                borderRadius: 12, textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; }}
-              >
-                View All <ArrowRight size={14} />
-              </Link>
-            )}
-          </div>
-
-          {completedTasks.length === 0 ? (
-            <div style={{
-              background: '#fff', borderRadius: 24, padding: 48,
-              textAlign: 'center', border: '1px dashed #d1d5db',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%',
-                background: '#f9fafb', color: '#9ca3af',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 20,
-              }}>
-                <ClipboardList size={28} strokeWidth={1.5} />
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 6 }}>No completed tasks yet</h3>
-              <p style={{ color: '#6b7280', fontSize: 14 }}>Your completed inspection reports will appear here.</p>
-            </div>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-              gap: 24,
-            }}>
-              {completedTasks.slice(0, 6).map(v => <PastTaskCard key={v._id} vehicle={v} />)}
-            </div>
-          )}
-        </section>
+        </Section>
 
       </div>
     </div>

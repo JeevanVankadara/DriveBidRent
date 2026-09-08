@@ -5,6 +5,7 @@ import { getVehicleDetails } from '../../../services/mechanic.services';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import ChecklistForm from './ChecklistForm';
+import { getVehicleCoverImageUrl } from '../../../utils/vehicleImage.util';
 
 export default function CarDetails() {
   const { id } = useParams();
@@ -30,7 +31,7 @@ export default function CarDetails() {
   const { vehicle, seller } = data;
 
   return (
-    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+    <div className="min-h-screen font-montserrat">
       
       {/* ── HERO — Full width image banner ── */}
       <section style={{
@@ -40,7 +41,7 @@ export default function CarDetails() {
         background: '#0c1220'
       }}>
         <img
-          src={vehicle.vehicleImage || '/placeholder-car.jpg'}
+          src={getVehicleCoverImageUrl(vehicle) || '/placeholder-car.jpg'}
           alt={vehicle.vehicleName}
           className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
         />

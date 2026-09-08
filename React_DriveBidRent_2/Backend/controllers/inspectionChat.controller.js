@@ -6,6 +6,34 @@ import AuctionManager from '../models/AuctionManager.js';
 // lightweight utility to get current user's id
 const getUserId = (req) => req.user && req.user._id;
 
+// InspectionMessage.sender is declared `ref: 'User'`, but auction managers
+// live in their own AuctionManager collection. A plain .populate('sender')
+// therefore resolves to NULL for every message an auction manager sent, which
+// made the client treat their own messages as somebody else's and render them
+// on the wrong side of the thread.
+//
+// Resolve senders against both collections instead, and always keep
+// `sender._id` populated so message ownership can be determined even when the
+// profile lookup finds nothing.
+const attachSenders = async (messages) => {
+  if (!messages.length) return messages;
+
+  const ids = [...new Set(messages.map((m) => String(m.sender)).filter(Boolean))];
+  const fields = 'firstName lastName profileImage';
+
+  const [users, managers] = await Promise.all([
+    User.find({ _id: { $in: ids } }).select(fields).lean(),
+    AuctionManager.find({ _id: { $in: ids } }).select(fields).lean(),
+  ]);
+
+  const byId = new Map([...users, ...managers].map((p) => [String(p._id), p]));
+  messages.forEach((m) => {
+    m.sender = byId.get(String(m.sender)) || { _id: m.sender };
+  });
+
+  return messages;
+};
+
 export const getMyInspectionChats = async (req, res) => {
   try {
     const uid = getUserId(req);
@@ -19,7 +47,7 @@ export const getMyInspectionChats = async (req, res) => {
       .populate('mechanic', 'firstName lastName profileImage _id')
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('seller', 'firstName lastName profileImage _id')
-      .populate({ path: 'inspectionTask', select: 'vehicleName vehicleImage make model year _id' })
+      .populate({ path: 'inspectionTask', select: 'vehicleName mainImage vehicleImage make model year _id' })
       .sort({ lastMessageAt: -1, createdAt: -1 })
       .lean();
 
@@ -42,7 +70,7 @@ export const getInspectionChatById = async (req, res) => {
       .populate('mechanic', 'firstName lastName profileImage _id')
       .populate('auctionManager', 'firstName lastName profileImage _id')
       .populate('seller', 'firstName lastName profileImage _id')
-      .populate({ path: 'inspectionTask', select: 'vehicleName vehicleImage make model year _id' })
+      .populate({ path: 'inspectionTask', select: 'vehicleName mainImage vehicleImage make model year _id' })
       .lean();
 
     if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
@@ -78,10 +106,11 @@ export const getInspectionMessages = async (req, res) => {
       }
     }
 
-    let messagesQuery = InspectionMessage.find(query).sort({ createdAt: 1 }).populate('sender', 'firstName lastName profileImage');
+    let messagesQuery = InspectionMessage.find(query).sort({ createdAt: 1 });
     if (!since) messagesQuery = messagesQuery.skip((page - 1) * limit).limit(parseInt(limit));
 
     const messages = await messagesQuery.lean();
+    await attachSenders(messages);
 
     // mark delivered for recipient
     try {
@@ -116,8 +145,12 @@ export const sendInspectionMessage = async (req, res) => {
 
     if (new Date() > new Date(chat.expiresAt)) return res.status(403).json({ success: false, message: 'Chat expired and read-only' });
 
-    const message = await InspectionMessage.create({ chat: chatId, sender: req.user._id, content, delivered: true, read: false });
-    await message.populate('sender', 'firstName lastName profileImage');
+    const created = await InspectionMessage.create({ chat: chatId, sender: req.user._id, content, delivered: true, read: false });
+
+    // Resolve the sender across both collections (see attachSenders above) —
+    // populate alone would blank out an auction manager's own message.
+    const message = created.toObject();
+    await attachSenders([message]);
 
     // update chat metadata
     try {

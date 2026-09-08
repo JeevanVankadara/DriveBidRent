@@ -1,12 +1,12 @@
-// Example: CurrentTaskCard.jsx (update both Current & Past)
 import { Link } from 'react-router-dom';
+import { getVehicleCoverImageUrl } from '../../../utils/vehicleImage.util';
 
 export default function CurrentTaskCard({ vehicle }) {
   return (
     <Link to={`/mechanic/car-details/${vehicle._id}`}
       className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 border-2 border-orange-300 overflow-hidden flex flex-col h-full">
       <div className="relative">
-        <img src={vehicle.vehicleImage} alt={vehicle.vehicleName} className="w-full h-56 object-cover" />
+        <img src={getVehicleCoverImageUrl(vehicle)} alt={vehicle.vehicleName} className="w-full h-56 object-cover" />
         <span className="absolute top-4 left-4 bg-orange-600 text-white font-bold px-5 py-2 rounded-full text-sm shadow-lg">
           CURRENT TASK
         </span>

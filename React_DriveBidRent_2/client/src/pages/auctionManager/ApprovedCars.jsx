@@ -168,7 +168,7 @@ export default function ApprovedCars() {
   }
 
   return (
-    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+    <div className="min-h-screen font-montserrat">
 
       {/* ── HERO — full-width dark banner ── */}
       <section style={{

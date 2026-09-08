@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance.util';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getVehicleCoverImage } from '../../utils/vehicleImage.util';
 
 export default function CompletedAuctionDetails() {
   const { id } = useParams();
@@ -52,7 +53,7 @@ export default function CompletedAuctionDetails() {
     );
   }
 
-  const { auction: auctionData, seller, winner, finalPrice, purchaseDate, bidHistory, mechanicReview: _mechanicReview } = auction;
+  const { auction: auctionData, seller, winner, finalPrice, purchaseDate, bidHistory } = auction;
 
   // Safety checks
   if (!auctionData || !seller || !winner) {
@@ -96,7 +97,7 @@ export default function CompletedAuctionDetails() {
         {/* Hero Section with Image */}
         <div className="relative h-96 md:h-[450px] bg-cover bg-center bg-no-repeat rounded-3xl overflow-hidden shadow-2xl mb-12"
           style={{
-            backgroundImage: `url(${auctionData.vehicleImage})`,
+            backgroundImage: `url(${getVehicleCoverImage(auctionData)})`,
             backgroundColor: '#1a1a1a'
           }}
         >

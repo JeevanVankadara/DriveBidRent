@@ -283,7 +283,7 @@ const getUserDetails = async (req, res) => {
         assignedMechanic: new mongoose.Types.ObjectId(userId),
         reviewStatus: 'completed'
       })
-      .select('vehicleName year mileage mechanicReview createdAt')
+      .select('vehicleName year mileage multipointInspection createdAt')
       .populate('sellerId', 'firstName lastName email')
       .lean();
       

@@ -30,6 +30,10 @@ const playBeep = () => {
   } catch(e) { console.error('Audio play failed', e); }
 };
 
+// How many recent bids the room lists. Mirrored server-side by the `limit(3)`
+// on the recentBids query in buyer/auctions.controller.js.
+const RECENT_BID_COUNT = 3;
+
 export default function LiveAuctionRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -54,7 +58,19 @@ export default function LiveAuctionRoom() {
         setCurrentBid(data.currentBid);
         setIsCurrentBidder(data.isCurrentBidder || false);
         
-        if (data.currentBid) {
+        // Seed the list from the real last-3 bids the API returns, so names
+        // survive a page reload instead of collapsing to a placeholder row.
+        if (data.recentBids?.length) {
+          setBidsHistory(
+            data.recentBids.map((bid) => ({
+              amount: bid.bidAmount,
+              name: bid.bidderName || 'Anonymous',
+              time: bid.bidTime
+                ? new Date(bid.bidTime).toLocaleTimeString()
+                : new Date().toLocaleTimeString()
+            }))
+          );
+        } else if (data.currentBid) {
           setBidsHistory([{
             amount: data.currentBid.bidAmount,
             time: new Date().toLocaleTimeString(),
@@ -86,9 +102,9 @@ export default function LiveAuctionRoom() {
       setCurrentBid({ bidAmount: data.bidAmount });
       setBidsHistory(prev => [{
         amount: data.bidAmount,
-        name: data.bidderName,
+        name: data.bidderName || 'Anonymous',
         time: new Date().toLocaleTimeString()
-      }, ...prev].slice(0, 5));
+      }, ...prev].slice(0, RECENT_BID_COUNT));
 
       // Retrieve current user ID assuming localStorage contains user info
       const user = JSON.parse(localStorage.getItem('user'));

@@ -46,7 +46,7 @@ export default function PendingCars() {
   }
 
   return (
-    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+    <div className="min-h-screen font-montserrat">
 
       {/* ── HERO — full-width dark banner ── */}
       <section style={{
@@ -100,7 +100,8 @@ export default function PendingCars() {
         {cars.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {cars.map((car) => {
-              const hasReview = !!car.multipointInspection || !!(car.mechanicReview && (car.mechanicReview.mechanicalCondition || car.mechanicReview.bodyCondition));
+              const insp = car.multipointInspection;
+              const hasReview = !!(insp && (insp.overallRating || insp.additionalNotes));
               return (
                 <div key={car._id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full group">
                   <div className="relative h-64 overflow-hidden bg-gray-100">
@@ -139,7 +140,7 @@ export default function PendingCars() {
                           Mechanic's Review
                         </p>
                         <p className="text-sm text-green-700 line-clamp-2 font-medium">
-                          {car.multipointInspection?.mechanicSummary || car.mechanicReview?.mechanicalCondition || car.mechanicReview?.bodyCondition || 'Review submitted successfully.'}
+                          {car.multipointInspection?.additionalNotes || 'Review submitted successfully.'}
                         </p>
                       </div>
                     ) : (

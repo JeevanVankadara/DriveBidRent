@@ -1,306 +1,167 @@
-import React, { useState } from 'react';
+// client/src/pages/mechanic/car-details/ChecklistForm.jsx
+//
+// The mechanic's inspection report. Deliberately short: three 1-5 ratings and
+// a note. It replaced a four-section, ~20-field checklist that took far longer
+// to fill in than anyone actually did.
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../../utils/axiosInstance.util';
 
-const InputWrapper = ({ label, children }) => (
-  <div className="mb-5">
-    <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">{label}</label>
-    {children}
-  </div>
+const RATING_LABELS = {
+  1: 'Poor',
+  2: 'Below average',
+  3: 'Average',
+  4: 'Good',
+  5: 'Excellent',
+};
+
+const RatingField = ({ label, hint, name, value, onChange }) => (
+  <fieldset className="hub-surface-card p-5">
+    <legend className="sr-only">{label}</legend>
+    <div className="flex items-baseline justify-between gap-4 mb-1">
+      <span className="font-semibold hub-text-foreground">{label}</span>
+      <span className="text-sm hub-text-primary font-semibold">
+        {value}/5 · {RATING_LABELS[value]}
+      </span>
+    </div>
+    {hint && <p className="text-xs hub-text-muted mb-3">{hint}</p>}
+
+    <div className="flex gap-2" role="radiogroup" aria-label={label}>
+      {[1, 2, 3, 4, 5].map((n) => {
+        const active = value === n;
+        return (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            aria-label={`${label}: ${n} out of 5 — ${RATING_LABELS[n]}`}
+            onClick={() => onChange(name, n)}
+            className={`flex-1 h-11 rounded-xl border font-semibold transition-colors ${
+              active
+                ? 'hub-bg-primary border-transparent'
+                : 'hub-bg-card hub-border-c hub-text-foreground hover:hub-bg-secondary'
+            }`}
+            style={active ? undefined : { borderWidth: 1, borderStyle: 'solid' }}
+          >
+            {n}
+          </button>
+        );
+      })}
+    </div>
+  </fieldset>
 );
 
 export default function ChecklistForm({ vehicleId, onSuccess }) {
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState('');
   const [form, setForm] = useState({
-    exterior: {
-      paintCondition: 5,
-      scratches: false,
-      dents: false,
-      rust: false,
-      tiresCondition: 'Good',
-      notes: ''
-    },
-    interior: {
-      seatsCondition: 'Good',
-      dashboardCondition: 'Good',
-      acWorks: true,
-      electronicsWork: true,
-      notes: ''
-    },
-    engine: {
-      fluidLeaks: false,
-      abnormalNoise: false,
-      startupSmoothness: 'Smooth',
-      batteryHealth: 'Good',
-      notes: ''
-    },
-    testDrive: {
-      brakesCondition: 'Good',
-      steeringFeel: 'Smooth',
-      suspension: 'Smooth',
-      transmissionShift: 'Smooth',
-      notes: ''
-    },
-    overallRating: 5,
-    isApprovedForAuction: true,
-    mechanicSummary: ''
+    interiorRating: 3,
+    engineRating: 3,
+    overallRating: 3,
+    additionalNotes: '',
   });
 
-  const updateSection = (section, field, value) => {
-    setForm(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
+  const setRating = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (step < 5) return setStep(s => s + 1);
+
+    if (!form.additionalNotes.trim()) {
+      const msg = 'Please add a few notes about the vehicle before submitting.';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
 
     setLoading(true);
+    setError('');
     try {
-      const submitData = {
-        exterior: form.exterior,
-        interior: form.interior,
-        engine: form.engine,
-        testDrive: form.testDrive,
+      await axiosInstance.post(`/mechanic/submit-inspection/${vehicleId}`, {
+        interiorRating: form.interiorRating,
+        engineRating: form.engineRating,
         overallRating: form.overallRating,
-        isApprovedForAuction: form.isApprovedForAuction,
-        mechanicSummary: form.mechanicSummary
-      };
-
-      await axiosInstance.post(`/mechanic/submit-inspection/${vehicleId}`, submitData);
-      toast.success('Inspection report submitted successfully!');
+        additionalNotes: form.additionalNotes.trim(),
+      });
+      toast.success('Inspection report submitted');
       if (onSuccess) onSuccess();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit inspection report');
+      const msg = err.response?.data?.message || 'Failed to submit the inspection report';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-8 md:p-12 relative overflow-hidden mt-8">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+    <div className="hub-surface-card p-6 md:p-8 mt-8">
+      <header className="mb-6">
+        <span className="hub-eyebrow hub-text-primary">Inspection</span>
+        <h2 className="hub-display text-2xl mt-1">Submit your report</h2>
+        <p className="hub-text-muted text-sm mt-1">
+          Rate each area from 1 to 5, then add anything the buyer and auction manager should know.
+        </p>
+      </header>
 
-      <div className="flex items-center justify-between mb-8">
-        <h3 className="text-3xl font-black text-gray-900">Multi-Point Inspection</h3>
-        <span className="bg-indigo-50 text-indigo-700 font-bold px-4 py-1.5 rounded-full text-sm border border-indigo-100">
-          Step {step} of 5
-        </span>
-      </div>
-
-      <div className="w-full bg-gray-100 h-2.5 rounded-full mb-10 overflow-hidden relative">
+      {error && (
         <div
-          className="absolute top-0 left-0 h-full bg-indigo-500 transition-all duration-300 ease-out"
-          style={{ width: `${(step / 5) * 100}%` }}
-        />
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        {step === 1 && (
-          <div className="space-y-6 animate-fade-in">
-            <h4 className="text-xl font-bold text-indigo-900 border-b border-gray-100 pb-3 mb-6">Exterior & Body Check</h4>
-            <div className="grid md:grid-cols-2 gap-6">
-              <InputWrapper label="Paint Condition (1-10)">
-                <input type="number" min="1" max="10" required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.exterior.paintCondition} onChange={e => updateSection('exterior', 'paintCondition', Number(e.target.value))} />
-              </InputWrapper>
-              <InputWrapper label="Tires Condition">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.exterior.tiresCondition} onChange={e => updateSection('exterior', 'tiresCondition', e.target.value)}>
-                  <option value="New">New</option>
-                  <option value="Good">Good</option>
-                  <option value="Fair">Fair</option>
-                  <option value="Needs Replacement">Needs Replacement</option>
-                </select>
-              </InputWrapper>
-            </div>
-            <div className="grid grid-cols-3 gap-4 p-5 bg-gray-50 rounded-xl border border-gray-200">
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.exterior.scratches} onChange={e => updateSection('exterior', 'scratches', e.target.checked)} />
-                Has Scratches
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.exterior.dents} onChange={e => updateSection('exterior', 'dents', e.target.checked)} />
-                Has Dents
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.exterior.rust} onChange={e => updateSection('exterior', 'rust', e.target.checked)} />
-                Has Rust
-              </label>
-            </div>
-            <InputWrapper label="Exterior Notes">
-              <textarea className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl resize-none h-24" value={form.exterior.notes} onChange={e => updateSection('exterior', 'notes', e.target.value)} />
-            </InputWrapper>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-6 animate-fade-in">
-            <h4 className="text-xl font-bold text-indigo-900 border-b border-gray-100 pb-3 mb-6">Interior & Electronics</h4>
-            <div className="grid md:grid-cols-2 gap-6">
-              <InputWrapper label="Seats & Upholstery">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.interior.seatsCondition} onChange={e => updateSection('interior', 'seatsCondition', e.target.value)}>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Fair">Fair</option>
-                  <option value="Torn/Damaged">Torn/Damaged</option>
-                </select>
-              </InputWrapper>
-              <InputWrapper label="Dashboard & Trims">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.interior.dashboardCondition} onChange={e => updateSection('interior', 'dashboardCondition', e.target.value)}>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Scratched/Cracked">Scratched/Cracked</option>
-                </select>
-              </InputWrapper>
-            </div>
-            <div className="grid grid-cols-2 gap-4 p-5 bg-gray-50 rounded-xl border border-gray-200">
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.interior.acWorks} onChange={e => updateSection('interior', 'acWorks', e.target.checked)} />
-                A/C Works Normally
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.interior.electronicsWork} onChange={e => updateSection('interior', 'electronicsWork', e.target.checked)} />
-                Electronics/Infotainment Working
-              </label>
-            </div>
-            <InputWrapper label="Interior Notes">
-              <textarea className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl resize-none h-24" value={form.interior.notes} onChange={e => updateSection('interior', 'notes', e.target.value)} />
-            </InputWrapper>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-6 animate-fade-in">
-            <h4 className="text-xl font-bold text-indigo-900 border-b border-gray-100 pb-3 mb-6">Engine, Battery & Fluids</h4>
-            <div className="grid md:grid-cols-2 gap-6">
-              <InputWrapper label="Startup Smoothness">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.engine.startupSmoothness} onChange={e => updateSection('engine', 'startupSmoothness', e.target.value)}>
-                  <option value="Smooth">Smooth</option>
-                  <option value="Rough">Rough</option>
-                  <option value="Failed">Failed</option>
-                </select>
-              </InputWrapper>
-              <InputWrapper label="Battery Health">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.engine.batteryHealth} onChange={e => updateSection('engine', 'batteryHealth', e.target.value)}>
-                  <option value="Good">Good</option>
-                  <option value="Weak">Weak</option>
-                  <option value="Dead">Dead</option>
-                </select>
-              </InputWrapper>
-            </div>
-            <div className="grid grid-cols-2 gap-4 p-5 bg-gray-50 rounded-xl border border-gray-200">
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.engine.fluidLeaks} onChange={e => updateSection('engine', 'fluidLeaks', e.target.checked)} />
-                Fluid/Oil Leaks Detected
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
-                <input type="checkbox" checked={form.engine.abnormalNoise} onChange={e => updateSection('engine', 'abnormalNoise', e.target.checked)} />
-                Abnormal Engine Noises
-              </label>
-            </div>
-            <InputWrapper label="Engine Notes">
-              <textarea className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl resize-none h-24" value={form.engine.notes} onChange={e => updateSection('engine', 'notes', e.target.value)} />
-            </InputWrapper>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div className="space-y-6 animate-fade-in">
-            <h4 className="text-xl font-bold text-indigo-900 border-b border-gray-100 pb-3 mb-6">Test Drive & Suspension</h4>
-            <div className="grid md:grid-cols-2 gap-6">
-              <InputWrapper label="Brakes Condition">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.testDrive.brakesCondition} onChange={e => updateSection('testDrive', 'brakesCondition', e.target.value)}>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Spongy">Spongy</option>
-                  <option value="Needs Replacement">Needs Replacement</option>
-                </select>
-              </InputWrapper>
-              <InputWrapper label="Steering Feel">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.testDrive.steeringFeel} onChange={e => updateSection('testDrive', 'steeringFeel', e.target.value)}>
-                  <option value="Smooth">Smooth</option>
-                  <option value="Vibrates">Vibrates</option>
-                  <option value="Pulls to side">Pulls to side</option>
-                </select>
-              </InputWrapper>
-              <InputWrapper label="Suspension/Shocks">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.testDrive.suspension} onChange={e => updateSection('testDrive', 'suspension', e.target.value)}>
-                  <option value="Smooth">Smooth</option>
-                  <option value="Noisy">Noisy</option>
-                  <option value="Bouncy">Bouncy</option>
-                </select>
-              </InputWrapper>
-              <InputWrapper label="Transmission Shifts">
-                <select required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl" value={form.testDrive.transmissionShift} onChange={e => updateSection('testDrive', 'transmissionShift', e.target.value)}>
-                  <option value="Smooth">Smooth</option>
-                  <option value="Jerky">Jerky</option>
-                  <option value="Slipping">Slipping</option>
-                  <option value="N/A">N/A</option>
-                </select>
-              </InputWrapper>
-            </div>
-            <InputWrapper label="Test Drive Notes">
-              <textarea className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl resize-none h-24" value={form.testDrive.notes} onChange={e => updateSection('testDrive', 'notes', e.target.value)} />
-            </InputWrapper>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div className="space-y-6 animate-fade-in">
-            <h4 className="text-xl font-bold text-indigo-900 border-b border-gray-100 pb-3 mb-6">Final Mechanic Verdict</h4>
-            <div className={`p-6 rounded-2xl border-2 mb-6 ${form.isApprovedForAuction ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <label className="flex items-center gap-4 cursor-pointer">
-                <input type="checkbox" className={`w-8 h-8 rounded ${form.isApprovedForAuction ? 'text-green-600 focus:ring-green-500' : 'text-red-600 focus:ring-red-500'}`} checked={form.isApprovedForAuction} onChange={e => setForm(f => ({ ...f, isApprovedForAuction: e.target.checked }))} />
-                <div>
-                  <div className={`text-xl font-black ${form.isApprovedForAuction ? 'text-green-800' : 'text-red-800'}`}>APPROVED FOR AUCTION?</div>
-                  <div className={`text-sm font-medium ${form.isApprovedForAuction ? 'text-green-600' : 'text-red-600'}`}>
-                    {form.isApprovedForAuction ? 'Vehicle meets minimal safety and quality standards.' : 'Vehicle DOES NOT meet standards. Recommending rejection.'}
-                  </div>
-                </div>
-              </label>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 items-end">
-              <InputWrapper label="Overall Rating (1-10)">
-                <div className="relative">
-                  <input type="number" min="1" max="10" required className="w-full text-2xl font-black p-4 border border-gray-200 bg-gray-50 rounded-xl text-center" value={form.overallRating} onChange={e => setForm(f => ({ ...f, overallRating: Number(e.target.value) }))} />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-black text-xl">/ 10</span>
-                </div>
-              </InputWrapper>
-            </div>
-
-            <InputWrapper label="Executive Summary">
-              <textarea required className="w-full p-4 border border-gray-200 bg-gray-50 rounded-xl resize-none h-32" value={form.mechanicSummary} onChange={e => setForm(f => ({ ...f, mechanicSummary: e.target.value }))} />
-            </InputWrapper>
-          </div>
-        )}
-
-        <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setStep(s => Math.max(1, s - 1))}
-            disabled={step === 1 || loading}
-            className={`px-6 py-3 font-bold rounded-xl text-gray-700 hover:bg-gray-100 transition-colors ${step === 1 ? 'invisible' : ''}`}
-          >
-            ← Previous
-          </button>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`px-10 py-3 font-black rounded-xl text-white shadow-sm transition-transform active:scale-95 disabled:opacity-70 disabled:active:scale-100 ${
-              step === 5 ? 'bg-gray-900 hover:bg-black text-lg' : 'bg-indigo-600 hover:bg-indigo-700'
-            }`}
-          >
-            {loading ? 'Submitting Report...' : (step === 5 ? 'Submit Report' : 'Next Step →')}
-          </button>
+          role="alert"
+          className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          {error}
         </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <RatingField
+          label="Interior condition"
+          hint="Seats, dashboard, trim, electronics and air conditioning."
+          name="interiorRating"
+          value={form.interiorRating}
+          onChange={setRating}
+        />
+        <RatingField
+          label="Engine condition"
+          hint="Startup, idle, noise, leaks and battery health."
+          name="engineRating"
+          value={form.engineRating}
+          onChange={setRating}
+        />
+        <RatingField
+          label="Overall condition"
+          hint="Your single verdict on the vehicle as a whole."
+          name="overallRating"
+          value={form.overallRating}
+          onChange={setRating}
+        />
+
+        <div className="hub-surface-card p-5">
+          <label htmlFor="additionalNotes" className="block font-semibold hub-text-foreground mb-1">
+            Additional notes <span className="text-red-500">*</span>
+          </label>
+          <p className="text-xs hub-text-muted mb-3">
+            Anything worth flagging — damage, recent repairs, things to budget for.
+          </p>
+          <textarea
+            id="additionalNotes"
+            className="hub-input"
+            rows={5}
+            value={form.additionalNotes}
+            onChange={(e) => {
+              setForm((prev) => ({ ...prev, additionalNotes: e.target.value }));
+              setError('');
+            }}
+            placeholder="e.g. Bodywork is straight with light scuffing on the rear bumper. Engine starts cleanly, no leaks. Front tyres need replacing within 5,000 km."
+          />
+        </div>
+
+        <button type="submit" disabled={loading} className="hub-cta w-full justify-center disabled:opacity-60">
+          {loading ? 'Submitting...' : 'Submit inspection report'}
+        </button>
       </form>
     </div>
   );

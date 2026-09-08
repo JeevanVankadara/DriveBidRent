@@ -3,6 +3,9 @@ import AuctionRequest from '../../models/AuctionRequest.js';
 import AuctionBid from '../../models/AuctionBid.js';
 import Purchase from '../../models/Purchase.js';
 import AuctionCost from '../../models/AuctionCost.js';
+// Imported explicitly so populate('buyerId') always has the model registered,
+// rather than relying on some other module having imported it first.
+import User from '../../models/User.js';
 
 import redisClient from '../../utils/redisClient.js';
 
@@ -145,6 +148,24 @@ export const getSingleAuction = async (req, res) => {
 
     const isCurrentBidder = currentBid && req.user._id.toString() === currentBid.buyerId.toString();
 
+    // The three most recent bids, with the bidder's name, so the live auction
+    // room can show real history on load instead of a placeholder row.
+    const recentBidDocs = await AuctionBid.find({ auctionId })
+      .sort({ bidTime: -1 })
+      .limit(3)
+      .populate('buyerId', 'firstName lastName')
+      .lean();
+
+    const recentBids = recentBidDocs.map((bid) => ({
+      _id: bid._id,
+      bidAmount: bid.bidAmount,
+      bidTime: bid.bidTime,
+      buyerId: bid.buyerId?._id || null,
+      bidderName: bid.buyerId
+        ? `${bid.buyerId.firstName || ''} ${bid.buyerId.lastName || ''}`.trim() || 'Anonymous'
+        : 'Anonymous'
+    }));
+
     res.json({
       success: true,
       message: 'Auction details fetched',
@@ -152,6 +173,7 @@ export const getSingleAuction = async (req, res) => {
         auction,
         seller: auction.sellerId,
         currentBid,
+        recentBids,
         isCurrentBidder,
         isLoggedIn: true,
         user: req.user
@@ -221,13 +243,13 @@ export const placeBid = async (req, res) => {
     const io = req.app.get('io');
     if (io) {
       try {
-        const User = (await import('../../models/User.js')).default;
         const bidder = await User.findById(buyerId).select('firstName lastName -_id').lean();
         const payload = {
           bidAmount: bidValue,
           auctionId: auctionId.toString(),
           buyerId: buyerId.toString(),
-          bidderName: bidder ? `${bidder.firstName} ${bidder.lastName.charAt(0)}.` : 'Anonymous'
+          // Full name, matching the bid history the auction page loads with.
+          bidderName: bidder ? `${bidder.firstName} ${bidder.lastName}`.trim() : 'Anonymous'
         };
 
         // Emit to specific auction room
@@ -419,7 +441,11 @@ export const getCompletedAuctionDetails = async (req, res) => {
         auction: {
           _id: auction._id,
           vehicleName: auction.vehicleName,
-          vehicleImage: auction.vehicleImage,
+          // Auctions store the cover photo as mainImage; keep the legacy
+          // key in the response so existing clients keep working.
+          vehicleImage: auction.mainImage || auction.vehicleImage,
+          mainImage: auction.mainImage,
+          additionalImages: auction.additionalImages,
           year: auction.year,
           mileage: auction.mileage,
           condition: auction.condition,
@@ -427,7 +453,7 @@ export const getCompletedAuctionDetails = async (req, res) => {
           transmission: auction.transmission,
           startingBid: auction.startingBid,
           auctionDate: auction.auctionDate,
-          mechanicReview: auction.mechanicReview
+          multipointInspection: auction.multipointInspection
         },
         seller: {
           _id: auction.sellerId._id,

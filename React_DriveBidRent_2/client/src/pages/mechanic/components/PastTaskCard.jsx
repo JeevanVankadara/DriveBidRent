@@ -1,20 +1,16 @@
 // client/src/pages/mechanic/components/PastTaskCard.jsx
 import { useState } from 'react';
 import { Calendar, Gauge, Star, CheckCircle, Car } from 'lucide-react';
+import { getVehicleCoverImageUrl, getVehicleCoverImage } from '../../../utils/vehicleImage.util';
 
 export default function PastTaskCard({ vehicle }) {
   const [imgError, setImgError] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'https://drivebidrent.onrender.com';
-  const imgSrc = vehicle.vehicleImage?.startsWith('http')
-    ? vehicle.vehicleImage
-    : `${backendUrl}${vehicle.vehicleImage}`;
+  const imgSrc = getVehicleCoverImageUrl(vehicle);
 
-  const rating = vehicle.multipointInspection?.overallRating
-    ? `${vehicle.multipointInspection.overallRating}/10`
-    : vehicle.mechanicReview?.conditionRating || 'N/A';
-
-  const hasRating = vehicle.multipointInspection?.overallRating || vehicle.mechanicReview?.conditionRating;
+  const overall = vehicle.multipointInspection?.overallRating;
+  const rating = overall ? `${overall}/5` : 'N/A';
+  const hasRating = Boolean(overall);
 
   const s = {
     card: {
@@ -91,7 +87,7 @@ export default function PastTaskCard({ vehicle }) {
           <CheckCircle size={12} />
           COMPLETED
         </div>
-        {imgError || !vehicle.vehicleImage ? (
+        {imgError || !getVehicleCoverImage(vehicle) ? (
           <div style={s.placeholder}>
             <Car size={40} strokeWidth={1.2} />
             <span style={{ fontSize: 12, fontWeight: 600, marginTop: 8 }}>{vehicle.vehicleName}</span>

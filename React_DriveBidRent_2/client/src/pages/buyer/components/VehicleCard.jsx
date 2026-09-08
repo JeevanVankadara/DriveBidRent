@@ -3,6 +3,7 @@
 // and rentals list pages, and the wishlist. Replaced the old CarCard.
 import { Link } from 'react-router-dom';
 import { Heart, Info, Users } from 'lucide-react';
+import { getVehicleCoverImage } from '../../../utils/vehicleImage.util';
 
 const formatINR = (value) => '₹' + (Number(value) || 0).toLocaleString('en-IN');
 
@@ -33,7 +34,7 @@ export default function VehicleCard({ item, type = 'auction', isInWishlist, onTo
     <article className="hub-surface-card hub-card">
       <div className="hub-card-media">
         <img
-          src={item.vehicleImage}
+          src={getVehicleCoverImage(item)}
           alt={item.vehicleName}
           loading="lazy"
           className="hub-card-img"

@@ -76,7 +76,7 @@ export const getReview = async (req, res) => {
 
     if (!car) return res.json(send(false, 'Car not found'));
 
-    const review = car.mechanicReview || {};
+    const review = car.multipointInspection || {};
     const mechanicName = car.assignedMechanic
       ? `${car.assignedMechanic.firstName} ${car.assignedMechanic.lastName}`
       : 'Unknown';
@@ -115,8 +115,11 @@ export const updateStatus = async (req, res) => {
       return res.json(send(false, 'Cannot change status until mechanic review is complete'));
     }
 
-    if (status === 'approved' && (!car.mechanicReview?.mechanicalCondition || !car.mechanicReview?.bodyCondition)) {
-      return res.json(send(false, 'Complete mechanic review required for approval'));
+    // The inspection must actually carry an overall rating before a car can
+    // be approved. `reviewStatus` alone is not enough - it can be flipped
+    // without a report behind it.
+    if (status === 'approved' && !car.multipointInspection?.overallRating) {
+      return res.json(send(false, 'Complete mechanic inspection required for approval'));
     }
 
     // Build the update object

@@ -169,7 +169,7 @@ export const assignMechanic = async (req, res) => {
         chatDoc = await InspectionChat.findById(chatDoc._id)
           .populate('mechanic', 'firstName lastName _id')
           .populate('auctionManager', 'firstName lastName _id')
-          .populate({ path: 'inspectionTask', select: 'vehicleName vehicleImage _id' });
+          .populate({ path: 'inspectionTask', select: 'vehicleName mainImage vehicleImage _id' });
       }
     } catch (cErr) {
       console.error('❌ [assignMechanic] Failed to create or fetch InspectionChat:', cErr);

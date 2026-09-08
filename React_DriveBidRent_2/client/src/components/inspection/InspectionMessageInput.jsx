@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-const InspectionMessageInput = ({ onSend, disabled, placeholder = "Type a message..." }) => {
+const InspectionMessageInput = ({ onSend, disabled, placeholder = 'Type a message...' }) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
@@ -12,25 +12,24 @@ const InspectionMessageInput = ({ onSend, disabled, placeholder = "Type a messag
   };
 
   return (
-    <div className="border-t bg-white p-4">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-3">
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={disabled ? 'Chat expired' : placeholder}
-          disabled={disabled}
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-        />
-        <button
-          type="submit"
-          disabled={disabled || !message.trim()}
-          className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white px-6 py-2 rounded-full font-medium transition-colors"
-        >
-          Send
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 py-3 hub-bg-card border-t hub-border-c">
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder={disabled ? 'This chat is read only' : placeholder}
+        disabled={disabled}
+        aria-label="Message"
+        className="hub-input flex-1 !rounded-full"
+      />
+      <button
+        type="submit"
+        disabled={disabled || !message.trim()}
+        className="hub-btn-solid hub-bg-primary !rounded-full !px-5 disabled:opacity-50"
+      >
+        Send
+      </button>
+    </form>
   );
 };
 

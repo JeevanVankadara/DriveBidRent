@@ -197,49 +197,52 @@ const yearsAgo = (n) => {
   return d;
 };
 
-// `live` auctions are visible to buyers (approved + started + not stopped).
-// The rest sit as `pending` so the auction manager dashboard has work too.
+// Every seeded car is created exactly as a seller upload leaves it: pending,
+// not started, no startingBid. The real workflow takes over from there —
+// auction manager reviews, assigns a mechanic, the mechanic inspects and
+// writes the review, and only then does the manager approve and start the
+// auction. Nothing in this script may short-circuit that.
 const AUCTIONS = [
   {
-    name: 'Maruti Suzuki Swift VXi', seller: 1, live: true,
+    name: 'Maruti Suzuki Swift VXi', seller: 1,
     searches: ['Maruti Suzuki Swift India', 'Suzuki Swift hatchback'], mustMatch: ['swift'], exclude: ['dzire', 'sport', 'gti', 'hybrid'], prefer: ['maruti'],
     carType: 'Hatchback', year: 2019, mileage: 42000, fuelType: 'petrol', transmission: 'manual',
-    condition: 'good', expectedBid: 480000, startingBid: 445000, auctionInDays: 4,
+    condition: 'good', expectedBid: 480000, auctionInDays: 4,
     reg: 'MH12AB4521', state: 'Maharashtra', owner: 'First Owner',
   },
   {
-    name: 'Hyundai Creta SX', seller: 2, live: true,
+    name: 'Hyundai Creta SX', seller: 2,
     searches: ['Hyundai Creta India', 'Hyundai Creta SX'], mustMatch: ['creta'], exclude: ['grand creta', 'ix25', 'n line'],
     carType: 'SUV', year: 2021, mileage: 28500, fuelType: 'diesel', transmission: 'automatic',
-    condition: 'excellent', expectedBid: 1420000, startingBid: 1350000, auctionInDays: 6,
+    condition: 'excellent', expectedBid: 1420000, auctionInDays: 6,
     reg: 'KA05MN7788', state: 'Karnataka', owner: 'First Owner',
   },
   {
-    name: 'Tata Nexon EV Max', seller: 1, live: true,
+    name: 'Tata Nexon EV Max', seller: 1,
     searches: ['Tata Nexon India', 'Tata Nexon EV'], mustMatch: ['nexon'], exclude: ['auto expo', 'concept'],
     carType: 'SUV', year: 2021, mileage: 31400, fuelType: 'electric', transmission: 'automatic',
-    condition: 'good', expectedBid: 830000, startingBid: 790000, auctionInDays: 3,
+    condition: 'good', expectedBid: 830000, auctionInDays: 3,
     reg: 'TN09CD1290', state: 'Tamil Nadu', owner: 'Second Owner',
   },
   {
-    name: 'Mahindra Thar LX', seller: 2, live: true,
+    name: 'Mahindra Thar LX', seller: 2,
     searches: ['Mahindra Thar India', 'Mahindra Thar 2020'], mustMatch: ['thar'], exclude: ['roxx'],
     carType: 'SUV', year: 2022, mileage: 19800, fuelType: 'diesel', transmission: 'manual',
-    condition: 'excellent', expectedBid: 1510000, startingBid: 1440000, auctionInDays: 8,
+    condition: 'excellent', expectedBid: 1510000, auctionInDays: 8,
     reg: 'DL08EF3344', state: 'Delhi', owner: 'First Owner',
   },
   {
-    name: 'Honda City ZX', seller: 1, live: false,
+    name: 'Honda City ZX', seller: 1,
     searches: ['Honda City India', 'Honda City sedan'], mustMatch: ['honda', 'city'], exclude: ['vento', 'and ', 'hybrid'],
     carType: 'Sedan', year: 2018, mileage: 58000, fuelType: 'petrol', transmission: 'automatic',
-    condition: 'good', expectedBid: 720000, startingBid: null, auctionInDays: 12,
+    condition: 'good', expectedBid: 720000, auctionInDays: 12,
     reg: 'GJ01GH5566', state: 'Gujarat', owner: 'Second Owner',
   },
   {
-    name: 'Toyota Innova Crysta', seller: 2, live: false,
+    name: 'Toyota Innova Crysta', seller: 2,
     searches: ['Toyota Innova Crysta', 'Toyota Innova India'], mustMatch: ['innova'], exclude: ['police', 'pcr', 'hycross', 'ambulance'],
     carType: 'Wagon', year: 2019, mileage: 76000, fuelType: 'diesel', transmission: 'manual',
-    condition: 'fair', expectedBid: 1290000, startingBid: null, auctionInDays: 14,
+    condition: 'fair', expectedBid: 1290000, auctionInDays: 14,
     reg: 'AP16JK9911', state: 'Andhra Pradesh', owner: 'Third Owner',
   },
 ];
@@ -295,7 +298,7 @@ const run = async () => {
   if (!ONLY_RENTALS) {
     console.log('--- AUCTIONS ---');
     for (const v of AUCTIONS) {
-      console.log(`\n  ${v.name}  (seller${v.seller}, ${v.live ? 'live auction' : 'pending approval'})`);
+      console.log(`\n  ${v.name}  (seller${v.seller}, awaiting auction manager)`);
 
       // Re-runnable: skip what this seller already has, so a run that dies
       // partway can just be repeated without duplicating or re-uploading.
@@ -327,9 +330,12 @@ const run = async () => {
         auctionDate: daysFromNow(v.auctionInDays),
         sellerId: sellerFor(v.seller),
         vehicleDocumentation: buildDocumentation(v),
-        ...(v.live
-          ? { status: 'approved', started_auction: 'yes', auction_stopped: false, startingBid: v.startingBid }
-          : { status: 'pending', started_auction: 'no' }),
+        // Fresh seller upload. startingBid, the mechanic assignment and the
+        // review all belong to later stages of the workflow, so none of them
+        // are set here.
+        status: 'pending',
+        started_auction: 'no',
+        auction_stopped: false,
       });
 
       await doc.save();
@@ -385,7 +391,8 @@ const run = async () => {
 
   console.log('\n--- TOTALS ---');
   console.log(`auctionrequests: ${await AuctionRequest.countDocuments()}`);
-  console.log(`  buyer-visible: ${await AuctionRequest.countDocuments({ status: 'approved', started_auction: 'yes', auction_stopped: false })}`);
+  console.log(`  awaiting auction manager: ${await AuctionRequest.countDocuments({ status: 'pending' })}`);
+  console.log(`  live (set by the auction manager, never by this script): ${await AuctionRequest.countDocuments({ status: 'approved', started_auction: 'yes', auction_stopped: false })}`);
   console.log(`rentalrequests : ${await RentalRequest.countDocuments()}`);
 
   await mongoose.disconnect();

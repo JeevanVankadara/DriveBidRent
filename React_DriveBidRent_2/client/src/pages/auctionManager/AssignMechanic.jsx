@@ -129,7 +129,7 @@ export default function AssignMechanic() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ background: '#fff', borderRadius: 20, padding: '40px 48px', border: '1px solid #fee2e2', textAlign: 'center', maxWidth: 420 }}>
           <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" style={{ width: 22, height: 22, color: '#dc2626' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
@@ -174,7 +174,7 @@ export default function AssignMechanic() {
   const documents = getDocuments();
 
   return (
-    <div className="font-montserrat" style={{ minHeight: '100vh', background: '#f8fafc' }}>
+    <div className="font-montserrat" style={{ minHeight: '100vh' }}>
 
       {/* ── BODY ───────────────────────────────────────────────────── */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 80px', display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32, alignItems: 'start' }}>

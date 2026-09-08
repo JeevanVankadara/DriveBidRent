@@ -280,7 +280,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full hub-bg-card">
       <InspectionChatHeader
         carName={chat?.inspectionTask?.vehicleName || "Vehicle Inspection"}
         currentUserId={myUserId}
@@ -288,33 +288,26 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
         onDeleteChat={handleDeleteChat}
       />
       
-      <div 
+      <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-8 bg-gradient-to-b from-white to-gray-50/50"
+        className="flex-1 overflow-y-auto px-4 py-5 hub-bg-secondary-50"
       >
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-2">
           {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <div className="w-24 h-24 mx-auto mb-6 text-gray-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-full h-full">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-2">Start the Conversation</h3>
-                <p className="text-gray-500 max-w-md mx-auto">
-                  Send your first message to discuss the vehicle inspection details with the mechanic
+            <div className="min-h-[240px] grid place-items-center text-center px-6">
+              <div>
+                <p className="font-semibold hub-text-foreground">No messages yet</p>
+                <p className="text-sm hub-text-muted mt-1 max-w-xs">
+                  Send the first message to discuss this inspection.
                 </p>
               </div>
             </div>
           ) : (
             <>
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200">
-                  <span className="text-sm font-medium text-amber-700">
-                    Inspection Chat Started • {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
-                  </span>
-                </div>
+              <div className="text-center pb-2">
+                <span className="hub-eyebrow hub-text-muted">
+                  Started · {new Date(chat?.createdAt || Date.now()).toLocaleDateString()}
+                </span>
               </div>
               
               {messages.map(m => {
@@ -325,8 +318,7 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
                   <InspectionChatBubble 
                     key={m._id} 
                     message={m} 
-                    isOwn={isOwn} 
-                    className={isOwn ? 'ml-auto' : 'mr-auto'}
+                    isOwn={isOwn}
                   />
                 );
               })}
@@ -337,30 +329,12 @@ export default function ChatRoomAuctionManager({ chatIdProp }) {
       </div>
       
       {expired ? (
-        <div className="px-8 py-4 bg-gradient-to-r from-amber-50 to-amber-100 border-t border-amber-200">
-          <div className="max-w-4xl mx-auto flex items-center justify-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-amber-800">This inspection chat has expired</p>
-              <p className="text-xs text-amber-600">The conversation is now read-only</p>
-            </div>
-          </div>
+        <div className="px-4 py-3 hub-bg-secondary border-t hub-border-c text-center">
+          <p className="text-sm font-medium hub-text-foreground">This inspection chat has expired</p>
+          <p className="text-xs hub-text-muted">The conversation is now read only</p>
         </div>
       ) : (
-        <div className="border-t border-gray-200 bg-white">
-          <div className="max-w-4xl mx-auto px-8">
-            <InspectionMessageInput 
-              onSend={handleSend} 
-              disabled={expired} 
-              placeholder="Type your message here..." 
-              className="border-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-            />
-          </div>
-        </div>
+        <InspectionMessageInput onSend={handleSend} disabled={expired} />
       )}
     </div>
   );

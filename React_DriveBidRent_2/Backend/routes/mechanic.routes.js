@@ -154,23 +154,6 @@ router.get('/vehicle-details/:id', mechanicMiddleware, async (req, res) => {
 router.post('/inspection/schedule', mechanicMiddleware, scheduleInspection);
 router.post('/submit-inspection/:auctionId', mechanicMiddleware, submitInspection);
 
-router.post('/submit-review/:id', mechanicMiddleware, async (req, res) => {
-  try {
-    const { mechanicalCondition, bodyCondition, recommendations, conditionRating } = req.body;
-    await AuctionRequest.findByIdAndUpdate(req.params.id, {
-      mechanicReview: { mechanicalCondition, bodyCondition, recommendations, conditionRating },
-      reviewStatus: 'completed',
-      'vehicleDocumentation.documentsVerified': true,
-      'vehicleDocumentation.verificationDate': new Date(),
-      'vehicleDocumentation.verifiedBy': req.user._id
-    });
-    res.json({ success: true, message: 'Review submitted', redirect: '/mechanic/dashboard' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Error submitting review' });
-  }
-});
-
 /* ---------- Profile ---------- */
 router.get('/profile', mechanicMiddleware, (req, res) => {
   res.json({ success: true, message: 'Profile data', data: { user: req.user } });

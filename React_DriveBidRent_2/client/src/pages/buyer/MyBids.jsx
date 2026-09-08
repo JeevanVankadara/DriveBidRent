@@ -5,6 +5,7 @@ import { getMyBids } from '../../services/buyer.services';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Gavel, Clock3, CheckCircle2 } from 'lucide-react';
 import './BuyerDashboard.css';
+import { getVehicleCoverImage } from '../../utils/vehicleImage.util';
 
 export default function MyBids() {
   const [auctionsWithBids, setAuctionsWithBids] = useState([]);
@@ -79,7 +80,7 @@ export default function MyBids() {
           <div className="lg:w-80 w-full p-4 pb-0 lg:pb-4">
             <div className="h-56 overflow-hidden rounded-2xl bg-slate-100">
               <img
-                src={auctionBid.auction?.vehicleImage}
+                src={getVehicleCoverImage(auctionBid.auction)}
                 alt={auctionBid.auction?.vehicleName}
                 className="w-full h-full object-cover"
                 onError={(e) => {

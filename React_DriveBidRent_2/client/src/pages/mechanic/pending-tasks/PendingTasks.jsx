@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { getPendingTasks, acceptPendingTask, declinePendingTask } from '../../../services/mechanic.services';
 import { Link } from 'react-router-dom';
+import { getVehicleCoverImageUrl } from '../../../utils/vehicleImage.util';
 
 export default function PendingTasks() {
   const [tasks, setTasks] = useState([]);
@@ -38,7 +39,7 @@ export default function PendingTasks() {
   }
 
   return (
-    <div className="min-h-screen font-montserrat" style={{ background: '#f8fafc' }}>
+    <div className="min-h-screen font-montserrat">
       {/* ── HERO — Premium dark banner ── */}
       <section style={{
         position: 'relative',
@@ -125,7 +126,7 @@ export default function PendingTasks() {
                     <div className="relative h-56 overflow-hidden bg-gray-100">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[1] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       <Link to={`/mechanic/car-details/${v._id}`}>
-                        <img src={v.vehicleImage} alt={v.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <img src={getVehicleCoverImageUrl(v)} alt={v.vehicleName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       </Link>
                       <div className="absolute top-4 left-4 z-10">
                         <span className="px-3 py-1 bg-amber-500/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-2">
